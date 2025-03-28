@@ -1,0 +1,72 @@
+MEM:
+LI - load intermediate
+    li <r>, <val> val -> r
+MV - move
+    mv <r1> <r2> r1 -> r2
+SW - store word
+    sw <r>, <offset> (*(start_+offset) <- r
+LW - load word
+    lw <r>, <offset> (*(start_+offset) -> r)
+WB - write byte
+    wb <r>, <offset> (*(start_+offset) <- r&0xFF
+LLW - load long word
+    llw <r1>, <r2> *(r1) -> r2
+SLW - store long word
+    slw <r1>, <r2> *(r1) <- r2
+
+MATH:
+ADD - add
+    add <r1>, <r2>, <r3> r1 <- r2 + r3
+ADDC - add c
+    add <r1>, <r2>, <r3> r1 <- r2 + r3 + c
+ADDI - add immediate
+    add <r1>, <r2>, <k> r1 <- r2 + k
+SUB - substract
+    sub <r1>, <r2>, <r3> r1 <- r2 - r3
+NEG - negative
+    neg <r> r <- -r
+
+INTERMEDIATE LOAD STUFF
+%lo - load lower part (decide about it later)
+%hi - load higher part (same)
+<offset>(r) - r + offset
+
+BITWISE:
+ROL - rotate left
+    rol <r1>, <r2>, <r3> r1 <- r2 (rot)<< r3
+ROR - rotate right
+    ror <r1>, <r2>, <r3> r1 <- r2 (rot)>> r3
+SHL - shift left
+    shl <r1>, <r2>, <r3> r1 <- r2 (sh)<< r3
+SHR - shift right
+    shr <r1>, <r2>, <r3> r1 <- r2 (sh)>> r3
+AND - bitwise and
+    and <r1>, <r2>, <r3> r1 <- r2 & r3
+OR - bitwise or
+    or <r1>, <r2>, <r3> r1 <- r2 | r3
+NOT - bitwise not
+    not <r1>, <r2> r1 <- !r2
+
+BRANCH:
+JMP - jump
+    jmp k pc+=k
+LJMP - long jump
+    ljmp <r1> pc = r1
+BZ(BN\BV\BC) - branch if (Z\N\V\C)
+    bz <k> z ? pc+=k
+BNZ(BNN\BNV\BNC) - branch if not (Z\N\V\C)
+    bnz <k> !z ? pc+=k
+BEQZ(BEQN) - branch if reg (Zero)\(negative)
+    beqz <r>, <k> r==0 ? pc+=k
+BNEQZ(BNEQN) - branch if reg not (Zero)\(negative)
+    bneqz <r>, <k> r!=0 ? pc+=k
+HALT - terminate execution
+    halt
+
+FUNCTION CALLING\RETURN
+CALL - call
+    call <k> pc += k, *sp <- pc, sp++
+RET - return
+    ret pc = sp.pop
+IRET - return from interruption
+    iret - ?
