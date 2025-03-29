@@ -68,5 +68,7 @@ CALL - call
     call <k> pc += k, *sp <- pc, sp++
 RET - return
     ret pc = sp.pop
-IRET - return from interruption
-    iret - ?
+POP - pop from stack top
+    pop <r> r <- stack.pop
+push - push to stack top
+    push <r> r -> stack.push

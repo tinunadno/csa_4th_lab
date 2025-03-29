@@ -1,43 +1,30 @@
-NO OPERANDS:
-
-ONE OPERAND:
-
-TWO OPERANDS:
-
-THREE OPERANDS:
-
-ONE OPERAND, ONE IMMEDIATE:
-
-5 blocks
-
-6 bits
-
    | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
 1. |                                           immediate value                                    |  lo\hi  |    register number     |       command number        |
 2. |                           immediate value                      |  lo\hi  |    register number          |    register number     |       command number        |
 3. |                immediate value                  |    register number     |    register number          |    register number     |       command number        |
 
-
 1 type
-0. NOP      | 0b100000
-1. HALT     | 0b100001
-2. CALL     | 0b100010
-3. RET      | 0b100011
-4. JMP      | 0b100100
-5. LJMP     | 0b100101
-6. BZ       | 0b100110
-7. BN       | 0b100111
-8. BV       | 0b101000
-9. BC       | 0b101001
-10. BNZ     | 0b101010
-11. BNN     | 0b101011
-12. BNV     | 0b101100
-13. BNC     | 0b101101
-14. LI      | 0b101110
-15. SW      | 0b101111
-16. LW      | 0b110000
-17. WB      | 0b110001
-18. NEG     | 0b110010
+0. NOP      | 0b000000
+1. HALT     | 0b100000
+2. CALL     | 0b100001
+3. RET      | 0b100010
+4. JMP      | 0b100011
+5. LJMP     | 0b100100
+6. BZ       | 0b100101
+7. BN       | 0b100110
+8. BV       | 0b100111
+9. BC       | 0b101000
+10. BNZ     | 0b101001
+11. BNN     | 0b101010
+12. BNV     | 0b101011
+13. BNC     | 0b101100
+14. LI      | 0b101101
+15. SW      | 0b101110
+16. LW      | 0b101111
+17. WB      | 0b110000
+18. NEG     | 0b110001
+    PUSH    | 0b110010
+    POP     | 0b110011
 
 2 type
 19. MV      | 0b000001
