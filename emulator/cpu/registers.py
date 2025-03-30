@@ -17,8 +17,22 @@ class registers:
         else:
             self.regs = [0 for _ in range(35)]
         self.regs[34] = 1
+
+    def __reg_to_signed__(self, reg_num: int) -> int:
+        mask = (1 << 32) - 1
+        unsigned_val = self.regs[reg_num % len(self.regs)] & mask
+
+        if unsigned_val >> 31:
+            return unsigned_val - (1 << 32)
+        return unsigned_val
     def write_reg(self, reg_number: int, value: int) -> None:
         self.regs[reg_number % len(self.regs)] = value
-
+    def write_lo(self, reg_number: int, value: int) -> None:
+        self.regs[reg_number % len(self.regs)] &= 0xFFFC0000
+        self.regs[reg_number % len(self.regs)] |= (value & 0x3FFFF)
+    def write_hi(self, reg_number: int, value: int) -> None:
+        self.regs[reg_number % len(self.regs)] &= 0x3FFFF
+        self.regs[reg_number % len(self.regs)] |= (value & 0xFFFC0000)
+        self.regs[reg_number % len(self.regs)] = self.__reg_to_signed__(reg_number)
     def get_reg(self, reg_number: int) -> int:
         return self.regs[reg_number % len(self.regs)]

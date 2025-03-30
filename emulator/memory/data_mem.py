@@ -22,9 +22,9 @@ class data_mem:
     def read(self, address: int) -> int:
         if address <= self.size - 4:
             ret = 0
-            for i in range(4):
+            for i in range(4, 0, -1):
                 ret <<= 8
-                ret |= self.data[address + i]
+                ret |= self.data[address + i - 1]
             return ret
         else:
             raise ValueError("Attempting to read memory out of address space")
