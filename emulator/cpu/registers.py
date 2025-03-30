@@ -1,5 +1,7 @@
 from random import randint
+from enum import Enum
 
+reg_names = Enum('regs', [("SP", 31), ("PC", 32), ("IR", 33), ("PS", 34)])
 
 class registers:
     # 31'st register is a stack pointer

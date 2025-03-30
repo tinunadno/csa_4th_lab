@@ -1,5 +1,5 @@
 MEM:
-LI - load intermediate
+LI - load immediate
     li <r>, <val> val -> r
 MV - move
     mv <r1> <r2> r1 -> r2

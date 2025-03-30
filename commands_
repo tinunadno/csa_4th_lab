@@ -2,12 +2,10 @@
 1. |                                           immediate value                                    |  lo\hi  |    register number     |       command number        |
 2. |                           immediate value                      |  lo\hi  |    register number          |    register number     |       command number        |
 3. |                immediate value                  |    register number     |    register number          |    register number     |       command number        |
-
 1 type
 0. NOP      | 0b000000
 1. HALT     | 0b100000
-2. CALL     | 0b100001
-3. RET      | 0b100010
+14. LI      | 0b101101
 4. JMP      | 0b100011
 5. LJMP     | 0b100100
 6. BZ       | 0b100101
@@ -18,13 +16,10 @@
 11. BNN     | 0b101010
 12. BNV     | 0b101011
 13. BNC     | 0b101100
-14. LI      | 0b101101
-15. SW      | 0b101110
-16. LW      | 0b101111
-17. WB      | 0b110000
-18. NEG     | 0b110001
     PUSH    | 0b110010
     POP     | 0b110011
+2. CALL     | 0b100001
+3. RET      | 0b100010
 
 2 type
 19. MV      | 0b000001
@@ -37,6 +32,9 @@
 26. BEQN    | 0b001000
 27. BNEQZ   | 0b001001
 28. BNEQN   | 0b001010
+18. NEG     | 0b001011
+    INC     | 0b001100
+    DEC     | 0b001101
 
 3 type
 29. ADD     | 0b010001
