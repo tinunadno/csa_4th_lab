@@ -4,7 +4,6 @@ from csa_4th_lab.emulator.cpu.registers import reg_names
 from csa_4th_lab.emulator.memory.data_mem import data_mem
 from csa_4th_lab.emulator.memory.instruction_memory import instruction_memory
 
-
 class instruction_decoder:
     def __init__(self, im: instruction_memory, mem_size: int, entry_point: int):
         self.instr = {0x20: [halt_instruction],
@@ -23,6 +22,8 @@ class instruction_decoder:
                       0b110011: [pop_instruction_fst_micro_command, pop_instruction_snd_micro_command],
                       0b100001: [call_instruction_fst_micro_command, call_instruction_snd_micro_command, call_instruction_thd_micro_command],
                       0b100010: [ret_instruction_fst_micro_command, ret_instruction_snd_micro_command],
+                      0b101110: [increment_instruction],
+                      0b101111: [decrement_instruction],
                       0b010001: [add_instruction]}
         self.inst_mem = im
         self.mem = data_mem(mem_size)

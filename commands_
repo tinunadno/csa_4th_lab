@@ -20,6 +20,8 @@
     POP     | 0b110011
 2. CALL     | 0b100001
 3. RET      | 0b100010
+   INC      | 0b101101
+   DEC      | 0b101110
 lw / sw ?
 
 2 type
@@ -34,8 +36,6 @@ lw / sw ?
 27. BNEQZ   | 0b001001
 28. BNEQN   | 0b001010
 18. NEG     | 0b001011
-    INC     | 0b001100
-    DEC     | 0b001101
 
 3 type
 29. ADD     | 0b010001

@@ -146,6 +146,16 @@ def ret_instruction_fst_micro_command(instruction: int, regs: registers) -> [ALU
 def ret_instruction_snd_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
     return ALU_signals(regs.get_reg(reg_names.SP.value), 4, add = True), control_signal(reg_names.SP.value)
 
+# INC
+def increment_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_num), 1, add = True), control_signal(reg_num)
+
+# DEC
+def decrement_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_num), 1, add=True, neg = True), control_signal(reg_num)
+
 # ADD
 def add_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
     imm, fst_operand, snd_operand, reg_num = split_third_type_instruction(instruction)
