@@ -24,6 +24,19 @@ class instruction_decoder:
                       0b100010: [ret_instruction_fst_micro_command, ret_instruction_snd_micro_command],
                       0b101110: [increment_instruction],
                       0b101111: [decrement_instruction],
+                      0b110000: [branch_equals_zero_fst_micro_command, branch_equals_zero_snd_micro_command],
+                      0b110001: [branch_less_than_a_zero_fst_micro_command, branch_less_than_a_zero_snd_micro_command],
+
+                      0b000001: [move_instruction],
+                      0b000100: [not_instruction],
+                      0b000101: [add_immediate_instruction],
+                      0b001011: [negative_instruction],
+                      0b000110: [subtract_immediate_instruction],
+                      0b110100: [branch_not_equals_zero_fst_micro_command, branch_not_equals_zero_snd_micro_command],
+                      0b110101: [branch_not_less_than_a_zero_fst_micro_command, branch_not_less_than_a_zero_snd_micro_command],
+                      0b000011: [store_long_word_instruction],
+                      0b000010: [load_long_word_instruction],
+
                       0b010001: [add_instruction]}
         self.inst_mem = im
         self.mem = data_mem(mem_size)
@@ -57,7 +70,7 @@ class instruction_decoder:
             a = 0
             for i in self.instr[instruction_number]:
                 self.exec_instr(instruction, i)
-            print(bin(instruction_number), self.regs.get_reg(reg_names.SP.value), self.regs.get_reg(reg_names.PC.value), self.regs.get_reg(0), self.regs.get_reg(1), self.regs.get_reg(2), self.alu.c)
+            print(bin(instruction_number), self.regs.get_reg(0), self.regs.get_reg(1), self.regs.get_reg(2))
             print(self.mem.data)
             print()
             self.regs.write_reg(reg_names.PC.value, self.regs.get_reg(reg_names.PC.value) + 1)

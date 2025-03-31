@@ -1,5 +1,5 @@
 class ALU_signals:
-    def __init__(self, reg1: int, reg2: int, shift = False, shift_left = False, cyclic = False, add = False, neg = False, comp = False, not_eq = False, fst_flag_bit = False, snd_flag_bit = False):
+    def __init__(self, reg1: int, reg2: int, shift = False, shift_left = False, cyclic = False, not_ = False, add = False, neg = False, comp = False, not_eq = False, fst_flag_bit = False, snd_flag_bit = False):
         """emulates alu takt by control signals
         :param reg1: first register value
         :param reg2: second register value
@@ -18,6 +18,7 @@ class ALU_signals:
         self.shift = shift
         self.shift_left = shift_left
         self.cyclic = cyclic
+        self.not_ = not_
         self.add = add
         self.neg = neg
         self.comp = comp

@@ -33,6 +33,8 @@ class ALU:
 
     def execute(self, signal: ALU_signals) -> int:
         ret = 0
+        if signal.not_:
+            signal.reg1 = ~signal.reg1
         # nzvc flags checking
         if signal.comp:
             if signal.fst_flag_bit and signal.snd_flag_bit:

@@ -1,6 +1,6 @@
    | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
 1. |                                           immediate value                                    |  lo\hi  |    register number     |       command number        |
-2. |                           immediate value                      |  lo\hi  |    register number          |    register number     |       command number        |
+2. |                           immediate value                                     |    register number     |    register number     |       command number        |
 3. |                immediate value                  |    register number     |    register number          |    register number     |       command number        |
 1 type
 0. NOP      | 0b000000
@@ -22,20 +22,20 @@
 3. RET      | 0b100010
    INC      | 0b101101
    DEC      | 0b101110
+25. BEQZ    | 0b110000
+26. BEQN    | 0b110001
+27. BNEQZ   | 0b110100
+28. BNEQN   | 0b110101
 lw / sw ?
 
 2 type
 19. MV      | 0b000001
-20. LLW     | 0b000010
-21. SLW     | 0b000011
 22. NOT     | 0b000100
 23. ADDI    | 0b000101
 24. SUBI    | 0b000110
-25. BEQZ    | 0b000111
-26. BEQN    | 0b001000
-27. BNEQZ   | 0b001001
-28. BNEQN   | 0b001010
 18. NEG     | 0b001011
+21. SLW     | 0b000011
+20. LLW     | 0b000010
 
 3 type
 29. ADD     | 0b010001

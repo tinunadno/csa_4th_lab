@@ -28,6 +28,14 @@ def split_first_type_instruction(instruction: int) -> [int, int]:
 def get_lo_hi_for_first_type_instruction(instruction: int) -> [bool, bool]:
     return (instruction & 0x1000) != 0, (instruction & 0x800) != 0
 
+def split_second_type_instruction(instruction: int) -> [int, int, int]:
+    imm = (instruction >> 16) & 0xFFFF
+    if imm >> 15 & 1 == 1:
+        imm &= 0x7FFF
+        imm = -imm
+    reg = (instruction >> 11) & 0x1F
+    reg_dest = (instruction >> 6) & 0x1F
+    return imm, reg, reg_dest
 
 def split_third_type_instruction(instruction: int) -> [int, int, int, int]:
     imm = (instruction >> 22) & 0x3FF
@@ -155,6 +163,73 @@ def increment_instruction(instruction: int, regs: registers) -> [ALU_signals, co
 def decrement_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
     imm, reg_num = split_first_type_instruction(instruction)
     return ALU_signals(regs.get_reg(reg_num), 1, add=True, neg = True), control_signal(reg_num)
+
+# BEQZ
+def branch_equals_zero_fst_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_num), 0, add = True), control_signal(reg_num)
+def branch_equals_zero_snd_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_names.PC.value), imm, comp=True), control_signal(reg_names.PC.value)
+
+# BEQN
+def branch_less_than_a_zero_fst_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_num), 0, add = True), control_signal(reg_num)
+def branch_less_than_a_zero_snd_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_names.PC.value), imm, comp=True,
+                       snd_flag_bit=True), control_signal(reg_names.PC.value)
+
+# BNEQZ
+def branch_not_equals_zero_fst_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_num), 0, add = True), control_signal(reg_num)
+def branch_not_equals_zero_snd_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_names.PC.value), imm, comp=True, not_eq=True), control_signal(reg_names.PC.value)
+
+# BNEQN
+def branch_not_less_than_a_zero_fst_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_num), 0, add = True), control_signal(reg_num)
+def branch_not_less_than_a_zero_snd_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg_names.PC.value), imm, comp=True, snd_flag_bit=True, not_eq=True), control_signal(reg_names.PC.value)
+# MV
+def move_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg, reg_dest = split_second_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg), 0, add = True), control_signal(reg_dest)
+
+# NOT
+def not_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg, reg_dest = split_second_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg), 0, not_ = True, add = True), control_signal(reg_dest)
+
+# ADDI
+def add_immediate_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg, reg_dest = split_second_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg), imm, add = True), control_signal(reg_dest)
+
+# SUBI
+def subtract_immediate_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg, reg_dest = split_second_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg), imm, add = True, neg = True), control_signal(reg_dest)
+
+# NEG
+def negative_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg, reg_dest = split_second_type_instruction(instruction)
+    return ALU_signals(0, regs.get_reg(reg), add = True, neg = True), control_signal(reg_dest)
+
+# SLW
+def store_long_word_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg, reg_dest = split_second_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg), 0, add = True), control_signal(reg_dest, write = True)
+
+# LLW
+def load_long_word_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg, reg_dest = split_second_type_instruction(instruction)
+    return ALU_signals(regs.get_reg(reg), 0, add = True), control_signal(reg_dest, read = True)
 
 # ADD
 def add_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
