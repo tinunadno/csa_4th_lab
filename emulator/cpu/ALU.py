@@ -1,4 +1,5 @@
 from csa_4th_lab.emulator.cpu.ALU_signals import ALU_signals
+from csa_4th_lab.emulator.utils import cast_to_signed_int, cast_to_unsigned_int
 
 
 class ALU:
@@ -33,6 +34,8 @@ class ALU:
 
     def execute(self, signal: ALU_signals) -> int:
         ret = 0
+        signal.reg1 = cast_to_unsigned_int(signal.reg1)
+        signal.reg2 = cast_to_unsigned_int(signal.reg2)
         if signal.not_:
             signal.reg1 = ~signal.reg1
         # nzvc flags checking
@@ -69,22 +72,25 @@ class ALU:
         elif signal.shift:
             if signal.cyclic:
                 if signal.shift_left:
-                    ret = signal.reg1 << signal.reg2
+                    ret = ((signal.reg1 << signal.reg2) % (1 << 32)) | (signal.reg1 >> (32 - signal.reg2))
                 else:
-                    ret = signal.reg1 >> signal.reg2
+                    ret = (signal.reg1 >> signal.reg2)|(signal.reg1 << (32 - signal.reg2)) & 0xFFFFFFFF
             else:
                 if signal.shift_left:
-                    ret = (signal.reg1 << signal.reg2) | (signal.reg1 >> (32 - signal.reg2))
+                    ret = signal.reg1 << signal.reg2 & 0xFFFFFFFF
                 else:
-                    ret = (signal.reg1 >> signal.reg2) | (signal.reg1 << (32 - signal.reg2))
+                    ret = signal.reg1 >> signal.reg2 & 0xFFFFFFFF
         # add \ sub
         elif signal.add:
+            signal.reg1 = cast_to_signed_int(signal.reg1)
+            signal.reg2 = cast_to_signed_int(signal.reg2)
+            c_ = int(self.c and signal.add_c)
             if signal.neg:
-                self.__handle_overflow__(signal.reg1, signal.reg2, signal.reg1 - signal.reg2, signal.neg)
-                ret = self.__handle_carry__(signal.reg1 - signal.reg2)
+                self.__handle_overflow__(signal.reg1, signal.reg2, signal.reg1 - signal.reg2 + c_, signal.neg)
+                ret = self.__handle_carry__(signal.reg1 - signal.reg2 + c_)
             else:
-                self.__handle_overflow__(signal.reg1, signal.reg2, signal.reg1 + signal.reg2, signal.neg)
-                ret = self.__handle_carry__(signal.reg1 + signal.reg2)
+                self.__handle_overflow__(signal.reg1, signal.reg2, signal.reg1 + signal.reg2 + c_, signal.neg)
+                ret = self.__handle_carry__(signal.reg1 + signal.reg2 + c_)
         # and \ or
         elif signal.neg:
             ret = signal.reg1 & signal.reg2

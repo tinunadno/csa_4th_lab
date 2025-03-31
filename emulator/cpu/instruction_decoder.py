@@ -37,7 +37,16 @@ class instruction_decoder:
                       0b000011: [store_long_word_instruction],
                       0b000010: [load_long_word_instruction],
 
-                      0b010001: [add_instruction]}
+                      0b010001: [add_instruction],
+                      0b010010: [add_carry_instruction],
+                      0b010011: [subtract_instruction],
+                      0b010100: [rotate_left_instruction],
+                      0b010101: [rotate_right_instruction],
+                      0b010110: [shift_left_instruction],
+                      0b010111: [shift_right_instruction],
+                      0b011000: [and_instruction],
+                      0b011001: [or_instruction]
+                      }
         self.inst_mem = im
         self.mem = data_mem(mem_size)
         self.alu = ALU()
@@ -70,7 +79,7 @@ class instruction_decoder:
             a = 0
             for i in self.instr[instruction_number]:
                 self.exec_instr(instruction, i)
-            print(bin(instruction_number), self.regs.get_reg(0), self.regs.get_reg(1), self.regs.get_reg(2))
-            print(self.mem.data)
+            print(bin(instruction_number), self.regs.get_reg(0), self.regs.get_reg(1), self.regs.get_reg(2), self.regs.get_reg(3))
+            print(self.alu.c)
             print()
             self.regs.write_reg(reg_names.PC.value, self.regs.get_reg(reg_names.PC.value) + 1)
