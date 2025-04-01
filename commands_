@@ -3,29 +3,32 @@
 2. |                           immediate value                                     |    register number     |    register number     |       command number        |
 3. |                immediate value                  |    register number     |    register number          |    register number     |       command number        |
 1 type
-0. NOP      | 0b000000
-1. HALT     | 0b100000
-14. LI      | 0b101101
-4. JMP      | 0b100011
-5. LJMP     | 0b100100
-6. BZ       | 0b100101
-7. BN       | 0b100110
-8. BV       | 0b100111
-9. BC       | 0b101000
-10. BNZ     | 0b101001
-11. BNN     | 0b101010
-12. BNV     | 0b101011
-13. BNC     | 0b101100
-    PUSH    | 0b110010
-    POP     | 0b110011
-2. CALL     | 0b100001
-3. RET      | 0b100010
-   INC      | 0b101101
-   DEC      | 0b101110
-25. BEQZ    | 0b110000
-26. BEQN    | 0b110001
-27. BNEQZ   | 0b110100
-28. BNEQN   | 0b110101
+0. NOP        | 0b000000
+1. HALT       | 0b100000
+14. LI        | 0b101101
+4. JMP        | 0b100011
+5. LJMP       | 0b100100
+6. BZ         | 0b100101
+7. BN         | 0b100110
+8. BV         | 0b100111
+9. BC         | 0b101000
+10. BNZ       | 0b101001
+11. BNN       | 0b101010
+12. BNV       | 0b101011
+13. BNC       | 0b101100
+    PUSH      | 0b110010
+    POP       | 0b110011
+2. CALL       | 0b100001
+3. RET        | 0b100010
+   INC        | 0b101101
+   DEC        | 0b101110
+25. BEQZ      | 0b110000
+26. BEQN      | 0b110001
+27. BNEQZ     | 0b110100
+28. BNEQN     | 0b110101
+    INT       | 0b111000    //ps, interruption processor have to save all the registers it changed
+    IRET      | 0b111001
+
 lw / sw ?
 
 2 type

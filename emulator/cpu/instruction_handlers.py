@@ -228,6 +228,40 @@ def branch_not_less_than_a_zero_snd_micro_command(instruction: int, regs: regist
     return ALU_signals(regs.get_reg(reg_names.PC.value), imm, comp=True, snd_flag_bit=True,
                        not_eq=True), control_signal(reg_names.PC.value)
 
+# INT
+def interruption_instruction_fst_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    return ALU_signals(regs.get_reg(reg_names.SP.value), 8, add=True, neg=True, discard_nzvc=True), control_signal(reg_names.SP.value)
+
+
+def interruption_instruction_snd_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    return ALU_signals(regs.get_reg(reg_names.SP.value), 0, add=True, discard_nzvc=True), control_signal(reg_names.PC.value, write=True)
+
+def interruption_instruction_thd_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    return ALU_signals(0, 0, get_nzvc=True, discard_nzvc=True), control_signal(reg_names.IC.value)
+
+def interruption_instruction_fth_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    return ALU_signals(regs.get_reg(reg_names.SP.value), 4, add = True, discard_nzvc=True), control_signal(reg_names.IC.value, write = True)
+
+def interruption_instruction_fifth_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    imm, reg_num = split_first_type_instruction(instruction)
+    return ALU_signals(imm, 0, add=True, discard_nzvc=True), control_signal(reg_names.IC.value, read_interruption_vector = True)
+
+def interruption_instruction_sixth_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    return ALU_signals(regs.get_reg(reg_names.IC.value), 0, add =True), control_signal(reg_names.PC.value)
+
+# IRET
+def interruption_ret_instruction_fst_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    return ALU_signals(regs.get_reg(reg_names.SP.value), 0, add=True, discard_nzvc=True), control_signal(reg_names.PC.value, read=True)
+
+def interruption_ret_instruction_snd_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    return ALU_signals(regs.get_reg(reg_names.SP.value), 4, add = True, discard_nzvc=True), control_signal(reg_names.IC.value, read = True)
+
+def interruption_ret_instruction_thd_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    return ALU_signals(regs.get_reg(reg_names.IC.value), 0, set_nzvc=True, discard_nzvc=True), control_signal(
+        reg_names.IC.value, read=True)
+
+def interruption_ret_instruction_fth_micro_command(instruction: int, regs: registers) -> [ALU_signals, control_signal]:
+    return ALU_signals(regs.get_reg(reg_names.SP.value), 8, add=True, discard_nzvc=True), control_signal(reg_names.SP.value)
 
 # MV
 def move_instruction(instruction: int, regs: registers) -> [ALU_signals, control_signal]:

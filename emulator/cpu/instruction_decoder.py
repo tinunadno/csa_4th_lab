@@ -6,6 +6,7 @@ from csa_4th_lab.emulator.memory.instruction_memory import instruction_memory
 
 class instruction_decoder:
     def __init__(self, im: instruction_memory, mem_size: int, entry_point: int):
+        # TODO add micro commands reuse (eg remove all implementations repeats)
         self.instr = {0x20: [halt_instruction],
                       0b101101: [load_immediate_instruction],
                       0b100011: [jump_instruction],
@@ -26,6 +27,10 @@ class instruction_decoder:
                       0b101111: [decrement_instruction],
                       0b110000: [branch_equals_zero_fst_micro_command, branch_equals_zero_snd_micro_command],
                       0b110001: [branch_less_than_a_zero_fst_micro_command, branch_less_than_a_zero_snd_micro_command],
+                      0b111000: [interruption_instruction_fst_micro_command, interruption_instruction_snd_micro_command, interruption_instruction_thd_micro_command,
+                                 interruption_instruction_fth_micro_command, interruption_instruction_fifth_micro_command, interruption_instruction_sixth_micro_command],
+                      0b111001: [interruption_ret_instruction_fst_micro_command, interruption_ret_instruction_snd_micro_command, interruption_ret_instruction_thd_micro_command,
+                                 interruption_ret_instruction_fth_micro_command],
 
                       0b000001: [move_instruction],
                       0b000100: [not_instruction],
@@ -64,6 +69,8 @@ class instruction_decoder:
             self.mem.write(alu_out_put, self.regs.get_reg(control_signals.out_reg))
         elif control_signals.read:
             self.regs.write_reg(control_signals.out_reg, self.mem.read(alu_out_put))
+        elif control_signals.read_interruption_vector:
+            self.regs.write_reg(control_signals.out_reg, self.inst_mem.get_instruction(alu_out_put))
         else:
             if control_signals.lo_load:
                 self.regs.write_lo(control_signals.out_reg, alu_out_put)
@@ -79,7 +86,6 @@ class instruction_decoder:
             a = 0
             for i in self.instr[instruction_number]:
                 self.exec_instr(instruction, i)
-            print(bin(instruction_number), self.regs.get_reg(0), self.regs.get_reg(1), self.regs.get_reg(2), self.regs.get_reg(3))
-            print(self.alu.c)
-            print()
+            print(f"PC: {self.regs.get_reg(reg_names.PC.value)}, IC: {self.regs.get_reg(reg_names.IC.value)},t0: {self.regs.get_reg(0)}, t1: {self.regs.get_reg(1)}, t2: {self.regs.get_reg(2)}, "
+                  f"NZVC: {bin(self.alu.__get_nzvc__())}")
             self.regs.write_reg(reg_names.PC.value, self.regs.get_reg(reg_names.PC.value) + 1)
