@@ -1,34 +1,26 @@
-from csa_4th_lab.emulator.cpu.instruction_decoder import instruction_decoder
-from csa_4th_lab.emulator.cpu.instruction_handlers import split_second_type_instruction
-from csa_4th_lab.emulator.memory.instruction_memory import instruction_memory
-from csa_4th_lab.emulator.utils import cast_to_signed_int, cast_to_unsigned_int
+from csa_4th_lab.emulator.cpu.pipeline.B_ID.instruction_decoder import intruction_decoder
+from csa_4th_lab.emulator.cpu.pipeline.B_ID.instruction_decoder_signal import instruction_decoder_signal
 
 if __name__ == "__main__":
-    instructions = [
-                        0x0,
-                        0x0,
-                        0x0,
-                        0x0,
-                        0x0,
-                        0x0,
-                        0x0,
-                        0x0,
-                        0x9,
-                        0x0,
-                        0b0000000000_00000_00001_00010_010001,  # 10| add t2, t0, t1  ; interruption processing
-                        0b0000000000000000000_00_00000_111001,  # 11| iret
-                        0x0,
-                        0x0,
-                        0x0,
-                        0x0,
-                        0x0,
-                        0x0,
-                        0b0000000000000000111_00_00000_101101,  # 18| li t0, 7
-                        0b0000000000000010111_00_00001_101101,  # 19| li t1, 23
-                        0b0000000000000000000_00_00011_101101,  # 20| li t3, 0
-                        0b0000000000000001000_00_00000_111000,  # 21| int 0x8
-                        0x20                                    # 22 | halt
-                    ]
-    im = instruction_memory(instructions)
-    id_ = instruction_decoder(im, 32, 18)
-    id_.init_execution()
+    id_ = intruction_decoder()
+    inst = 0b11111111_000_11111_00000_11111_100_000
+    ids = instruction_decoder_signal(inst)
+    tmp = id_.decode(ids)
+    print(f"reg1: {tmp.alu_signals.reg1}")
+    print(f"reg2: {tmp.alu_signals.reg2}")
+    print(f"add: {tmp.alu_signals.add}")
+    print(f"ns: {tmp.alu_signals.neg_second}")
+    print(f"xor: {tmp.alu_signals.xor}")
+    print(f"n_shift: {tmp.alu_signals.need_shift}")
+    print(f"sh_dir: {tmp.alu_signals.sh_direction}")
+    print(f"cyc: {tmp.alu_signals.cyclic}")
+    print(f"dnzvc: {tmp.alu_signals.discard_nzvc}")
+    print()
+    print(f"nm: {tmp.mw_signals.need_mem}")
+    print(f"reg: {tmp.mw_signals.register}")
+    print(f"rd: {tmp.mw_signals.register_dest}")
+    print(f"wb: {tmp.mw_signals.write_byte}")
+    print()
+    print(f"rd: {tmp.wb_signals.reg_dest}")
+    print(f"val: {tmp.wb_signals.value}")
+    print(f"nwb: {tmp.wb_signals.need_write_back}")

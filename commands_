@@ -1,52 +1,43 @@
-   | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
-1. |                                           immediate value                                    |  lo\hi  |    register number     |       command number        |
-2. |                           immediate value                                     |    register number     |    register number     |       command number        |
-3. |                immediate value                  |    register number     |    register number          |    register number     |       command number        |
-1 type
-0. NOP        | 0b000000
-1. HALT       | 0b100000
-14. LI        | 0b101101
-4. JMP        | 0b100011
-5. LJMP       | 0b100100
-6. BZ         | 0b100101
-7. BN         | 0b100110
-8. BV         | 0b100111
-9. BC         | 0b101000
-10. BNZ       | 0b101001
-11. BNN       | 0b101010
-12. BNV       | 0b101011
-13. BNC       | 0b101100
-    PUSH      | 0b110010
-    POP       | 0b110011
-2. CALL       | 0b100001
-3. RET        | 0b100010
-   INC        | 0b101101
-   DEC        | 0b101110
-25. BEQZ      | 0b110000
-26. BEQN      | 0b110001
-27. BNEQZ     | 0b110100
-28. BNEQN     | 0b110101
-    INT       | 0b111000    //ps, interruption processor have to save all the registers it changed
-    IRET      | 0b111001
+1 type 0b00
+ADD SUB AND OR XOR MV ADDI SHL SHR ROL ROR          add, neg, xor, shift, left, cyclic
+funct1: 1st bit - sum or bitwise or\and
+        2nd bit - 2nd operand - negative/(if sum = 0 => or|and)
+        3d  bit - addi (if 1st bit is 1), xor (if first bit is 0)
+funct2: 1st bit - need shift or not
+        2nd bit - shift left\right
+        3d  bit - cyclic shift
+here s1 - first register, s2 - second register, rd - destination register, imm only used in addi
+2 type 0b01
+LW SW LI SB PUSH POP                                lower\upper
+funct: 1st bit - read\write
+       2nd bit - (if read - load immediate)(if write - write byte)
+       3d  bit - (increment\decrement stack) (if this bit is one, than looking on 1st bit and defining push or pop)
+hilo - if load immediate defines lower (upper - upper 12 signed bits)(lower - lower 20 bits)
+d - add displacement from immediate
+register is address (if LW or SW or SB) or pushing value, or register, where pop will be placed
+if its LI register is a destination register
+3 type 0b10
+BEQZ BEQN BNEZ BNEN JMP LJMP                        comp, n/z, not
+funct: 1st bit - (JMP or branch instruction) (if 1 => JMP)
+       2/3 bit - (00 - BEQZ, 01 - BEQN, 10 - BNEZ, 11 - BNEN) if first bit is zero - defines JMP or long JMP(LJMP)
+register is comparing value, immediate is a displacement
+if its a jump, immediate value is displacement
+if its long jump, register is an address
 
-lw / sw ?
+spec 0b11
+INT IRET HALT CALL RET
+register is a register with address
+funct: 1st bit - is interruption
+       2nd bit - is return (is interruption is zero, this bit defines call\ret, else int\iret)
+       3d  bit - halt
 
-2 type
-19. MV      | 0b000001
-22. NOT     | 0b000100
-23. ADDI    | 0b000101
-24. SUBI    | 0b000110
-18. NEG     | 0b001011
-21. SLW     | 0b000011
-20. LLW     | 0b000010
+3 bits - command number
+| 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
+| +- |                       imm        |    funct2    |           s2           |           r1           |           rd           |     funct1   |       cn     | 1st type
+| +- |                                                      imm                                |  d |hilo|           rd           |     funct    |       cn     | 2nd type
+| +- |                                                      imm                                          |           rd           |     funct    |       cn     | 3d  type
+| +- |                                                      imm                                          |           rd           |     funct    |       cn     | spec
 
-3 type
-29. ADD     | 0b010001
-30. ADDC    | 0b010010
-31. SUB     | 0b010011
-32. ROL     | 0b010100
-33. ROR     | 0b010101
-34. SHL     | 0b010110
-35. SHR     | 0b010111
-36. AND     | 0b011000
-37. OR      | 0b011001
+
+
+
