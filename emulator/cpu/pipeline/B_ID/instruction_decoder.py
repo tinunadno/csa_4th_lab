@@ -3,12 +3,13 @@ from csa_4th_lab.emulator.cpu.pipeline.C_EX.ALU_signals import ALU_signals
 from csa_4th_lab.emulator.cpu.pipeline.D_MEM.mem_writer_signals import mem_writer_signals
 from csa_4th_lab.emulator.cpu.pipeline.E_WB.write_back_signals import write_back_signals
 from csa_4th_lab.emulator.cpu.pipeline.pipeline_signals import pipeline_signals
-from csa_4th_lab.emulator.utils import cast_to_unsigned_int
+from csa_4th_lab.emulator.cpu.registers import registers, reg_names
+from csa_4th_lab.emulator.utils import cast_to_unsigned_int, cast_to_signed_int
 
 
 class intruction_decoder:
-    def __init__(self):
-        pass
+    def __init__(self, regs: registers):
+        self.regs = regs
     def __get_command_number__(self, instruction: int):
         instruction = cast_to_unsigned_int(instruction)
         return instruction & 0x7
@@ -39,16 +40,21 @@ class intruction_decoder:
         return imm
 
     def __get_second_type_immediate__(self, instruction: int) -> int:
+        imm = instruction >> 16 & 0xFFFF
+        if imm >> 15 & 1:
+            imm = -(imm & 0x7FFF)
+        return imm
+    def __get_third_type_immediate__(self, instruction: int) -> int:
         imm = instruction >> 13 & 0x7FFFF
         if imm >> 18 & 0x1:
             imm = -(imm & 0x3FFFF)
         return imm
-    def __get_second_type_additional_flags__(self, instruction: int) -> [bool, bool]:
+    def __get_third_type_additional_flags__(self, instruction: int) -> [bool, bool]:
         return [
             instruction >> 12 & 0x1,
             instruction >> 11 & 0x1
         ]
-    def __get_third_type_immediate__(self, instruction: int) -> int:
+    def __get_fourth_type_immediate__(self, instruction: int) -> int:
         imm = instruction >> 11 & 0x1FFFFF
         if imm & 0x100000 != 0:
             imm = -(imm & 0xFFFFF)
@@ -65,11 +71,11 @@ class intruction_decoder:
             write_back_signals(0, 0)
         )
         if cn == 0b00: #eg 1st type
-            ps.alu_signals.reg1 = regs[1]
+            ps.alu_signals.reg1 = self.regs.get_reg(regs[1])
             if flags[5] and flags[3]:
                 ps.alu_signals.reg2 = self.__get_first_type_immediate__(inst)
             else:
-                ps.alu_signals.reg2 = regs[2]
+                ps.alu_signals.reg2 = self.regs.get_reg(regs[2])
             ps.alu_signals.add = flags[5]
             ps.alu_signals.neg_second = flags[4]
             ps.alu_signals.xor = (not flags[5]) and flags[3]
@@ -79,6 +85,19 @@ class intruction_decoder:
             ps.mw_signals.need_mem = False
             ps.wb_signals.reg_dest = regs[0]
             ps.wb_signals.need_write_back = True
+
+        if cn == 0b01:
+            ps.mw_signals.need_mem = True
+            ps.mw_signals.read_write = flags[5]
+            ps.mw_signals.write_byte = flags[4]
+            ps.mw_signals.register_dest = regs[0]
+            ps.alu_signals.reg1 = self.regs.get_reg(regs[1])
+            ps.alu_signals.add = True
+            if flags[3]:
+                ps.alu_signals.reg2 = self.__get_second_type_immediate__(inst)
+            if not flags[5]:
+                ps.wb_signals.need_write_back = True
+                ps.wb_signals.reg_dest = regs[0]
 
         return ps
 
