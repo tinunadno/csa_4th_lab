@@ -23,7 +23,7 @@ funct: 1st bit - LI or PUSH POP
 4 type 0b11
 BEQZ BEQN BNEZ BNEN JMP LJMP                        comp, n/z, not
 funct: 1st bit - (JMP or branch instruction) (if 1 => JMP)
-       2/3 bit - (00 - BEQZ, 01 - BEQN, 10 - BNEZ, 11 - BNEN) if first bit is zero - defines JMP or long JMP(LJMP)
+       2/3 bit - (00 - BEQZ, 01 - BEQN, 10 - BNEZ, 11 - BNEN) if first bit is 1 - 2nd bit defines JMP or long JMP(LJMP)
 register is comparing value, immediate is a displacement
 if its a jump, immediate value is displacement
 if its long jump, register is an address

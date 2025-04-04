@@ -1,12 +1,14 @@
 from csa_4th_lab.emulator.cpu.pipeline.B_ID.instruction_decoder import intruction_decoder
 from csa_4th_lab.emulator.cpu.pipeline.B_ID.instruction_decoder_signal import instruction_decoder_signal
-from csa_4th_lab.emulator.cpu.registers import registers
+from csa_4th_lab.emulator.cpu.registers import registers, reg_names
 
 if __name__ == "__main__":
     regs = registers()
     regs.write_reg(31, 123321)
+    regs.write_reg(1, 123)
+    regs.write_reg(reg_names.PC.value, 21)
     id_ = intruction_decoder(regs)
-    inst = 0b1111111111_00001_011_010
+    inst = 0b1111111111_00001_110_011
     ids = instruction_decoder_signal(inst)
     tmp = id_.decode(ids)
     print(f"reg1: {tmp.alu_signals.reg1}")
@@ -18,6 +20,8 @@ if __name__ == "__main__":
     print(f"sh_dir: {tmp.alu_signals.sh_direction}")
     print(f"cyc: {tmp.alu_signals.cyclic}")
     print(f"dnzvc: {tmp.alu_signals.discard_nzvc}")
+    print(f"comp: {tmp.alu_signals.comp}")
+    print(f"comp_num: {tmp.alu_signals.comp_num}")
     print()
     print(f"nm: {tmp.mw_signals.need_mem}")
     print(f"rw: {tmp.mw_signals.read_write}")

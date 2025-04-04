@@ -116,6 +116,21 @@ class intruction_decoder:
                 else:
                     ps.wb_signals.need_write_back = True
                     ps.wb_signals.reg_dest = regs[0]
+        if cn == 0b11:
+            ps.alu_signals.reg1 = self.regs.get_reg(reg_names.PC.value)
+            ps.alu_signals.reg2 = self.__get_fourth_type_immediate__(inst)
+            ps.alu_signals.discard_nzvc = True
+            ps.mw_signals.need_mem = False
+            ps.wb_signals.need_write_back = True
+            ps.wb_signals.reg_dest = reg_names.PC.value
+            if not flags[5]:
+                ps.alu_signals.comp = True
+                ps.alu_signals.comp_num = inst >> 4 & 0x3
+            else:
+                ps.alu_signals.add = True
+                if flags[4]:
+                    ps.alu_signals.reg1 = self.regs.get_reg(regs[0])
+                    ps.alu_signals.reg2 = 0
 
         return ps
 
