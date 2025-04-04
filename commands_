@@ -39,8 +39,8 @@ funct: 1st bit - is interruption
 | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
 | +- |                       imm        |    funct2    |           s2           |           r1           |           rd           |     funct1   |       cn     | 1st type
 | +- |                                                      imm                 |           r            |           rd           |     funct    |       cn     | 2nd type
-| +- |                                                      imm                                          |           rd           |     funct    |       cn     | 2nd type
-| +- |                                                      imm                                          |           rd           |     funct    |       cn     | 3d  type
+| +- |                                                      imm                                          |           rd           |     funct    |       cn     | 3nd type
+| +- |                                                      imm                                          |           rd           |     funct    |       cn     | 4d  type
 | +- |                                                      imm                                          |           rd           |     funct    |       cn     | spec
 
 

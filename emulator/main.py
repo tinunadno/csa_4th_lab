@@ -6,7 +6,7 @@ if __name__ == "__main__":
     regs = registers()
     regs.write_reg(31, 123321)
     id_ = intruction_decoder(regs)
-    inst = 0b1111111111111111_11111_00001_111_001
+    inst = 0b1111111111_00001_011_010
     ids = instruction_decoder_signal(inst)
     tmp = id_.decode(ids)
     print(f"reg1: {tmp.alu_signals.reg1}")
@@ -28,3 +28,5 @@ if __name__ == "__main__":
     print(f"rd: {tmp.wb_signals.reg_dest}")
     print(f"val: {tmp.wb_signals.value}")
     print(f"nwb: {tmp.wb_signals.need_write_back}")
+    print(f"lo: {tmp.wb_signals.write_lower}")
+    print(f"hi: {tmp.wb_signals.write_upper}")

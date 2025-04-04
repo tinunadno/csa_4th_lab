@@ -45,15 +45,8 @@ class intruction_decoder:
             imm = -(imm & 0x7FFF)
         return imm
     def __get_third_type_immediate__(self, instruction: int) -> int:
-        imm = instruction >> 13 & 0x7FFFF
-        if imm >> 18 & 0x1:
-            imm = -(imm & 0x3FFFF)
+        imm = instruction >> 11 & 0x1FFFFF
         return imm
-    def __get_third_type_additional_flags__(self, instruction: int) -> [bool, bool]:
-        return [
-            instruction >> 12 & 0x1,
-            instruction >> 11 & 0x1
-        ]
     def __get_fourth_type_immediate__(self, instruction: int) -> int:
         imm = instruction >> 11 & 0x1FFFFF
         if imm & 0x100000 != 0:
@@ -98,6 +91,31 @@ class intruction_decoder:
             if not flags[5]:
                 ps.wb_signals.need_write_back = True
                 ps.wb_signals.reg_dest = regs[0]
+        if cn == 0b10:
+            if not flags[5]:
+                if not flags[3]:
+                    ps.alu_signals.reg1 = self.__get_third_type_immediate__(inst)
+                    ps.alu_signals.add = True
+                    ps.wb_signals.write_upper = True
+                else:
+                    ps.alu_signals.reg1 = (self.__get_third_type_immediate__(inst) & 0x3FF) << 21
+                    ps.alu_signals.add = True
+                    ps.wb_signals.write_lower = True
+                ps.mw_signals.need_mem = False
+                ps.wb_signals.need_write_back = True
+                ps.wb_signals.reg_dest = regs[0]
+            else:
+                ps.alu_signals.reg1 = self.regs.get_reg(reg_names.SP.value)
+                ps.alu_signals.reg2 = 4
+                ps.alu_signals.add = True
+                ps.alu_signals.neg_second = not flags[4]
+                if not flags[4]:
+                    ps.mw_signals.need_mem = True
+                    ps.mw_signals.read_write = True
+                    ps.mw_signals.register_dest = regs[0]
+                else:
+                    ps.wb_signals.need_write_back = True
+                    ps.wb_signals.reg_dest = regs[0]
 
         return ps
 
