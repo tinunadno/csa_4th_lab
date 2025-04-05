@@ -10,7 +10,7 @@ class mem_writer:
     def execute_wm(self, mws: mem_writer_signals) -> int:
         if not mws.need_mem:
             return 0
-        if mws.read_write:
+        if not mws.read_write:
             return self.dm.read(mws.address)
         else:
             if mws.write_byte:

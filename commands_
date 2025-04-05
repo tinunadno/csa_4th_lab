@@ -29,7 +29,7 @@ if its a jump, immediate value is displacement
 if its long jump, register is an address
 
 spec 0b100
-INT IRET HALT CALL RET
+INT IRET HALT
 register is a register with address
 funct: 1st bit - is interruption
        2nd bit - is return (is interruption is zero, this bit defines call\ret, else int\iret)

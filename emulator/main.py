@@ -1,36 +1,27 @@
 from csa_4th_lab.emulator.cpu.pipeline.B_ID.instruction_decoder import intruction_decoder
 from csa_4th_lab.emulator.cpu.pipeline.B_ID.instruction_decoder_signal import instruction_decoder_signal
+from csa_4th_lab.emulator.cpu.pipeline.pipeline import pipeline
 from csa_4th_lab.emulator.cpu.registers import registers, reg_names
 
+# | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
+# | +- |                       imm        |    funct2    |           s2           |           r1           |           rd           |     funct1   |       cn     | 1st type
+# | +- |                                                      imm                 |           r            |           rd           |     funct    |       cn     | 2nd type
+# | +- |                                                      imm                                          |           rd           |     funct    |       cn     | 3nd type
+# | +- |                                                      imm                                          |           rd           |     funct    |       cn     | 4d  type
+# | +- |                                                      imm                                          |           rd           |     funct    |       cn     | spec
+
+
 if __name__ == "__main__":
-    regs = registers()
-    regs.write_reg(31, 123321)
-    regs.write_reg(1, 123)
-    regs.write_reg(reg_names.PC.value, 21)
-    id_ = intruction_decoder(regs)
-    inst = 0b1111111111_00001_110_011
-    ids = instruction_decoder_signal(inst)
-    tmp = id_.decode(ids)
-    print(f"reg1: {tmp.alu_signals.reg1}")
-    print(f"reg2: {tmp.alu_signals.reg2}")
-    print(f"add: {tmp.alu_signals.add}")
-    print(f"ns: {tmp.alu_signals.neg_second}")
-    print(f"xor: {tmp.alu_signals.xor}")
-    print(f"n_shift: {tmp.alu_signals.need_shift}")
-    print(f"sh_dir: {tmp.alu_signals.sh_direction}")
-    print(f"cyc: {tmp.alu_signals.cyclic}")
-    print(f"dnzvc: {tmp.alu_signals.discard_nzvc}")
-    print(f"comp: {tmp.alu_signals.comp}")
-    print(f"comp_num: {tmp.alu_signals.comp_num}")
-    print()
-    print(f"nm: {tmp.mw_signals.need_mem}")
-    print(f"rw: {tmp.mw_signals.read_write}")
-    print(f"addr: {tmp.mw_signals.address}")
-    print(f"rd: {tmp.mw_signals.register_dest}")
-    print(f"wb: {tmp.mw_signals.write_byte}")
-    print()
-    print(f"rd: {tmp.wb_signals.reg_dest}")
-    print(f"val: {tmp.wb_signals.value}")
-    print(f"nwb: {tmp.wb_signals.need_write_back}")
-    print(f"lo: {tmp.wb_signals.write_lower}")
-    print(f"hi: {tmp.wb_signals.write_upper}")
+    instructions = [
+        0b111111111_00000_000_010,
+        0b0000000000000001_00001_00000_111_001,
+        0b0000000000000000_00010_00001_100_001,
+        0b100
+    ]
+    mem_size = 32
+    pl = pipeline(mem_size, instructions)
+    pl.init_pipeline(0)
+    print(pl.regs.get_reg(0))
+    print(pl.regs.get_reg(1))
+    print(pl.regs.get_reg(2))
+    print(pl.mem.data)

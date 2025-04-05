@@ -20,11 +20,11 @@ class registers:
         self.regs[34] = 1
     def write_reg(self, reg_number: int, value: int) -> None:
         self.regs[reg_number % len(self.regs)] = value
-    def write_lo(self, reg_number: int, value: int) -> None:
-        self.regs[reg_number % len(self.regs)] &= 0xFFFC0000
-        self.regs[reg_number % len(self.regs)] |= (value & 0x3FFFF)
     def write_hi(self, reg_number: int, value: int) -> None:
-        self.regs[reg_number % len(self.regs)] &= 0x3FFFF
-        self.regs[reg_number % len(self.regs)] |= (value & 0xFFFC0000)
+        self.regs[reg_number % len(self.regs)] &= 0xFFE00000
+        self.regs[reg_number % len(self.regs)] |= (value & 0x1FFFFF)
+    def write_lo(self, reg_number: int, value: int) -> None:
+        self.regs[reg_number % len(self.regs)] &= 0x1FFFFF
+        self.regs[reg_number % len(self.regs)] |= (value & 0xFFE00000)
     def get_reg(self, reg_number: int) -> int:
         return self.regs[reg_number % len(self.regs)]
