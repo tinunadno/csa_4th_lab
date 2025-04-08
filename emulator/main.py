@@ -10,12 +10,20 @@ from csa_4th_lab.emulator.cpu.registers import registers, reg_names
 # | +- |                                                      imm                                          |           rd           |     funct    |       cn     | 4d  type
 # | +- |                                                      imm                                          |           rd           |     funct    |       cn     | spec
 
+# TODO fix branches, so they compare actual register values, not the processers flags
+# TODO create some cool system for handling bubbles
 
 if __name__ == "__main__":
+
     instructions = [
-        0b111111111_00000_000_010,
-        0b0000000000000001_00001_00000_111_001,
-        0b0000000000000000_00010_00001_100_001,
+        0b111111111111111111111_00000_000_010,
+        0b000000000000000000000_00000_001_010,
+        0b11111_00001_000_010,
+        0b000000000000000000000_00001_001_010,
+        0b1_00000_000_010,
+        0b00_00000_010_011,
+        0b000000000000000000000_00001_011_010,
+        0b000000000000000000000_00001_011_010,
         0b100
     ]
     mem_size = 32
@@ -25,3 +33,4 @@ if __name__ == "__main__":
     print(pl.regs.get_reg(1))
     print(pl.regs.get_reg(2))
     print(pl.mem.data)
+    print(pl.regs.get_reg(31))

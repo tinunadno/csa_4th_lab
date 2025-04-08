@@ -35,11 +35,11 @@ class pipeline:
 
     def init_pipeline(self, entry_point: int):
         self.regs.write_reg(reg_names.PC.value, entry_point)
+        self.regs.write_reg(reg_names.SP.value, self.mem.size)
         while self.regs.get_reg(reg_names.PS.value) != 0:
-            # TODO finish pipeline buffer system
-
             self.tick += 1
-
+            if self.tick == 249:
+                a = 0
             ps = self.pipeline_signal_buffer[3]
             if not ps.flush:
                 self.WB.execute_wb(ps.wb_signals)

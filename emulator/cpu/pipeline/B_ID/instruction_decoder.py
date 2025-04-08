@@ -51,7 +51,7 @@ class intruction_decoder:
                     ps.alu_signals.add = True
                     ps.wb_signals.write_upper = True
                 else:
-                    ps.alu_signals.reg1 = (get_third_type_immediate(inst) & 0x3FF) << 21
+                    ps.alu_signals.reg1 = (get_third_type_immediate(inst) & 0x3FF) << 22
                     ps.alu_signals.add = True
                     ps.wb_signals.write_lower = True
                 ps.mw_signals.need_mem = False
@@ -61,14 +61,16 @@ class intruction_decoder:
                 ps.alu_signals.reg1 = self.regs.get_reg(reg_names.SP.value)
                 ps.alu_signals.reg2 = 4
                 ps.alu_signals.add = True
-                ps.alu_signals.neg_second = not flags[4]
                 if not flags[4]:
                     ps.mw_signals.need_mem = True
                     ps.mw_signals.read_write = True
                     ps.mw_signals.register_dest = regs[0]
+                    ps.alu_signals.neg_second = True
+                    ps.wb_signals.need_write_back = True
+                    ps.wb_signals.reg_dest = reg_names.SP.value
                 else:
                     ps.wb_signals.need_write_back = True
-                    ps.wb_signals.reg_dest = regs[0]
+                    ps.wb_signals.reg_dest = reg_names.SP.value
         if cn == 0b11:
             ps.alu_signals.reg1 = self.regs.get_reg(reg_names.PC.value)
             ps.alu_signals.reg2 = get_fourth_type_immediate(inst)

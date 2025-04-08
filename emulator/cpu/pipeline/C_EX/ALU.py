@@ -52,14 +52,17 @@ class ALU:
         reg1 = cast_to_unsigned_int(signal.reg1)
         reg2 = cast_to_unsigned_int(signal.reg2)
         if signal.comp:
+            reg1 = cast_to_signed_int(signal.reg1)
+            reg2 = cast_to_signed_int(signal.reg2)
+            ret = reg1
             if signal.comp_num == 0b00 and self.z:
-                ret = signal.reg1 + signal.reg2
+                ret = reg1 + reg2
             elif signal.comp_num == 0b01 and self.n:
-                ret = signal.reg1 + signal.reg2
+                ret = reg1 + reg2
             elif signal.comp_num == 0b10 and (not self.z):
-                ret = signal.reg1 + signal.reg2
+                ret = reg1 + reg2
             elif signal.comp_num == 0b11 and (not self.n):
-                ret = signal.reg1 + signal.reg2
+                ret = reg1 + reg2
         elif signal.need_shift:
             if not signal.cyclic:
               if signal.sh_direction:
