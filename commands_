@@ -44,5 +44,13 @@ funct: 1st bit - is interruption
 | +- |                                                      imm                                          |           rd           |     funct    |       cn     | spec
 
 
-
+IF      |   ID  |   EX  |   MEM     |   WB
+li t0   |   x   |   x   |   x       |   x
+li t1   | li t0 |   x   |   x       |   x
+add t2  | li t1 | li t0 |   x       |   x
+  x     |add t2 | li t1 |  li t0    |   x
+          |_________|         |
+          |    DF             |
+          |___________________|
+                    DF
 

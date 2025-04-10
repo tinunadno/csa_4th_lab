@@ -1,6 +1,7 @@
 from csa_4th_lab.emulator.cpu.pipeline.C_EX.ALU_signals import ALU_signals
 from csa_4th_lab.emulator.cpu.pipeline.D_MEM.mem_writer_signals import mem_writer_signals
 from csa_4th_lab.emulator.cpu.pipeline.E_WB.write_back_signals import write_back_signals
+from csa_4th_lab.emulator.cpu.pipeline.Z_DF.data_forward_signals import data_forward_signals
 
 
 class pipeline_signals:

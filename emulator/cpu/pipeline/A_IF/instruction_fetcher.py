@@ -12,12 +12,15 @@ class instruction_fetcher:
         self.flush_counter = 0
     def __guess_next__(self, inst:instruction_decoder_signal) -> None:
         cn = get_command_number(inst.instruction)
-        # if cn == 0b100:
-        self.next_flush = True
-        self.flush_counter = 0
-    def fetch(self, ps: pipeline_signals) -> instruction_decoder_signal:
+        if cn == 0b100:
+            self.next_flush = True
+            self.flush_counter = 0
+    def fetch(self, ps: pipeline_signals, stall: bool) -> instruction_decoder_signal:
         if self.next_flush and (self.flush_counter < 4):
             self.flush_counter+=1
+            ps.flush = True
+            return instruction_decoder_signal(0)
+        if stall:
             ps.flush = True
             return instruction_decoder_signal(0)
         ret = instruction_decoder_signal(self.im.get_instruction(self.regs.get_reg(reg_names.PC.value)))
