@@ -37,7 +37,6 @@ class pipeline:
         self.regs.write_reg(reg_names.SP.value, self.mem.size)
         while self.regs.get_reg(reg_names.PS.value) != 0:
             self.tick += 1
-            print(self.tick)
             ps = self.pipeline_signal_buffer[3]
 
             if not ps.flush:
