@@ -6,6 +6,12 @@ funct1: 1st bit - sum or bitwise or\and
 funct2: 1st bit - need shift or not
         2nd bit - shift left\right
         3d  bit - cyclic shift
+combined funct:
+        1st bit of funct 1 and 1st bit of funct 2 - need multiplication or division or remainder
+        funct1 snd bit - multiplication
+        funct1 thd bit - division
+        funct 1 snd and thd bit - remainder
+        in this case funct2 snd and thd bit - are reserved
 here s1 - first register, s2 - second register, rd - destination register, imm only used in addi
 2 type 0b01
 LW SW SB                                lower\upper

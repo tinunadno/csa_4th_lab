@@ -26,12 +26,17 @@ class intruction_decoder:
                 ps.alu_signals.reg2 = get_first_type_immediate(inst)
             else:
                 ps.alu_signals.reg2 = self.__get_reg__(regs[1], df)
-            ps.alu_signals.add = flags[5]
-            ps.alu_signals.neg_second = flags[4]
-            ps.alu_signals.xor = (not flags[5]) and flags[3]
-            ps.alu_signals.need_shift = flags[2]
-            ps.alu_signals.sh_direction = not flags[1]
-            ps.alu_signals.cyclic = flags[0]
+            if flags[5] and flags[2]:
+                ps.alu_signals.rem = flags[4] and flags[3]
+                ps.alu_signals.mul = flags[4]
+                ps.alu_signals.div = flags[3]
+            else:
+                ps.alu_signals.add = flags[5]
+                ps.alu_signals.neg_second = flags[4]
+                ps.alu_signals.xor = (not flags[5]) and flags[3]
+                ps.alu_signals.need_shift = flags[2]
+                ps.alu_signals.sh_direction = not flags[1]
+                ps.alu_signals.cyclic = flags[0]
             ps.mw_signals.need_mem = False
             ps.wb_signals.reg_dest = regs[0]
             ps.wb_signals.need_write_back = True

@@ -49,11 +49,15 @@ class ALU:
 
     def execute(self, signal: ALU_signals) -> int:
         ret = 0
-        reg1 = cast_to_unsigned_int(signal.reg1)
-        reg2 = cast_to_unsigned_int(signal.reg2)
-        if signal.comp:
-            reg1 = cast_to_signed_int(signal.reg1)
-            reg2 = cast_to_signed_int(signal.reg2)
+        reg1 = cast_to_signed_int(signal.reg1)
+        reg2 = cast_to_signed_int(signal.reg2)
+        if signal.rem:
+            ret = reg1 % reg2
+        elif signal.mul:
+            ret = reg1 * reg2
+        elif signal.div:
+            ret = reg1 // reg2
+        elif signal.comp:
             ret = reg1
             if signal.comp_num == 0b00 and self.z:
                 ret = reg1 + reg2
@@ -64,6 +68,8 @@ class ALU:
             elif signal.comp_num == 0b11 and (not self.n):
                 ret = reg1 + reg2
         elif signal.need_shift:
+            reg1 = cast_to_unsigned_int(signal.reg1)
+            reg2 = cast_to_unsigned_int(signal.reg2)
             if not signal.cyclic:
               if signal.sh_direction:
                   ret = reg1 << reg2
@@ -75,14 +81,16 @@ class ALU:
                 else:
                     ret = ((reg1 >> reg2) | (reg1 << (32 - reg2))) & ((1 << 32) - 1)
         elif signal.xor:
+            reg1 = cast_to_unsigned_int(signal.reg1)
+            reg2 = cast_to_unsigned_int(signal.reg2)
             ret = reg1 ^ reg2
         elif signal.add:
-            reg1 = cast_to_signed_int(signal.reg1)
-            reg2 = cast_to_signed_int(signal.reg2)
             if signal.neg_second:
                 reg2 *= -1
             ret = reg1 + reg2
         elif not signal.add:
+            reg1 = cast_to_unsigned_int(signal.reg1)
+            reg2 = cast_to_unsigned_int(signal.reg2)
             if signal.neg_second:
                 ret = reg1 & reg2
             else:
