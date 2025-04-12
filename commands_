@@ -1,5 +1,5 @@
 1 type 0b00
-ADD SUB AND OR XOR MV ADDI SHL SHR ROL ROR          add, neg, xor, shift, left, cyclic
+ADD SUB AND OR XOR MV ADDI SHL SHR ROL ROR MUL DIV REM          add, neg, xor, shift, left, cyclic              MV
 funct1: 1st bit - sum or bitwise or\and
         2nd bit - 2nd operand - negative/(if sum = 0 => or|and)
         3d  bit - addi (if 1st bit is 1), xor (if first bit is 0)
