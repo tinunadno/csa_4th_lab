@@ -22,7 +22,7 @@ class intruction_decoder:
         stall = False
         if cn == 0b00: #eg 1st type
             ps.alu_signals.reg1 = self.__get_reg__(regs[2], df)
-            if flags[5] and flags[3]:
+            if flags[5] and flags[3] and (not (flags[5] and flags[2])):
                 ps.alu_signals.reg2 = get_first_type_immediate(inst)
             else:
                 ps.alu_signals.reg2 = self.__get_reg__(regs[1], df)
