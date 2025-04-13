@@ -1,5 +1,5 @@
-from csa_4th_lab.translator.command_builders.token_exception import token_exception
-from csa_4th_lab.translator.command_builders.warning import warning
+from csa_4th_lab.compiler.translator.command_builders.token_exception import token_exception
+from csa_4th_lab.compiler.translator.command_builders.warning import warning
 
 
 class command_prebuild_meta_inf:
@@ -23,7 +23,7 @@ class command_metainf:
 
 class command_builder:
     def __init__(self):
-        from csa_4th_lab.translator.command_builders.primitive_handlers import parse_reg, parse_immediate, build_fst_type_command, build_snd_type_command, build_thd_type_command, parse_token_with_displacement, parse_immediate_upper_lower, halt_appeared
+        from csa_4th_lab.compiler.translator.command_builders.primitive_handlers import parse_reg, parse_immediate, build_fst_type_command, build_snd_type_command, build_thd_type_command, parse_token_with_displacement, parse_immediate_upper_lower, halt_appeared
         self.commands_meta_inf = {
             "add": command_metainf([0b000, 0b001], (parse_reg, parse_reg, parse_reg), 0, build_fst_type_command, 8),
             "addi": command_metainf([0b000, 0b101], (parse_reg, parse_reg, parse_immediate), 0, build_fst_type_command,8),
@@ -65,8 +65,6 @@ class command_builder:
         except:
             raise token_exception(0, "No such command!")
         self.warnings = []
-        if tokens[0] == "halt":
-            asd = 0
         cpmi = command_prebuild_meta_inf(cmi.flags_, cmi.command_number)
         if not cmi.zero_args:
             if len(tokens) - 1 < len(cmi.value_processors):

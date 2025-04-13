@@ -10,7 +10,7 @@ from csa_4th_lab.emulator.cpu.registers import registers, reg_names
 from csa_4th_lab.emulator.memory.data_mem import data_mem
 from csa_4th_lab.emulator.memory.instruction_memory import instruction_memory
 
-
+# TODO add interruptions
 class pipeline:
     def __init__(self, mem_size: int, instructions: list[int], trash = False):
         self.mem = data_mem(mem_size, trash)

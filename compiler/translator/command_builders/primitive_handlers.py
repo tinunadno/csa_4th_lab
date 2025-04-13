@@ -1,6 +1,6 @@
-from csa_4th_lab.translator.command_builders.command_builder import command_builder, command_prebuild_meta_inf
-from csa_4th_lab.translator.command_builders.token_exception import token_exception
-from csa_4th_lab.translator.command_builders.warning import warning
+from csa_4th_lab.compiler.translator.command_builders.command_builder import command_builder, command_prebuild_meta_inf
+from csa_4th_lab.compiler.translator.command_builders.token_exception import token_exception
+from csa_4th_lab.compiler.translator.command_builders.warning import warning
 
 
 # PS imm_size here just to match the interface
