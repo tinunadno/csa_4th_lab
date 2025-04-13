@@ -1,3 +1,7 @@
-lw t3, t7, 1, 1, 1
-li t1, t6
-add t14, t22, 12
+lw t3, 0(t7)
+push t11
+add t14, t22, t12
+li t1, %hi(111)
+jmp 123
+ljmp t13
+halt
