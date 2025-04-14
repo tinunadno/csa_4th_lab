@@ -12,9 +12,9 @@ from csa_4th_lab.emulator.memory.instruction_memory import instruction_memory
 
 # TODO add interruptions
 class pipeline:
-    def __init__(self, mem_size: int, instructions: list[int], trash = False):
-        self.mem = data_mem(mem_size, trash)
-        self.inst_mem = instruction_memory(instructions)
+    def __init__(self, mem: data_mem, instructions: instruction_memory, trash = False):
+        self.mem = mem
+        self.inst_mem = instructions
         self.regs = registers(trash)
         self.IF = instruction_fetcher(self.regs, self.inst_mem)
         self.ID = intruction_decoder(self.regs)
