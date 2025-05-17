@@ -1,0 +1,346 @@
+registers:
+  register_count: 36
+  common_registers: [ 0, 30 ]
+  special_registers:
+    - { name: "SP", number: 31 } # stack pointer
+    - { name: "PC", number: 32 } # program counter
+    - { name: "IR", number: 33 } # instruction register
+    - { name: "PS", number: 34 } # program state
+    - { name: "IC", number: 35 } # interruption context register
+pipeline:
+  pipeline_signals:
+    - name: "EX_signal"
+      bit_layout:
+        - { name: "reg1",         bits: [ 0, 31 ],   description: "first operand" }
+        - { name: "reg2",         bits: [ 32, 62 ],  description: "second operand" }
+        - { name: "add",          bits: [ 63 ],      description: "add signal" }
+        - { name: "and",          bits: [ 64 ],      description: "and signal" }
+        - { name: "neg_second",   bits: [ 65 ],      description: "neg second signal or or" }
+        - { name: "xor",          bits: [ 66 ],      description: "xor signal" }
+        - { name: "need_shift",   bits: [ 67 ],      description: "need shift signal" }
+        - { name: "sh_dir",       bits: [ 68 ],      description: "shift direction signal" }
+        - { name: "cycl",         bits: [ 69 ],      description: "cyclic shift signal" }
+        - { name: "discard_nzvc", bits: [ 70 ],      description: "discard NZVC flags signal" }
+        - { name: "comp",         bits: [ 71 ],      description: "comparison mode signal" }
+        - { name: "comp_num_fst", bits: [ 72 ],      description: "comparison number first bit" }
+        - { name: "comp_num_snd", bits: [ 73 ],      description: "comparison number second bit" }
+        - { name: "mul",          bits: [ 74 ],      description: "multiplication signal" }
+        - { name: "div",          bits: [ 75 ],      description: "division signal" }
+        - { name: "rem",          bits: [ 76 ],      description: "remainder signal" }
+    - name: "MEM_signal"
+      bit_layout:
+        - { name: "address",    bits: [ 0, 5 ],   description: "address register" }
+        - { name: "value",      bits: [ 6, 10 ],  description: "value register" }
+        - { name: "need_mem",   bits: [ 11 ],     description: "need memory write signal" }
+        - { name: "reed_write", bits: [ 12 ],     description: "read or write" }
+        - { name: "wb",         bits: [ 13 ],     description: "write only byte" }
+    - name: "WB_signal"
+      bit_layout:
+        - { name: "value",       bits: [ 0, 31 ],   description: "value (EX output)" }
+        - { name: "reg_dest",    bits: [ 32, 36 ],  description: "destination register number" }
+        - { name: "need_wb",     bits: [ 33 ],      description: "need write back signal" }
+        - { name: "write_upper", bits: [ 34 ],      description: "write upper part" }
+        - { name: "write_lower", bits: [ 35 ],      description: "write lower part" }
+    - name: "DF_signal"
+      bit_layout:
+        - { name: "fst_reg_num",      bits: [ 0, 5 ],    description: "first forwarded register number" }
+        - { name: "fst_reg_val",      bits: [ 0, 31 ],   description: "first forwarded register value" }
+        - { name: "is_fst_forwarded", bits: [ 32 ],      description: "is first register forwarded" }
+        - { name: "snd_reg_num",      bits: [ 33, 37 ],  description: "second forwarded register number" }
+        - { name: "snd_reg_val",      bits: [ 38, 68 ],  description: "second forwarded register value" }
+        - { name: "is_snd_forwarded", bits: [ 69 ],      description: "is second register forwarded" }
+    - name: "stall"
+      bit_layout:
+        - { name: "stall size", bits: [ 0, 3 ], description: "how many ticks we gotta stall" }
+    - name: "ALU_output"
+      bit_layout:
+        - { name: "value", bits: [ 0, 31 ], "ALU output value" }
+  stages:
+    - name: "IF"  # instruction fetch
+      dependencies: [ "registers", "instruction_memory" ]
+      input_signals: [ "stall" ]
+      output_signals: [ ]  # empty
+      behaviour:
+        name: "load_stage"
+        handler: "INSTRUCTION_LOAD_HANDLER"
+        args: [ "instruction_memory", "registers", "stall", "PC", "IR" ]
+
+    - name: "ID"  # instruction decoding
+      dependencies: [ "registers" ]
+      input_signals: [ "DF_signal" ]
+      output_signals: [ "EX_signal", "MEM_signal", "WB_signal", "stall" ]
+      behaviour:
+        name: "decode"
+        handler: "INSTRUCTION_DECODER_HANDLER"
+        args: [ "DF_signal", "registers", "IR" ]
+
+    - name: "EX"  # execution
+      dependencies: [ ]
+      input_signals: [ "EX_signal" ]
+      output_signals: [ "ALU_output" ]
+      behaviour:
+        name: "execution"
+        handler: "ALU_EXECUTION_HANDLER"
+        args: [ "EX_signal" ]
+
+    - name: "MEM"
+      dependencies: [ "data_memory", "registers" ]
+      input_signals: [ "MEM_signal" ]
+      output_signals: [ "DF_signal" ]
+      behaviour:
+        name: "mem_write"
+        handler: "MEM_HANDLER"
+        args: [ "data_memory", "registers", "MEM_signal" ]
+
+    - name: "WB"
+      dependencies: [ "registers" ]
+      input_signals: [ "WB_signal" ]
+      output_signals: [ ]
+      behaviour:
+        name: "write_back"
+        handler: "REGISTER_handler"
+        args: [ "registers", "WB_signal" ]
+instructions:
+  instructions_format:
+    command_number_bits: 3
+    types:
+      first_type:
+        command_number: 0
+        description: "arithmetic operations"
+        bit_layout:
+          - { name: "cn",     bits: [ 0, 2 ],   description: "Command number" }
+          - { name: "funct1", bits: [ 3, 8 ],   description: "functional bits 1" }
+          - { name: "rd",     bits: [ 9, 13 ],  description: "register destination" }
+          - { name: "r1",     bits: [ 14, 18 ], description: "first operand register number" }
+          - { name: "r2",     bits: [ 19, 23 ], description: "second operand register number" }
+          - { name: "imm",    bits: [ 24, 31 ], description: "immediate value" }
+      second_type:
+        command_number: 1
+        description: "load write registers value"
+        bit_layout:
+          - { name: "cn",    bits: [ 0, 2 ],   description: "Command number" }
+          - { name: "funct", bits: [ 3, 5 ],   description: "functional bits" }
+          - { name: "rd",    bits: [ 6, 10 ],  description: "destination register" }
+          - { name: "r",     bits: [ 11, 15 ], description: "value register" }
+          - { name: "imm",   bits: [ 16, 31 ], description: "immediate value" }
+      third_type:
+        command_number: 2
+        description: "load immediate \ push \ pop"
+        bit_layout:
+          - { name: "cn",    bits: [ 0, 2 ],   description: "command number" }
+          - { name: "funct", bits: [ 3, 5 ],   description: "command number" }
+          - { name: "rd",    bits: [ 6, 10 ],  description: "register destination" }
+          - { name: "imm",   bits: [ 11, 31 ], description: "immediate value" }
+      fourth_type:
+        command_number: 3
+        description: "branch operations"
+        bit_layout:
+          - { name: "cn",    bits: [ 0, 2 ],   description: "command number" }
+          - { name: "funct", bits: [ 3, 5 ],   description: "command number" }
+          - { name: "rd",    bits: [ 6, 10 ],  description: "register destination" }
+          - { name: "imm",   bits: [ 11, 31 ], description: "immediate value" }
+      fifth_type:
+        command_number: 4
+        description: "special commands"
+        bit_layout:
+          - { name: "cn",    bits: [ 0, 2 ],   description: "command number" }
+          - { name: "funct", bits: [ 3, 5 ],   description: "command number" }
+          - { name: "rd",    bits: [ 6, 10 ],  description: "register destination" }
+          - { name: "imm",   bits: [ 11, 31 ], description: "immediate value" }
+  decoding_rules:
+    - mnemonic: "ADD"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 0, 0, 0, 0, 0, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "add" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "SUB"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 0, 0, 0, 0, 1, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "add", "neg_second" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "AND"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 0, 0, 0, 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "and" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "OR"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 0, 0, 0, 0, 1, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "and", "neg_second" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "XOR"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 0, 0, 0, 1, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "xor" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "ADDI"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "%", "imm" ]
+      type: 0
+      functional_bits_match: [ 0, 0, 0, 1, 0, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "imm", "add" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "SHL"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 0, 0, 1, 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "need_shift" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "SHR"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 0, 1, 1, 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "need_shift", "sh_dir" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "ROL"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 1, 0, 1, 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "need_shift", "cycl" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "ROR"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 1, 1, 1, 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "need_shift", "sh_dir", "cycl" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "MUL"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 0, 1, 1, 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "mul" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "DIV"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 1, 0, 1, 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "div" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+    - mnemonic: "REM"
+      args:
+        - [ "t%", "rd" ]
+        - [ "t%", "r1" ]
+        - [ "t%", "r2" ]
+      type: 0
+      functional_bits_match: [ 1, 1, 1, 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1", "r2", "rem" ]
+        - name: "MEM_signal"
+          args: [ ]
+        - name: "WB_signal"
+          args: [ "rd", "need_wb" ]
+
+

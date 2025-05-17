@@ -29,12 +29,10 @@ class data_mem:
         else:
             raise ValueError("Attempting to read memory out of address space")
 
-    def print_mem(self):
-        print("memory state:")
-        current_segment = ""
-        for i in range(1, len(self.data) + 1):
-            temp =  hex(self.data[i-1])[2:]
-            current_segment = ("0" * (2-len(temp))) + temp + " " + current_segment
-            if i%4 == 0:
-                print(current_segment)
-                current_segment = ""
+    def get_memory_view(self, data_start: int, data_end: int) -> list[str]:
+        ret = ["MEMORY:", "ADDRESS    | DATA"]
+        for i in range(data_start, data_end):
+            if data_end > self.size:
+                break
+            ret.append(f"0x{i:08X} | 0x{self.data[i]:08X}")
+        return ret

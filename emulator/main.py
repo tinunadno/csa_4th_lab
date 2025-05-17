@@ -1,5 +1,7 @@
 from csa_4th_lab.emulator.cpu.pipeline.pipeline import pipeline
 from csa_4th_lab.emulator.loader import loader
+from csa_4th_lab.emulator.memory.data_mem import data_mem
+from csa_4th_lab.emulator.memory.instruction_memory import instruction_memory
 
 # | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
 # | +- |                       imm        |    funct2    |           s2           |           r1           |           rd           |     funct1   |       cn     | 1st type
@@ -23,7 +25,8 @@ if __name__ == "__main__":
         0b100
     ]
     mem_size = 32
-    pl = loader.load_data([(0, [1233]), (10, [32212, 32213, 32214])], [226, 226, 6217, 67115240, 227490, 6409, 74184, 145864, 4], mem_size)
+    # pl = loader.load_data([(0, [1233]), (10, [32212, 32213, 32214])], [226, 226, 6209, 67115240, 162, 6401, 67115240, 227490, 6273, 74184, 145864, 4], mem_size)
+    pl = pipeline(data_mem(32), instruction_memory(instructions))
     pl.init_pipeline(0)
     print("0", pl.regs.get_reg(0))
     print("1", pl.regs.get_reg(1))
@@ -34,5 +37,6 @@ if __name__ == "__main__":
     print("6", pl.regs.get_reg(6))
     print("7", pl.regs.get_reg(7))
     print("8", pl.regs.get_reg(8))
-    print(pl.mem.data)
+
+    pl.mem.print_mem()
 

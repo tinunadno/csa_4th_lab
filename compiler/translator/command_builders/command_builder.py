@@ -39,7 +39,7 @@ class command_builder:
             "div": command_metainf([0b001, 0b101], (parse_reg, parse_reg, parse_reg), 0, build_fst_type_command, 8),
             "rem": command_metainf([0b001, 0b111], (parse_reg, parse_reg, parse_reg), 0, build_fst_type_command, 8),
 
-            "lw": command_metainf([0b001,], (parse_reg, parse_token_with_displacement), 1, build_snd_type_command, 16),
+            "lw": command_metainf([0b000,], (parse_reg, parse_token_with_displacement), 1, build_snd_type_command, 16),
             "sw": command_metainf([0b000,], (parse_reg, parse_token_with_displacement), 1, build_snd_type_command, 16),
             "sb": command_metainf([0b010,], (parse_reg, parse_token_with_displacement), 1, build_snd_type_command, 16),
 

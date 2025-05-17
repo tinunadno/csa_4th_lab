@@ -45,14 +45,20 @@ def parse_immediate(imm: str, imm_size: int, command_bldr: command_builder, toke
     cpmi.imm = val
 
 def parse_immediate_upper_lower(imm: str, imm_size: int, command_bldr: command_builder, token_number: int, cpmi: command_prebuild_meta_inf) -> None:
+    is_high = False
     if (not imm.startswith("%lo")) and (not imm.startswith("%hi")):
         command_bldr.warnings.append(warning(token_number, "Immediate value, in case of immediate load command, should be tagged with %lo or %hi, now immediate will be threatened as %lo"))
     else:
         if imm.startswith("%lo"):
             cpmi.flags_[0] |= 0b100
+        else:
+            is_high = True
         imm = imm[imm.find("(") + 1:imm.find(")")]
     try:
         val = int(imm)
+        if is_high:
+            val >>= 15
+        val &= 0xFFFF
     except:
         raise token_exception(token_number, "can't parse integer in immediate value!")
     max_val = int("1" * (imm_size - 1), 2)

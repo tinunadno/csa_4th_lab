@@ -13,6 +13,9 @@ _start:
     addi t3, t3, 4
     li t2, %hi(111)
     lw t4, t3
+    addi t3, t3, 4
+    li t2, %lo(111)
+    sw t2, t3
 end:
     add t7, t4, t1
     add t7, t7, t2
