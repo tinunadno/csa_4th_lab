@@ -395,8 +395,8 @@ instructions:
           args: [ "need_wb" ]
     - mnemonic: "SW"
       args:
-        - [ "t$", "$%rd" ]
         - [ "$0(t$1)", "$1%r", "$0%imm" ]
+        - [ "t$", "$%rd" ]
       type: 1
       functional_bits_match: [ 1, 0, 1 ]
       signals:
@@ -449,16 +449,74 @@ instructions:
           args: [ "stall_fst", "stall_snd" ]
         - name: "WB_signal"
           args: [ "need_wb", "$PC%reg_dest" ]
+    - mnemonic: "LJMP"
+      args:
+        - [ "$1(t$0)", "$0%rd", "$1%imm" ]
+      type: 3
+      functional_bits_match: [ 0, 1, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "rd%reg1", "imm%reg2", "add", "FORCE_DISCARD_FORWARDING" ]
+        - name: "stall"
+          args: [ "stall_fst", "stall_snd" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$PC%reg_dest" ]
+    - mnemonic: "BEQZ"
+      args:
+        - [ "$", "$%imm" ]
+      type: 3
+      functional_bits_match: [ 0, 0, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp" ]
+        - name: "stall"
+          args: [ "stall_fst", "stall_snd" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$PC%reg_dest" ]
+    - mnemonic: "BEQN"
+      args:
+        - [ "$", "$%imm" ]
+      type: 3
+      functional_bits_match: [ 0, 1, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "comp_num_fst" ]
+        - name: "stall"
+          args: [ "stall_fst", "stall_snd" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$PC%reg_dest" ]
+    - mnemonic: "BNEZ"
+      args:
+        - [ "$", "$%imm" ]
+      type: 3
+      functional_bits_match: [ 1, 0, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "comp_num_snd" ]
+        - name: "stall"
+          args: [ "stall_fst", "stall_snd" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$PC%reg_dest" ]
+    - mnemonic: "BNEN"
+      args:
+        - [ "$", "$%imm" ]
+      type: 3
+      functional_bits_match: [ 1, 1, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "comp_num_fst", "comp_num_snd" ]
+        - name: "stall"
+          args: [ "stall_fst", "stall_snd" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$PC%reg_dest" ]
     - mnemonic: "NOP"                               # required for bubbles
       args:
-        - [ ]
       type: 4
       functional_bits_match: [ 0, 0, 0 ]
       signals:
         - [ ]
     - mnemonic: "HALT"
       args:
-        -[ ]
       type: 4
       functional_bits_match: [ 1, 0, 0 ]
       signals:

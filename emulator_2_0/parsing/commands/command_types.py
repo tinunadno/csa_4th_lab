@@ -1,4 +1,4 @@
-from csa_4th_lab.emulator_2_0.core.bitwise_utils import get_int_cut
+from csa_4th_lab.emulator_2_0.core.utils.bitwise_utils import get_int_cut
 
 class command_types:
     def __init__(self, command_description):

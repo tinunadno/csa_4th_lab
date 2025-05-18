@@ -1,10 +1,13 @@
-from csa_4th_lab.emulator_2_0.core.bitwise_utils import set_int_cut
+from prompt_toolkit.key_binding.bindings.named_commands import self_insert
+
+from csa_4th_lab.emulator_2_0.core.utils.bitwise_utils import set_int_cut
 from csa_4th_lab.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
 from csa_4th_lab.emulator_2_0.core.memory.data_mem import data_mem
 from csa_4th_lab.emulator_2_0.core.memory.instruction_memory import instruction_memory
 from csa_4th_lab.emulator_2_0.core.cpu.registers import registers
 from csa_4th_lab.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_stage import pipeline_stage
-from csa_4th_lab.emulator_2_0.core.log_utils import *
+from csa_4th_lab.emulator_2_0.core.utils.log_utils import *
+from csa_4th_lab.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
 from csa_4th_lab.emulator_2_0.parsing.commands.command_types import command_types
 from csa_4th_lab.emulator_2_0.parsing.handlers.handler_pool import handler_pool
 
@@ -52,10 +55,12 @@ class pipeline:
                     if not "static" in item:
                         key_value = item["name"]
                         self.signals_for_each_tick[-1][0][key_value] = pipeline_signal(item)
-
         c_types = command_types(instructions_desc["instructions_format"])
+        self.last_tick_logs = []
         hp = handler_pool(c_types, instructions_desc["decoding_rules"])
         self.stages = [pipeline_stage(i, hp) for i in stages_descriptions]
+        self.stages_mnemonics = ["NOP" for _ in range(len(self.stages))]
+        self.instruction_desc = instructions_desc
         self.tick_ = 0
 
     def print_initial_logs(self):
@@ -74,6 +79,7 @@ class pipeline:
             signal: pipeline_signal = self.signals_for_each_tick[0][0][i]
             signal.flush_signal()
         signals_idx = len(self.signals_for_each_tick) - 1
+        self.last_tick_logs = []
         for i in self.stages[::-1]:
             args = []
             stage: pipeline_stage = i
@@ -86,16 +92,20 @@ class pipeline:
                     args.append(self.signals_for_each_tick[signals_idx][0][j])
                 else:
                     args.append(j)
-            valid_stage = stage.stage_handler.handle(args, self.signals_for_each_tick[signals_idx][1])
+            valid_stage = stage.stage_handler.handle(args, self.signals_for_each_tick[signals_idx][1], self.last_tick_logs)
             self.signals_for_each_tick[signals_idx][1] = valid_stage
             signals_idx -= 1
+        self.stages_mnemonics[-1] = reconstruct_command(self.regs.get_reg("IR"), self.instruction_desc)
+        self.stages_mnemonics = [self.stages_mnemonics[-1]] + self.stages_mnemonics[:-1]
         return True
 
     def print_logs_for_each_stage(self):
+        print("TICK: ", self.tick_)
         print(" PIPELINE STATE:")
-        stage_index = 1
-        stages_data = [
-                          self.data_mem.get_memory_view(0, 16)] + [
+        stages_data = [self.last_tick_logs] + [self.data_mem.get_memory_view(0, 16)] + [
                           self.inst_mem.get_memory_view(self.regs.get_reg("PC"))]
         glue_string_lists(stages_data)
+        print("\nPIPELINE_STAGES_MNEMONICS:")
+        pl_mnems = ["{[" + self.stages[i].stage_name + "]: '" + self.stages_mnemonics[i] + "'}" for i in range(len(self.stages))]
+        print('->'.join(pl_mnems))
         self.regs.print_logs()

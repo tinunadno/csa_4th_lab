@@ -1,4 +1,4 @@
-from csa_4th_lab.emulator_2_0.core.bitwise_utils import *
+from csa_4th_lab.emulator_2_0.core.utils.bitwise_utils import *
 
 
 class pipeline_signal:
