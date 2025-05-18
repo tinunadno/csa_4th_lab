@@ -62,8 +62,8 @@ class MEM_handler(handler):
             return True
 
         # Получение сигналов
-        need_write = mem_signals.get_signal("read_write")
-        write_byte = mem_signals.get_signal("write_byte")
+        need_write = mem_signals.get_signal("need_write")
+        write_byte = mem_signals.get_signal("wb")
         register_dest = mem_signals.get_signal("reg_dest")
         address = alu_output.get_signal("value")
 
@@ -86,7 +86,7 @@ class MEM_handler(handler):
         print(f"[MEM] Read value: 0x{value:X} from 0x{address:X}")
 
         # Подготовка для WB
-        wb_signal.set_signal("value", value)
+        alu_output.set_signal("value", value)
         wb_signal.set_signal("reg_dest", register_dest)
         print(f"[MEM] Prepared WB: reg[{register_dest}] = 0x{value:X}")
 
@@ -256,7 +256,7 @@ class ALU_execution_handler(handler):
             # Carry flag
             self.flags['C'] = (result >> 32) & 1
 
-    # args: [ "EX_signal", "ALU_output", "WB_signal", "DF_signal", "MEM_signal" ]
+    # args: [ "EX_signal", "ALU_output", "WB_signal", "DF_signal", "MEM_signal", "registers" ]
     def handle(self, args: list[any], is_valid: bool) -> bool:
         """
         Обработчик стадии выполнения (EX) с поддержкой флагов и кастов
@@ -277,6 +277,8 @@ class ALU_execution_handler(handler):
         need_mem = mem_signals.get_signal("need_mem")
         need_wb = wb_signals.get_signal("need_wb")
         df_destination = wb_signals.get_signal("reg_dest")
+        need_lower = wb_signals.get_signal("write_lower") == 1
+        need_upper = wb_signals.get_signal("write_upper") == 1
         need_forwarding = (need_mem != 1) and (need_wb == 1)
 
 
@@ -394,6 +396,12 @@ class ALU_execution_handler(handler):
             alu_output.set_signal("value", self._to_unsigned32(result))
 
             if need_forwarding:
+                if need_lower or need_upper:
+                    regs: registers = args[-1]
+                    if need_lower:
+                        result = regs.convert_to_lower(result)
+                    else:
+                        result = regs.convert_to_upper(result)
                 do_data_forward(df_signals, df_destination, result, "EX")
 
             if not signals['discard_nzvc']:

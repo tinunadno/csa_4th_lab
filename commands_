@@ -22,10 +22,10 @@ rd - destination register (where data will be writen\readen)
 r - address register
 
 3 type 0b10
-LI PUSH POP
-funct: 1st bit - LI or PUSH POP
-       2nd bit - (if 1st = 1) defines PUSH\POP
-       3d  bit - (if 1st = 0) upper\lower
+LI
+funct: 1st bit - LI
+       2nd bit -
+       3d  bit - upper\lower
 4 type 0b11
 BEQZ BEQN BNEZ BNEN JMP LJMP                        comp, n/z, not
 funct: 1st bit - (JMP or branch instruction) (if 1 => JMP)

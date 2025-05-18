@@ -32,12 +32,13 @@ pipeline:
     - name: "MEM_signal"
       bit_layout:
         - { name: "value",      bits: [ 0, 5 ],  description: "value register" }
-        - { name: "need_mem",   bits: [ 6 ],     description: "need memory write signal" }
-        - { name: "read_write", bits: [ 7 ],     description: "read or write" }
-        - { name: "wb",         bits: [ 8 ],     description: "write only byte" }
+        - { name: "reg_dest",   bits: [ 6, 10 ],  description: "value register" }
+        - { name: "need_mem",   bits: [ 11 ],     description: "need memory write signal" }
+        - { name: "need_write", bits: [ 12 ],     description: "read or write" }
+        - { name: "wb",         bits: [ 13 ],     description: "write only byte" }
     - name: "WB_signal"
       bit_layout:
-        - { name: "reg_dest",    bits: [ 0, 5 ],  description: "destination register number" }
+        - { name: "reg_dest",    bits: [ 0, 5 ],   description: "destination register number" }
         - { name: "need_wb",     bits: [ 6 ],      description: "need write back signal" }
         - { name: "write_upper", bits: [ 7 ],      description: "write upper part" }
         - { name: "write_lower", bits: [ 8 ],      description: "write lower part" }
@@ -45,12 +46,12 @@ pipeline:
     - name: "DF_signal"
       static: 1
       bit_layout:
-        - { name: "fst_reg_num",      bits: [0, 4],   description: "first forwarded register number (5 бит)" }
-        - { name: "fst_reg_val",      bits: [5, 36],  description: "first forwarded register value (32 бита)" }
-        - { name: "is_fst_forwarded", bits: [37],     description: "is first register forwarded" }
-        - { name: "snd_reg_num",      bits: [38, 42], description: "second forwarded register number (5 бит)" }
-        - { name: "snd_reg_val",      bits: [43, 74], description: "second forwarded register value (32 бита)" }
-        - { name: "is_snd_forwarded", bits: [75],     description: "is second register forwarded" }
+        - { name: "fst_reg_num",      bits: [ 0, 4 ],   description: "first forwarded register number (5 бит)" }
+        - { name: "fst_reg_val",      bits: [ 5, 36 ],  description: "first forwarded register value (32 бита)" }
+        - { name: "is_fst_forwarded", bits: [ 37 ],     description: "is first register forwarded" }
+        - { name: "snd_reg_num",      bits: [ 38, 42 ], description: "second forwarded register number (5 бит)" }
+        - { name: "snd_reg_val",      bits: [ 43, 74 ], description: "second forwarded register value (32 бита)" }
+        - { name: "is_snd_forwarded", bits: [ 75 ],     description: "is second register forwarded" }
     - name: "terminate"
       bit_layout:
         - { name: "TERMINATE", bits: [ 0 ], description: "is pipeline working" }
@@ -63,7 +64,7 @@ pipeline:
         - { name: "stall_thd", bits: [ 2 ], description: "how many ticks we gotta stall" }
     - name: "ALU_output"
       bit_layout:
-        - { name: "value", bits: [ 0, 31 ], "ALU output value" }
+        - { name: "value", bits: [ 0, 31 ], description: "ALU output value" }
   stages:
     - name: "IF"  # instruction fetch
       dependencies: [ "registers", "instruction_memory", "NOP_CMD", "stall" ]
@@ -82,11 +83,11 @@ pipeline:
 
     - name: "EX"  # execution
       need_non_static_signals: 1
-      dependencies: [ "EX_signal", "ALU_output", "WB_signal", "DF_signal", "MEM_signal" ]
+      dependencies: [ "EX_signal", "ALU_output", "WB_signal", "DF_signal", "MEM_signal", "registers" ]
       behaviour:
         name: "execution"
         handler: "ALU_EXECUTION_HANDLER"
-        args: [ "EX_signal", "ALU_output", "WB_signal", "DF_signal", "MEM_signal" ]
+        args: [ "EX_signal", "ALU_output", "WB_signal", "DF_signal", "MEM_signal", "registers" ]
 
     - name: "MEM"
       need_non_static_signals: 1
@@ -148,7 +149,7 @@ instructions:
             bits: [ 16, 31 ]
             description: "immediate value"
       - command_number: 2
-        description: "load immediate \ push \ pop"
+        description: "load immediate"
         bit_layout:
           cn:
             bits: [ 0, 2 ]
@@ -195,9 +196,9 @@ instructions:
   decoding_rules:
     - mnemonic: "ADD"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 0, 0, 0, 0, 0, 1 ]
       signals:
@@ -208,9 +209,9 @@ instructions:
 
     - mnemonic: "SUB"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 0, 0, 0, 0, 1, 1 ]
       signals:
@@ -221,9 +222,9 @@ instructions:
 
     - mnemonic: "AND"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 0, 0, 0, 0, 0, 0 ]
       signals:
@@ -234,9 +235,9 @@ instructions:
 
     - mnemonic: "OR"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 0, 0, 0, 0, 1, 0 ]
       signals:
@@ -247,9 +248,9 @@ instructions:
 
     - mnemonic: "XOR"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 0, 0, 0, 1, 0, 0 ]
       signals:
@@ -260,9 +261,9 @@ instructions:
 
     - mnemonic: "ADDI"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "%", "imm" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "$", "$%imm" ]
       type: 0
       functional_bits_match: [ 0, 0, 0, 1, 0, 1 ]
       signals:
@@ -273,9 +274,9 @@ instructions:
 
     - mnemonic: "SHL"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 0, 0, 1, 0, 0, 0 ]
       signals:
@@ -286,9 +287,9 @@ instructions:
 
     - mnemonic: "SHR"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 0, 1, 1, 0, 0, 0 ]
       signals:
@@ -299,9 +300,9 @@ instructions:
 
     - mnemonic: "ROL"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 1, 0, 1, 0, 0, 0 ]
       signals:
@@ -312,9 +313,9 @@ instructions:
 
     - mnemonic: "ROR"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 1, 1, 1, 0, 0, 0 ]
       signals:
@@ -325,9 +326,9 @@ instructions:
 
     - mnemonic: "MUL"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 0, 1, 1, 0, 0, 0 ]
       signals:
@@ -351,9 +352,9 @@ instructions:
 
     - mnemonic: "REM"
       args:
-        - [ "t%", "rd" ]
-        - [ "t%", "r1" ]
-        - [ "t%", "r2" ]
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
       type: 0
       functional_bits_match: [ 1, 1, 1, 0, 0, 0 ]
       signals:
@@ -361,6 +362,80 @@ instructions:
           args: [ "r1%reg1", "r2%reg2", "rem" ]
         - name: "WB_signal"
           args: [ "$rd%reg_dest", "need_wb" ]
+    - mnemonic: "LW"
+      args:
+        - [ "t$", "$%rd" ]
+        - [ "$0(t$1)", "$1%r", "$0%imm" ]
+      type: 1
+      functional_bits_match: [ 1, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r%reg1", "imm%reg2", "add" ]
+        - name: "stall"
+          args: [ "stall_fst" ]
+        - name: "MEM_signal"
+          args: [ "need_mem", "$rd%reg_dest" ]
+        - name: "WB_signal"
+          args: [ "need_wb" ]
+    - mnemonic: "LB"
+      args:
+        - [ "t$", "$%rd" ]
+        - [ "$0(t$1)", "$1%r", "$0%imm" ]
+      type: 1
+      functional_bits_match: [ 1, 1, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r%reg1", "imm%reg2", "add" ]
+        - name: "stall"
+          args: [ "stall_fst" ]
+        - name: "MEM_signal"
+          args: [ "need_mem", "$rd%reg_dest", "wb" ]
+        - name: "WB_signal"
+          args: [ "need_wb" ]
+    - mnemonic: "SW"
+      args:
+        - [ "t$", "$%rd" ]
+        - [ "$0(t$1)", "$1%r", "$0%imm" ]
+      type: 1
+      functional_bits_match: [ 1, 0, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r%reg1", "imm%reg2", "add" ]
+        - name: "MEM_signal"
+          args: [ "need_mem", "$rd%reg_dest", "need_write" ]
+    - mnemonic: "SB"
+      args:
+        - [ "t$", "$%rd" ]
+        - [ "$0(t$1)", "$1%r", "$0%imm" ]
+      type: 1
+      functional_bits_match: [ 1, 1, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r%reg1", "imm%reg2", "add" ]
+        - name: "MEM_signal"
+          args: [ "need_mem", "$rd%reg_dest", "wb", "need_write" ]
+    - mnemonic: "LIU"
+      args:
+        - [ "t$", "$%rd" ]
+        - [ "$", "$%imm" ]
+      type: 2
+      functional_bits_match: [ 0, 0, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "imm%reg1", "add" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$rd%reg_dest", "write_upper" ]
+    - mnemonic: "LIL"
+      args:
+        - [ "t$", "$%rd" ]
+        - [ "$", "$%imm" ]
+      type: 2
+      functional_bits_match: [ 1, 0, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "imm%reg1", "add" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$rd%reg_dest", "write_lower" ]
     - mnemonic: "NOP"                               # required for bubbles
       args:
         - [ ]

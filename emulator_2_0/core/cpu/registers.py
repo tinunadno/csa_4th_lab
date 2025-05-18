@@ -24,7 +24,7 @@ class registers:
         r_num = reg
         if isinstance(reg, str):
             r_num = self.special_regs[reg]
-        self.regs[r_num] = (self.regs[r_num] & ~(mask << self.upper[0])) | ((value & mask) << self.upper[0])
+        self.regs[r_num] =  ((value & mask) << self.upper[0])
 
     def set_lower(self, reg: Union[int, str], value: int) -> None:
         mask = (1 << (self.lower[1] - self.lower[0] + 1)) - 1
@@ -32,8 +32,15 @@ class registers:
         r_num = reg
         if isinstance(reg, str):
             r_num = self.special_regs[reg]
-        self.regs[r_num] = (self.regs[r_num] & ~(mask << self.lower[0])) | shifted_value
+        self.regs[r_num] =  shifted_value
 
+    def convert_to_upper(self, value: int) -> int:
+        mask = (1 << (self.upper[1] - self.upper[0] + 1)) - 1
+        return ((value & mask) << self.upper[0])
+    def convert_to_lower(self, value: int) -> int:
+        mask = (1 << (self.lower[1] - self.lower[0] + 1)) - 1
+        shifted_value = (value & mask) << self.lower[0]
+        return shifted_value
     def print_logs(self):
         print("\nREGISTERS:")
         reg_count = len(self.regs)

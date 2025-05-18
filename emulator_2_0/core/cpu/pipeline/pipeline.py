@@ -8,6 +8,7 @@ from csa_4th_lab.emulator_2_0.core.log_utils import *
 from csa_4th_lab.emulator_2_0.parsing.commands.command_types import command_types
 from csa_4th_lab.emulator_2_0.parsing.handlers.handler_pool import handler_pool
 
+
 def reconstruct_nop(inst_desc) -> int:
     nop_mnemonic = inst_desc["NOP"]
     cn = 0
@@ -34,7 +35,7 @@ class pipeline:
         self.inst_mem = instruction_mem
         self.nop = reconstruct_nop(instructions_desc)
         self.possible_dependencies = {"registers": self.regs,
-                                      "data_mem": self.data_mem,
+                                      "data_memory": self.data_mem,
                                       "instruction_memory": self.inst_mem,
                                       "NOP_CMD": self.nop}
         self.static_signals = {}
@@ -59,10 +60,8 @@ class pipeline:
 
     def print_initial_logs(self):
         print(" PIPELINE SETUP:")
-        stages_data = [stage.get_stage_info_as_lines() for stage in self.stages] + [
-            self.data_mem.get_memory_view(0, 16)] + [self.inst_mem.get_memory_view(self.regs.get_reg("PC"))]
+        stages_data = [stage.get_stage_info_as_lines() for stage in self.stages]
         glue_string_lists(stages_data)
-        self.regs.print_logs()
 
     def tick(self) -> bool:
         last_term_signal: pipeline_signal = self.signals_for_each_tick[-1][0]["terminate"]
@@ -91,13 +90,12 @@ class pipeline:
             self.signals_for_each_tick[signals_idx][1] = valid_stage
             signals_idx -= 1
         return True
+
     def print_logs_for_each_stage(self):
         print(" PIPELINE STATE:")
         stage_index = 1
-        for i in self.signals_for_each_tick:
-            print(f"STAGE: {self.stages[stage_index].stage_name}")
-            stage_index += 1
-            stages_data = [stage[1].signal_to_string() for stage in i[0].items()] + [
-                self.data_mem.get_memory_view(0, 16)] + [self.inst_mem.get_memory_view(self.regs.get_reg("PC"))]
-            glue_string_lists(stages_data)
+        stages_data = [
+                          self.data_mem.get_memory_view(0, 16)] + [
+                          self.inst_mem.get_memory_view(self.regs.get_reg("PC"))]
+        glue_string_lists(stages_data)
         self.regs.print_logs()

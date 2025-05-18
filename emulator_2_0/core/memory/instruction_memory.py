@@ -18,4 +18,6 @@ class instruction_memory:
                 ret.append(f"0x{i:08X} | 0x{self.instructions[i]:08X}")
                 if i == instruction_pointer:
                     ret[-1] += "  <--PC"
+        if instruction_pointer >= len(self.instructions):
+            ret.append("                        <--PC")
         return ret

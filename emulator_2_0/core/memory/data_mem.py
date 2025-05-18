@@ -39,5 +39,5 @@ class data_mem:
         for i in range(data_start, data_end):
             if data_end > self.size:
                 break
-            ret.append(f"0x{i:08X} | 0x{self.data[i]:08X}")
+            ret.append(f"0x{i:08X} | 0x{self.data[i]:02X}")
         return ret
