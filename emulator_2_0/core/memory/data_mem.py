@@ -19,6 +19,11 @@ class data_mem:
             self.data[address] = (value & 0xFF)
         else:
             raise ValueError("Attempting to write memory out of address space")
+    def read_byte(self, address: int) -> int:
+        if address < self.size:
+            return self.data[address]
+        else:
+            raise ValueError("Attempting to read memory out of address space")
     def read(self, address: int) -> int:
         if address <= self.size - 4:
             ret = 0

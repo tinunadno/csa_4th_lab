@@ -35,11 +35,13 @@ if its a jump, immediate value is displacement
 if its long jump, register is an address
 
 spec 0b100
-INT IRET HALT
+INT IRET HALT NOP
 register is a register with address
 funct: 1st bit - is interruption
        2nd bit - is return (is interruption is zero, this bit defines call\ret, else int\iret)
        3d  bit - halt
+       if all zeros => NOP
+
 
 3 bits - command number
 | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |

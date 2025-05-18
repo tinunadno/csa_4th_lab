@@ -2,15 +2,11 @@ from csa_4th_lab.emulator_2_0.parsing.handlers.handler_pool import handler, hand
 
 
 class pipeline_stage:
-    def __init__(self, stage_description):
+    def __init__(self, stage_description, hp: handler_pool):
         self.stage_name = stage_description["name"]
         self.dependencies = stage_description["dependencies"]
-        self.dependencies_objects = []
-        self.input_signals = stage_description["input_signals"]
-        self.input_signals_objects = []
-        self.output_signals = stage_description["output_signals"]
         self.behaviour = stage_description["behaviour"]
-        self.stage_handler: handler = handler_pool.get_handler(stage_description["behaviour"]["handler"])
+        self.stage_handler: handler = hp.get_handler(stage_description["behaviour"]["handler"])
 
     def get_stage_info_as_lines(self) -> list[str]:
         content_lines = []
@@ -20,17 +16,6 @@ class pipeline_stage:
 
         content_lines.append("DEPENDENCIES:")
         content_lines.extend(f"  • {dep}" for dep in self.dependencies)
-        content_lines.append("")
-
-        content_lines.append("INPUT SIGNALS:")
-        content_lines.extend(f"  • {sig}" for sig in self.input_signals)
-        content_lines.append("")
-
-        content_lines.append("OUTPUT SIGNALS:")
-        if self.output_signals:
-            content_lines.extend(f"  • {sig}" for sig in self.output_signals)
-        else:
-            content_lines.append("  [none]")
         content_lines.append("")
 
         content_lines.append("BEHAVIOUR:")

@@ -5,6 +5,8 @@ class registers:
     def __init__(self, reg_conf):
         self.regs = [0] * reg_conf["register_count"]
         self.special_regs = {reg["name"]: reg["number"] for reg in reg_conf["special_registers"]}
+        self.upper = reg_conf["upper"]
+        self.lower = reg_conf["lower"]
 
     def get_reg(self, reg: Union[int, str]) -> int:
         if isinstance(reg, str):
@@ -16,6 +18,21 @@ class registers:
             self.regs[self.special_regs[reg]] = value
         else:
             self.regs[reg] = value
+
+    def set_upper(self, reg: Union[int, str], value: int) -> None:
+        mask = (1 << (self.upper[1] - self.upper[0] + 1)) - 1
+        r_num = reg
+        if isinstance(reg, str):
+            r_num = self.special_regs[reg]
+        self.regs[r_num] = (self.regs[r_num] & ~(mask << self.upper[0])) | ((value & mask) << self.upper[0])
+
+    def set_lower(self, reg: Union[int, str], value: int) -> None:
+        mask = (1 << (self.lower[1] - self.lower[0] + 1)) - 1
+        shifted_value = (value & mask) << self.lower[0]
+        r_num = reg
+        if isinstance(reg, str):
+            r_num = self.special_regs[reg]
+        self.regs[r_num] = (self.regs[r_num] & ~(mask << self.lower[0])) | shifted_value
 
     def print_logs(self):
         print("\nREGISTERS:")

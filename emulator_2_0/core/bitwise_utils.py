@@ -10,20 +10,24 @@ def get_signal_bit(signal: list[int], position: int) -> int:
 
     return (signal[word_index] >> bit_offset) & 1
 
-def set_signal_bit(signal: list[int], position: int):
+def set_signal_bit(signal: list[int], position: int, val: int):
     if position < 0:
         raise IndexError("Position must be non-negative")
     word_index = position // 32
     bit_offset = position % 32
     if word_index >= len(signal):
         raise IndexError(f"Position {position} exceeds signal length")
-    signal[word_index] |= 1 << bit_offset
+    if val == 1:
+        signal[word_index] |= (val << bit_offset)
+    else:
+        signal[word_index] &= (val << bit_offset)
 
 
 def set_signal_cut(signal: list[int], position: list[int], value: int):
 
     if len(position) == 1:
-        set_signal_bit(signal, position[0])
+        set_signal_bit(signal, position[0], value & 0x1)
+        return
 
     start, end = position
 
@@ -77,3 +81,18 @@ def get_signal_cut(signal: list[int], position: list[int]) -> int:
         result |= (bit << (i - start))
 
     return result
+
+def get_int_cut(src: int, pos: list[int]):
+    if len(pos) == 1:
+        return (src >> pos[0]) & 0x1
+    mask = (1 << (pos[1] - pos[0] + 1)) - 1
+    return (src >> pos[0]) & mask
+
+def set_int_cut(src: int, pos: list[int], val: int) -> int:
+    if len(pos) == 1:
+        mask = 1 << pos[0]
+        return (src & ~mask) | ((val & 0x1) << pos[0])
+    else:
+        mask = (1 << (pos[1] - pos[0] + 1)) - 1
+        shifted_mask = mask << pos[0]
+        return (src & ~shifted_mask) | ((val & mask) << pos[0])

@@ -1,7 +1,10 @@
 class instruction_memory:
     def __init__(self, instructions: list[int]):
         self.instructions = instructions.copy()
+        self.nop = 0
     def get_instruction(self, address: int) -> int:
+        if address >= len(self.instructions):
+            return self.nop
         return self.instructions[address]
     def get_memory_view(self, instruction_pointer: int) -> list[str]:
         ret = ["INSTRUCTION MEMORY:", "ADDRESS    | INSTRUCTION"]

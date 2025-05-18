@@ -11,9 +11,12 @@ def parse_config(config_path: str) -> pipeline:
         data = yaml.safe_load(conf)
 
     data_mem_ = data_mem(32)
-    instruction_memory_ = instruction_memory(list(range(100)))
+    # [0, 0, 1, 0, 0, 0]
+    instruction_memory_ = instruction_memory([0b11_00000_00000_00000_000101_000, 0b1_00000_00001_00001_000101_000, 0b1_00000_00001_00010_000001_000,
+                                              0b1_00000_00010_00011_000010_000, 0b1_00011_00001_00100_101000_000,  0b100100])
     regs = registers(data["registers"])
 
-    pl = pipeline(data_mem_, instruction_memory_, regs, data["pipeline"]["stages"], data["pipeline"]["pipeline_signals"])
+    pl = pipeline(data_mem_, instruction_memory_, regs, data["pipeline"]["stages"], data["pipeline"]["pipeline_signals"], data["instructions"])
+    instruction_memory_.nop = pl.nop
 
     return pl
