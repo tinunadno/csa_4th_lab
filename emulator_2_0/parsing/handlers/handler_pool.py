@@ -5,7 +5,7 @@ from csa_4th_lab.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal i
 from csa_4th_lab.emulator_2_0.core.cpu.registers import registers
 from csa_4th_lab.emulator_2_0.core.memory.instruction_memory import instruction_memory
 from csa_4th_lab.emulator_2_0.parsing.commands.command_types import command_types
-from csa_4th_lab.emulator_2_0.core.bitwise_utils import get_int_cut
+from csa_4th_lab.emulator_2_0.core.bitwise_utils import get_int_cut, cast_immediate
 
 
 def do_data_forward(df_signals: pipeline_signal, r_dest, value, stage):
@@ -197,19 +197,28 @@ class instruction_decoder_handler(handler):
                     need_reg_num = reg_arg[0] == "$"
                     if need_reg_num:
                         reg_arg = reg_arg[1:]
-                    value = get_int_cut(command, cmd_desc["bit_layout"][reg_arg]["bits"])
-                    if reg_arg != 'imm' and not need_reg_num:
-                        if int(value) == fst_reg_num and is_fst_forwarded != 0:
-                            value = fst_reg_val
-                            df_signals.set_signal("is_fst_forwarded", 0)
-                            print(f"[ID] Using forwarded value for {reg_arg} as {value}")
-                        elif int(value) == snd_reg_num and is_snd_forwarded != 0:
-                            value = snd_reg_val
-                            df_signals.set_signal("is_snd_forwarded", 0)
-                            print(f"[ID] Using forwarded value for {reg_arg} as {value}")
+                    if reg_arg not in cmd_desc["bit_layout"]:
+                        if need_reg_num:
+                            value = regs.get_reg_num(reg_arg)
                         else:
-                            value = regs.get_reg(value)
-                            print(f"[ID] Read register {reg_arg} value: {value}")
+                            value = regs.get_reg(reg_arg)
+                    else:
+                        reg_arg_bits = cmd_desc["bit_layout"][reg_arg]["bits"]
+                        value = get_int_cut(command, reg_arg_bits)
+                        if reg_arg == 'imm':
+                            value = cast_immediate(value, reg_arg_bits)
+                        if reg_arg != 'imm' and not need_reg_num:
+                            if int(value) == fst_reg_num and is_fst_forwarded != 0:
+                                value = fst_reg_val
+                                df_signals.set_signal("is_fst_forwarded", 0)
+                                print(f"[ID] Using forwarded value for {reg_arg} as {value}")
+                            elif int(value) == snd_reg_num and is_snd_forwarded != 0:
+                                value = snd_reg_val
+                                df_signals.set_signal("is_snd_forwarded", 0)
+                                print(f"[ID] Using forwarded value for {reg_arg} as {value}")
+                            else:
+                                value = regs.get_reg(value)
+                                print(f"[ID] Read register {reg_arg} value: {value}")
                     signals[signal_name].set_signal(sig_arg, value)
                     print(f"[ID] Set signal {signal_name}.{sig_arg} = {value}")
                 else:
@@ -274,13 +283,6 @@ class ALU_execution_handler(handler):
         df_signals: pipeline_signal = args[3]
         mem_signals: pipeline_signal = args[4]
 
-        need_mem = mem_signals.get_signal("need_mem")
-        need_wb = wb_signals.get_signal("need_wb")
-        df_destination = wb_signals.get_signal("reg_dest")
-        need_lower = wb_signals.get_signal("write_lower") == 1
-        need_upper = wb_signals.get_signal("write_upper") == 1
-        need_forwarding = (need_mem != 1) and (need_wb == 1)
-
 
         # Получаем все управляющие сигналы
         signals = {
@@ -299,8 +301,16 @@ class ALU_execution_handler(handler):
                         ex_signal.get_signal("comp_num_snd"),
             'mul': ex_signal.get_signal("mul"),
             'div': ex_signal.get_signal("div"),
-            'rem': ex_signal.get_signal("rem")
+            'rem': ex_signal.get_signal("rem"),
+            "FORCE_DISCARD_FORWARDING": ex_signal.get_signal("FORCE_DISCARD_FORWARDING")
         }
+
+        need_mem = mem_signals.get_signal("need_mem")
+        need_wb = wb_signals.get_signal("need_wb")
+        df_destination = wb_signals.get_signal("reg_dest")
+        need_lower = wb_signals.get_signal("write_lower") == 1
+        need_upper = wb_signals.get_signal("write_upper") == 1
+        need_forwarding = (need_mem != 1) and (need_wb == 1) and (signals["FORCE_DISCARD_FORWARDING"] != 1)
 
         print(f"[EX] Starting execution with signals: {signals}")
 
@@ -312,9 +322,9 @@ class ALU_execution_handler(handler):
         try:
             # Арифметические операции
             if signals['add']:
-                op2 = -self._to_signed32(reg2) if signals['neg_second'] else self._to_signed32(reg2)
-                result = self._to_signed32(reg1) + op2
-                self._update_flags(result, (reg1, op2))
+                reg2 = -self._to_signed32(reg2) if signals['neg_second'] else self._to_signed32(reg2)
+                result = self._to_signed32(reg1) + reg2
+                self._update_flags(result, (reg1, reg2))
                 print(f"[EX] ADD operation: {reg1} {'-' if signals['neg_second'] else '+'} {reg2} = {result}")
 
             # Логические операции (беззнаковые)
@@ -364,20 +374,26 @@ class ALU_execution_handler(handler):
                     condition_met = True
 
                 if condition_met:
-                    result = self._to_unsigned32(reg1 + self._to_signed32(reg2))
+                    reg2 = self._to_signed32(reg2)
+                    reg1 = self._to_signed32(reg1)
+                    result = self._to_unsigned32(reg1 + reg2)
                     print(f"[EX] Branch taken: PC = {reg1} + {reg2} = {result}")
                 else:
                     print(f"[EX] Branch not taken (condition not met)")
 
             # Умножение/деление
             elif signals['mul']:
-                result = self._to_signed32(reg1) * self._to_signed32(reg2)
+                reg2 = self._to_signed32(reg2)
+                reg1 = self._to_signed32(reg1)
+                result = reg1 * reg2
                 self._update_flags(result)
                 print(f"[EX] MUL: {reg1} * {reg2} = {result}")
 
             elif signals['div']:
                 if reg2 != 0:
-                    result = self._to_signed32(reg1) // self._to_signed32(reg2)
+                    reg2 = self._to_signed32(reg2)
+                    reg1 = self._to_signed32(reg1)
+                    result = reg1 // reg2
                 else:
                     result = 0xFFFFFFFF
                     print("[EX] Division by zero!")
@@ -385,7 +401,9 @@ class ALU_execution_handler(handler):
 
             elif signals['rem']:
                 if reg2 != 0:
-                    result = self._to_signed32(reg1) % self._to_signed32(reg2)
+                    reg2 = self._to_signed32(reg2)
+                    reg1 = self._to_signed32(reg1)
+                    result = reg1 % reg2
                 else:
                     result = 0xFFFFFFFF
                     print("[EX] Division by zero in REM!")

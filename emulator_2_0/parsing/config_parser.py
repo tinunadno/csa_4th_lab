@@ -13,6 +13,7 @@ def parse_config(config_path: str) -> pipeline:
     data_mem_ = data_mem(32, True)
     # [0, 0, 1, 0, 0, 0]
     instruction_memory_ = instruction_memory([0b11111_00000_101_010, 0b_00001_00000_101_001, 0b_00001_00010_100_001,
+                                                                     0b000000000000000000000_00000_000_011,
                                                                      0b_00001_00010_00011_000001_000, 0b100100])
     regs = registers(data["registers"])
 

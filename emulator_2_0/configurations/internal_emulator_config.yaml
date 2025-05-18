@@ -29,6 +29,7 @@ pipeline:
         - { name: "mul",          bits: [ 75 ],      description: "multiplication signal" }
         - { name: "div",          bits: [ 76 ],      description: "division signal" }
         - { name: "rem",          bits: [ 77 ],      description: "remainder signal" }
+        - { name: "FORCE_DISCARD_FORWARDING",          bits: [ 78 ],      description: "remainder signal" }
     - name: "MEM_signal"
       bit_layout:
         - { name: "value",      bits: [ 0, 5 ],  description: "value register" }
@@ -414,7 +415,7 @@ instructions:
           args: [ "r%reg1", "imm%reg2", "add" ]
         - name: "MEM_signal"
           args: [ "need_mem", "$rd%reg_dest", "wb", "need_write" ]
-    - mnemonic: "LIU"
+    - mnemonic: "LUI"
       args:
         - [ "t$", "$%rd" ]
         - [ "$", "$%imm" ]
@@ -425,7 +426,7 @@ instructions:
           args: [ "imm%reg1", "add" ]
         - name: "WB_signal"
           args: [ "need_wb", "$rd%reg_dest", "write_upper" ]
-    - mnemonic: "LIL"
+    - mnemonic: "LLI"
       args:
         - [ "t$", "$%rd" ]
         - [ "$", "$%imm" ]
@@ -436,6 +437,18 @@ instructions:
           args: [ "imm%reg1", "add" ]
         - name: "WB_signal"
           args: [ "need_wb", "$rd%reg_dest", "write_lower" ]
+    - mnemonic: "JMP"
+      args:
+        - ["$", "$%imm"]
+      type: 3
+      functional_bits_match: [ 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "PC%reg1", "imm%reg2", "add", "FORCE_DISCARD_FORWARDING" ]
+        - name: "stall"
+          args: [ "stall_fst", "stall_snd" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$PC%reg_dest" ]
     - mnemonic: "NOP"                               # required for bubbles
       args:
         - [ ]

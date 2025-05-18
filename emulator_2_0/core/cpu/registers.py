@@ -13,6 +13,11 @@ class registers:
             return self.regs[self.special_regs[reg]]
         return self.regs[reg]
 
+    def get_reg_num(self, reg: Union[int, str]) -> int:
+        if isinstance(reg, str):
+            return self.special_regs[reg]
+        return reg
+
     def set_reg(self, reg: Union[int, str], value: int) -> None:
         if isinstance(reg, str):
             self.regs[self.special_regs[reg]] = value

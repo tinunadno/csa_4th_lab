@@ -29,6 +29,9 @@ def set_signal_cut(signal: list[int], position: list[int], value: int):
         set_signal_bit(signal, position[0], value & 0x1)
         return
 
+    if value < 0:
+        value = value & 0xffffffff
+
     start, end = position
 
     if start > end:
@@ -96,3 +99,21 @@ def set_int_cut(src: int, pos: list[int], val: int) -> int:
         mask = (1 << (pos[1] - pos[0] + 1)) - 1
         shifted_mask = mask << pos[0]
         return (src & ~shifted_mask) | ((val & mask) << pos[0])
+
+
+def cast_immediate(num: int, bit_range: list[int]) -> int:
+    start, end = bit_range
+    bit_length = end - start + 1
+
+    # Получаем битовую длину числа (без ведущих нулей)
+    num_bits = num.bit_length() if num != 0 else 0
+
+    # Если число имеет такую же длину, как диапазон
+    if num_bits == bit_length:
+        # Обрезаем старший бит
+        mask = (1 << (bit_length - 1)) - 1
+        result = num & mask
+        # Делаем число отрицательным
+        return -result
+    else:
+        return num
