@@ -99,13 +99,18 @@ class pipeline:
         self.stages_mnemonics = [self.stages_mnemonics[-1]] + self.stages_mnemonics[:-1]
         return True
 
-    def print_logs_for_each_stage(self):
-        print("TICK: ", self.tick_)
-        print(" PIPELINE STATE:")
-        stages_data = [self.last_tick_logs] + [self.data_mem.get_memory_view(0, 16)] + [
-                          self.inst_mem.get_memory_view(self.regs.get_reg("PC"))]
-        glue_string_lists(stages_data)
-        print("\nPIPELINE_STAGES_MNEMONICS:")
-        pl_mnems = ["{[" + self.stages[i].stage_name + "]: '" + self.stages_mnemonics[i] + "'}" for i in range(len(self.stages))]
-        print('->'.join(pl_mnems))
-        self.regs.print_logs()
+    def get_stages_mnemonics(self):
+        pl_mnems = ["{[" + self.stages[i].stage_name + "]: '" + self.stages_mnemonics[i] + "'}" for i in
+                    range(len(self.stages))]
+        return '->'.join(pl_mnems)
+
+    # def print_logs_for_each_stage(self):
+    #     print("TICK: ", self.tick_)
+    #     print(" PIPELINE STATE:")
+    #     stages_data = [self.last_tick_logs] + [self.data_mem.get_memory_view(0, 16)] + [
+    #                       self.inst_mem.get_memory_view(self.regs.get_reg("PC"))]
+    #     glue_string_lists(stages_data)
+    #     print("\nPIPELINE_STAGES_MNEMONICS:")
+    #     pl_mnems = ["{[" + self.stages[i].stage_name + "]: '" + self.stages_mnemonics[i] + "'}" for i in range(len(self.stages))]
+    #     print('->'.join(pl_mnems))
+    #     self.regs.print_logs()
