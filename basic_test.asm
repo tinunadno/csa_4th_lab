@@ -18,5 +18,9 @@ _start:
         lli t4 output_val
         sw 0(t4) t2
         push t2
+        lw t5 0(t31)
+        addi t6 t5 0xF
+        push t6
+        pop
         pop
         halt
