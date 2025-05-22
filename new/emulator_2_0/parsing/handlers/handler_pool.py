@@ -31,7 +31,25 @@ def do_data_forward(df_signals: pipeline_signal, r_dest, value, stage, tick_logs
     tick_logs.append(f"  [NEW] reg[{df_signals.get_signal("fst_reg_num")}] = 0x{df_signals.get_signal("fst_reg_val"):X}, valid = {df_signals.get_signal("is_fst_forwarded")}")
     tick_logs.append(f"  [SHIFTED] reg[{df_signals.get_signal("snd_reg_num")}] = 0x{df_signals.get_signal("snd_reg_val"):X}, valid = {df_signals.get_signal("is_snd_forwarded")}")
 
+def get_data_forward(df_signals: pipeline_signal, r_dest, value, stage, tick_logs):
+    current_forward = (
+        df_signals.get_signal("fst_reg_num"),
+        df_signals.get_signal("fst_reg_val"),
+        df_signals.get_signal("is_fst_forwarded"),
+        df_signals.get_signal("snd_reg_num"),
+        df_signals.get_signal("snd_reg_val"),
+        df_signals.get_signal("is_snd_forwarded")
+    )
 
+
+
+    if current_forward[0] == r_dest and current_forward[2] == 1:
+        tick_logs.append(f"f[{stage}] Got forward {current_forward[1]} for reg[{r_dest}]")
+        return current_forward[1]
+    if current_forward[3] == r_dest and current_forward[5] == 1:
+        tick_logs.append(f"f[{stage}] Got forward {current_forward[1]} for reg[{r_dest}]")
+        return current_forward[4]
+    return value
 class handler(ABC):
     @abstractmethod
     def handle(self, args: list[any], is_valid: bool, tick_logs: list[str]) -> bool:
@@ -156,18 +174,6 @@ class instruction_decoder_handler(handler):
         df_signals: pipeline_signal = args[0]
         tick_logs.append("[ID] Checking data forwarding signals")
 
-        fst_reg_num = df_signals.get_signal("fst_reg_num")
-        fst_reg_val = df_signals.get_signal("fst_reg_val")
-        is_fst_forwarded = df_signals.get_signal("is_fst_forwarded")
-        snd_reg_num = df_signals.get_signal("snd_reg_num")
-        snd_reg_val = df_signals.get_signal("snd_reg_val")
-        is_snd_forwarded = df_signals.get_signal("is_snd_forwarded")
-
-        if is_fst_forwarded:
-            tick_logs.append(f"[ID] Found forwarded value for register {fst_reg_num}: {fst_reg_val}")
-        if is_snd_forwarded:
-            tick_logs.append(f"[ID] Found forwarded value for register {snd_reg_num}: {snd_reg_val}")
-
         signals: dict[str, pipeline_signal] = {
             "EX_signal": args[3],
             "MEM_signal": args[4],
@@ -203,23 +209,17 @@ class instruction_decoder_handler(handler):
                             value = regs.get_reg_num(reg_arg)
                         else:
                             value = regs.get_reg(reg_arg)
+                            if regs.is_common(reg_arg):
+                                reg_num = regs.get_reg_num(reg_arg)
+                                value = get_data_forward(df_signals, reg_num, value, "ID", tick_logs)
                     else:
                         reg_arg_bits = cmd_desc["bit_layout"][reg_arg]["bits"]
                         value = get_int_cut(command, reg_arg_bits)
                         if reg_arg == 'imm':
                             value = cast_immediate(value, reg_arg_bits)
                         if reg_arg != 'imm' and not need_reg_num:
-                            if int(value) == fst_reg_num and is_fst_forwarded != 0:
-                                value = fst_reg_val
-                                df_signals.set_signal("is_fst_forwarded", 0)
-                                tick_logs.append(f"[ID] Using forwarded value for {reg_arg} as {value}")
-                            elif int(value) == snd_reg_num and is_snd_forwarded != 0:
-                                value = snd_reg_val
-                                df_signals.set_signal("is_snd_forwarded", 0)
-                                tick_logs.append(f"[ID] Using forwarded value for {reg_arg} as {value}")
-                            else:
-                                value = regs.get_reg(value)
-                                tick_logs.append(f"[ID] Read register {reg_arg} value: {value}")
+                            value = get_data_forward(df_signals, int(value), regs.get_reg(value), "ID", tick_logs)
+                            tick_logs.append(f"[ID] Got register {reg_arg} value: {value}")
                     signals[signal_name].set_signal(sig_arg, value)
                     tick_logs.append(f"[ID] Set signal {signal_name}.{sig_arg} = {value}")
                 else:
@@ -307,7 +307,8 @@ class ALU_execution_handler(handler):
             'mul': ex_signal.get_signal("mul"),
             'div': ex_signal.get_signal("div"),
             'rem': ex_signal.get_signal("rem"),
-            "FORCE_DISCARD_FORWARDING": ex_signal.get_signal("FORCE_DISCARD_FORWARDING")
+            "FORCE_DISCARD_FORWARDING": ex_signal.get_signal("FORCE_DISCARD_FORWARDING"),
+            "FORCE_ENABLE_FORWARDING": ex_signal.get_signal("FORCE_ENABLE_FORWARDING")
         }
 
         need_mem = mem_signals.get_signal("need_mem")
@@ -418,7 +419,7 @@ class ALU_execution_handler(handler):
             self.last_result = result
             alu_output.set_signal("value", self._to_unsigned32(result))
 
-            if need_forwarding:
+            if need_forwarding or signals["FORCE_ENABLE_FORWARDING"]:
                 if need_lower or need_upper:
                     regs: registers = args[-1]
                     if need_lower:

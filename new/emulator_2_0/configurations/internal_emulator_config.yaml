@@ -2,7 +2,7 @@ registers:
   register_count: 36
   lower: [ 0, 20 ]
   upper: [ 21, 31 ]
-  common_registers: [ 0, 30 ]
+  common_registers: [ 0, 31 ]
   special_registers:
     - { name: "SP", number: 31 } # stack pointer
     - { name: "PC", number: 32 } # program counter
@@ -29,7 +29,8 @@ pipeline:
         - { name: "mul",          bits: [ 75 ],      description: "multiplication signal" }
         - { name: "div",          bits: [ 76 ],      description: "division signal" }
         - { name: "rem",          bits: [ 77 ],      description: "remainder signal" }
-        - { name: "FORCE_DISCARD_FORWARDING",          bits: [ 78 ],      description: "remainder signal" }
+        - { name: "FORCE_DISCARD_FORWARDING",          bits: [ 78 ],      description: "we really don't wanna do forward" }
+        - { name: "FORCE_ENABLE_FORWARDING",           bits: [ 79 ],      description: "we really wanna do forward" }
     - name: "MEM_signal"
       bit_layout:
         - { name: "value",      bits: [ 0, 5 ],  description: "value register" }
@@ -447,11 +448,20 @@ instructions:
       functional_bits_match: [ 0, 0, 0 ]
       signals:
         - name: "EX_signal"
-          args: ["SP%reg1", "4%reg2", "add", "neg_second", "FORCE_DISCARD_FORWARDING", "discard_nzvc" ]
+          args: ["SP%reg1", "4%reg2", "add", "neg_second", "discard_nzvc", "FORCE_ENABLE_FORWARDING" ]
         - name: "MEM_signal"
           args: [ "need_mem", "$rd%reg_dest", "need_write" ]
         - name: "WB_signal"
           args: [ "need_wb", "$SP%reg_dest"]
+    - mnemonic: "POP"
+      args:
+      type: 2
+      functional_bits_match: [ 1, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "SP%reg1", "4%reg2", "add", "discard_nzvc", "FORCE_ENABLE_FORWARDING" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$SP%reg_dest" ]
     - mnemonic: "JMP"
       args:
         - ["$", "$%imm"]

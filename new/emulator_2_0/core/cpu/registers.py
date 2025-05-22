@@ -4,6 +4,7 @@ from typing import Union
 class registers:
     def __init__(self, reg_conf, mem_size):
         self.regs = [0] * reg_conf["register_count"]
+        self.common_regs = reg_conf["common_registers"]
         self.special_regs = {reg["name"]: reg["number"] for reg in reg_conf["special_registers"]}
         self.upper = reg_conf["upper"]
         self.lower = reg_conf["lower"]
@@ -24,7 +25,11 @@ class registers:
             self.regs[self.special_regs[reg]] = value
         else:
             self.regs[reg] = value
-
+    def is_common(self, reg: Union[int, str]) -> bool:
+        reg_num = reg
+        if isinstance(reg, str):
+            reg_num = self.special_regs[reg]
+        return self.common_regs[0] <= reg_num <= self.common_regs[1]
     def set_upper(self, reg: Union[int, str], value: int) -> None:
         mask = (1 << (self.upper[1] - self.upper[0] + 1)) - 1
         r_num = reg

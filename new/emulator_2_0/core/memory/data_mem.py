@@ -47,7 +47,7 @@ class data_mem:
     def get_memory_view(self, data_start: int, data_end: int) -> list[str]:
         ret = ["MEMORY:", "ADDRESS    | DATA"]
         for i in range(data_start, data_end):
-            if data_end > self.size:
+            if i >= self.size:
                 break
             ret.append(f"0x{i:08X} | 0x{self.data[i]:02X}")
         return ret
