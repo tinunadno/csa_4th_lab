@@ -8,13 +8,13 @@ from csa_4th_lab.new.emulator_2_0.parsing.commands.command_types import command_
 from csa_4th_lab.new.common_utils.bitwise_utils import get_int_cut, cast_immediate
 
 
-def do_data_forward(df_signals: pipeline_signal, r_dest, value, stage):
+def do_data_forward(df_signals: pipeline_signal, r_dest, value, stage, tick_logs):
     current_forward = (
         df_signals.get_signal("fst_reg_num"),
         df_signals.get_signal("fst_reg_val"),
         df_signals.get_signal("is_fst_forwarded")
     )
-    print(f"[{stage}] Current forwarding head: reg[{current_forward[0]}] = 0x{current_forward[1]:X}")
+    tick_logs.append(f"[{stage}] Current forwarding head: reg[{current_forward[0]}] = 0x{current_forward[1]:X}")
 
     # Сдвигаем очередь:
     # 1. Переносим первый элемент во второй
@@ -27,9 +27,9 @@ def do_data_forward(df_signals: pipeline_signal, r_dest, value, stage):
     df_signals.set_signal("fst_reg_val", value)
     df_signals.set_signal("is_fst_forwarded", 1)
 
-    print(f"[{stage}] Updated forwarding queue:")
-    print(f"  [NEW] reg[{df_signals.get_signal("fst_reg_num")}] = 0x{df_signals.get_signal("fst_reg_val"):X}, valid = {df_signals.get_signal("is_fst_forwarded")}")
-    print(f"  [SHIFTED] reg[{df_signals.get_signal("snd_reg_num")}] = 0x{df_signals.get_signal("snd_reg_val"):X}, valid = {df_signals.get_signal("is_snd_forwarded")}")
+    tick_logs.append(f"[{stage}] Updated forwarding queue:")
+    tick_logs.append(f"  [NEW] reg[{df_signals.get_signal("fst_reg_num")}] = 0x{df_signals.get_signal("fst_reg_val"):X}, valid = {df_signals.get_signal("is_fst_forwarded")}")
+    tick_logs.append(f"  [SHIFTED] reg[{df_signals.get_signal("snd_reg_num")}] = 0x{df_signals.get_signal("snd_reg_val"):X}, valid = {df_signals.get_signal("is_snd_forwarded")}")
 
 
 class handler(ABC):
@@ -99,7 +99,7 @@ class MEM_handler(handler):
         )
         tick_logs.append(f"[MEM] Current forwarding head: reg[{current_forward[0]}] = 0x{current_forward[1]:X}")
 
-        do_data_forward(df_signals, register_dest, value, "MEM")
+        do_data_forward(df_signals, register_dest, value, "MEM", tick_logs)
 
         return True
 
@@ -423,7 +423,7 @@ class ALU_execution_handler(handler):
                         result = regs.convert_to_lower(result)
                     else:
                         result = regs.convert_to_upper(result)
-                do_data_forward(df_signals, df_destination, result, "EX")
+                do_data_forward(df_signals, df_destination, result, "EX", tick_logs)
 
             if not signals['discard_nzvc']:
                 tick_logs.append(f"[EX] Operation completed. Result: {result}, Flags: {self.flags}")

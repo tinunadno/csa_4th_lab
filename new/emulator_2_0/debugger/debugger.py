@@ -123,7 +123,11 @@ def process_command(cmd, db_state: debug_state):
         cmd_name = cmd
     for i in db_state.commands:
         if i.get_command_name() == cmd_name:
-            i.handle(cmd, db_state)
+            # hehe
+            try:
+                i.handle(cmd, db_state)
+            except:
+                pass
 
 
 
