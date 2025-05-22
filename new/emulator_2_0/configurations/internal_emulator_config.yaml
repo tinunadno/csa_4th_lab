@@ -440,6 +440,18 @@ instructions:
           args: [ "imm%reg1", "add" ]
         - name: "WB_signal"
           args: [ "need_wb", "$rd%reg_dest", "write_lower" ]
+    - mnemonic: "PUSH"
+      args:
+        - ["t$", "$%rd"]
+      type: 2
+      functional_bits_match: [ 0, 0, 0 ]
+      signals:
+        - name: "EX_signal"
+          args: ["SP%reg1", "4%reg2", "add", "neg_second", "FORCE_DISCARD_FORWARDING", "discard_nzvc" ]
+        - name: "MEM_signal"
+          args: [ "need_mem", "$rd%reg_dest", "need_write" ]
+        - name: "WB_signal"
+          args: [ "need_wb", "$SP%reg_dest"]
     - mnemonic: "JMP"
       args:
         - ["$", "$%imm"]

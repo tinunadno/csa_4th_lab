@@ -54,7 +54,7 @@ def parse_config(config_path: str, executable_bin_stuff: bytearray) -> pipeline:
 
     data_mem_ = data_mem(32, loaded_data['data_clusters'])
 
-    regs = registers(data["registers"])
+    regs = registers(data["registers"], data_mem_.size)
     regs.set_reg("PC", loaded_data['entry_point'])
     instruction_memory_ = instruction_memory(loaded_data["text_section"], data["instructions"])
 

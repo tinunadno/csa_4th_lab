@@ -2,11 +2,12 @@ from typing import Union
 
 
 class registers:
-    def __init__(self, reg_conf):
+    def __init__(self, reg_conf, mem_size):
         self.regs = [0] * reg_conf["register_count"]
         self.special_regs = {reg["name"]: reg["number"] for reg in reg_conf["special_registers"]}
         self.upper = reg_conf["upper"]
         self.lower = reg_conf["lower"]
+        self.set_reg("SP", mem_size)
 
     def get_reg(self, reg: Union[int, str]) -> int:
         if isinstance(reg, str):

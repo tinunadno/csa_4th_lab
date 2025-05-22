@@ -1,4 +1,5 @@
 import os
+from xxlimited_35 import error
 
 from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
 from abc import ABC, abstractmethod
@@ -126,8 +127,8 @@ def process_command(cmd, db_state: debug_state):
             # hehe
             try:
                 i.handle(cmd, db_state)
-            except:
-                pass
+            except error as e:
+                print(str(e))
 
 
 

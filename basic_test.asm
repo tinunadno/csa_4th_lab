@@ -17,4 +17,5 @@ _start:
         lui t4 output_val
         lli t4 output_val
         sw 0(t4) t2
+        push t2
         halt

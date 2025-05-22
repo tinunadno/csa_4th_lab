@@ -197,7 +197,9 @@ class instruction_decoder_handler(handler):
                     if need_reg_num:
                         reg_arg = reg_arg[1:]
                     if reg_arg not in cmd_desc["bit_layout"]:
-                        if need_reg_num:
+                        if reg_arg.isdigit():
+                            value = int(reg_arg)
+                        elif need_reg_num:
                             value = regs.get_reg_num(reg_arg)
                         else:
                             value = regs.get_reg(reg_arg)
