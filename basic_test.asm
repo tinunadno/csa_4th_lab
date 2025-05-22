@@ -1,20 +1,20 @@
-.data
-.org 0x80
-0xFFFFFFFF
-.org 0x10
-buf: .word 0xFFF
-buf1: .buf '/0F/FE/EE'
-val: .byte 0x44
-val1: .byte 0x44
-
-.text
-
+    .data
+input_val:  .word   0x5
+output_val: .word   0x00
+    .text
 _start:
-ADDI t0 t1 val1
-
-.data
-.org 0x30
-0x123
-
-.text
-end: HALT
+    lui t0 input_val
+    lli t0 input_val
+    lw t1 0(t0)
+    factorial_begin:
+        addi t2 t3 1
+    factorial_while:
+        beqz factorial_end
+        mul t2 t2 t1
+        addi t1 t1 -1
+        jmp factorial_while
+    factorial_end:
+        lui t4 output_val
+        lli t4 output_val
+        sw 0(t4) t2
+        halt

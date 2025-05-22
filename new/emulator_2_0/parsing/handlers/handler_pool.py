@@ -246,8 +246,12 @@ class ALU_execution_handler(handler):
         """Гарантирует 32-битное беззнаковое число"""
         return value & 0xFFFFFFFF
 
-    def _update_flags(self, result: int, operands: tuple = None):
+    def _update_flags(self, result: int, operands: tuple = None, discard_nzvc: int = 0):
         """Обновляет флаги NZVC на основе результата"""
+
+        if discard_nzvc == 1:
+            return
+
         result32 = self._to_unsigned32(result)
 
         self.flags['Z'] = (result32 == 0)
@@ -323,7 +327,7 @@ class ALU_execution_handler(handler):
             if signals['add']:
                 reg2 = -self._to_signed32(reg2) if signals['neg_second'] else self._to_signed32(reg2)
                 result = self._to_signed32(reg1) + reg2
-                self._update_flags(result, (reg1, reg2))
+                self._update_flags(result, (reg1, reg2), signals['discard_nzvc'])
                 tick_logs.append(f"[EX] ADD operation: {reg1} {'-' if signals['neg_second'] else '+'} {reg2} = {result}")
 
             # Логические операции (беззнаковые)
@@ -332,12 +336,12 @@ class ALU_execution_handler(handler):
                     result = reg1 | reg2
                 else:
                     result = reg1 & reg2
-                self._update_flags(result)
+                self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
                 tick_logs.append(f"[EX] AND operation: {reg1} & {reg2} = {result}")
 
             elif signals['xor']:
                 result = reg1 ^ reg2
-                self._update_flags(result)
+                self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
                 tick_logs.append(f"[EX] XOR operation: {reg1} ^ {reg2} = {result}")
 
             # Операции сдвига
@@ -356,7 +360,7 @@ class ALU_execution_handler(handler):
                         result = (reg1 << shift_amount) & 0xFFFFFFFF
                         pass
                     tick_logs.append(f"[EX] {'SHL' if signals['sh_dir'] else 'SHR'}: {reg1} by {shift_amount} = {result}")
-                self._update_flags(result)
+                self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
 
             # Операции сравнения/перехода
             elif signals['comp']:
@@ -385,7 +389,7 @@ class ALU_execution_handler(handler):
                 reg2 = self._to_signed32(reg2)
                 reg1 = self._to_signed32(reg1)
                 result = reg1 * reg2
-                self._update_flags(result)
+                self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
                 tick_logs.append(f"[EX] MUL: {reg1} * {reg2} = {result}")
 
             elif signals['div']:
@@ -396,7 +400,7 @@ class ALU_execution_handler(handler):
                 else:
                     result = 0xFFFFFFFF
                     tick_logs.append("[EX] Division by zero!")
-                self._update_flags(result)
+                self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
 
             elif signals['rem']:
                 if reg2 != 0:
@@ -406,7 +410,7 @@ class ALU_execution_handler(handler):
                 else:
                     result = 0xFFFFFFFF
                     tick_logs.append("[EX] Division by zero in REM!")
-                self._update_flags(result)
+                self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
 
             # Сохраняем результат
             self.last_result = result

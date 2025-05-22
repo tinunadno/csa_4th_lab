@@ -30,10 +30,19 @@ def parse_byte_line(line: str) -> list[int]:
 
 
 def parse_word_line(line: str) -> int:
+    # Очистка строки от лишних символов
     if ":" in line:
         line = line[line.find(":") + 1:]
     line = line.replace(".word", "").strip()
-    return parse_int(line)
+
+    value = parse_int(line)
+
+    return (
+            ((value & 0xFF) << 24) |
+            ((value >> 8 & 0xFF) << 16) |
+            ((value >> 16 & 0xFF) << 8) |
+            (value >> 24 & 0xFF)
+    )
 
 
 def parse_buffer(line: str) -> list[int]:
@@ -82,7 +91,7 @@ def find_labels(code: str, line_splitter: str):
             if current_section == "text":
                 labels[label_name] = {"address": text_address, "section": "text"}
                 if line[line.find(":") + 1:].strip() != "":
-                    text_address += 4
+                    text_address += 1
                 text_lines.append(line)
             elif current_section == "data":
                 data_len = process_type_size(line)
@@ -91,7 +100,7 @@ def find_labels(code: str, line_splitter: str):
                 data_lines.append(line)
         else:
             if current_section == "text":
-                text_address += 4
+                text_address += 1
                 text_lines.append(line)
             else:
                 data_address += 4
@@ -103,29 +112,30 @@ def find_labels(code: str, line_splitter: str):
 def substitute_labels(data_lines: list[str], text_lines: list[str], labels):
     data_section: list[int, bytearray] = []
     current_address = 0
-    if not ".org" in data_lines[0]:
-        data_section.append([current_address, bytearray()])
-    for line in data_lines:
-        if ".org" in line:
-            line = line[line.find(".org") + 4 : ]
-            value = parse_int(line.strip())
-            current_address = value
+    if len(data_lines) > 0:
+        if not ".org" in data_lines[0]:
             data_section.append([current_address, bytearray()])
-            continue
-        if ".byte" in line:
-            bytes_data = parse_byte_line(line)
-            data_section[-1][1].extend(bytes(bytes_data))
-        elif ".word" in line:
-            word = parse_word_line(line)
-            data_section[-1][1].extend(word.to_bytes(4))
-        elif ".buf" in line:
-            buf_data = parse_buffer(line)
-            data_section[-1][1].extend(buf_data)
-        else:
-            word = parse_word_line(line)
-            data_section[-1][1].extend(word.to_bytes(4))
+        for line in data_lines:
+            if ".org" in line:
+                line = line[line.find(".org") + 4 : ]
+                value = parse_int(line.strip())
+                current_address = value
+                data_section.append([current_address, bytearray()])
+                continue
+            if ".byte" in line:
+                bytes_data = parse_byte_line(line)
+                data_section[-1][1].extend(bytes(bytes_data))
+            elif ".word" in line:
+                word = parse_word_line(line)
+                data_section[-1][1].extend(word.to_bytes(4))
+            elif ".buf" in line:
+                buf_data = parse_buffer(line)
+                data_section[-1][1].extend(buf_data)
+            else:
+                word = parse_word_line(line)
+                data_section[-1][1].extend(word.to_bytes(4))
     text_section_processed = []
-
+    text_address = 0
     for line in text_lines:
         if ":" in line:
             line = line[line.find(":") + 1 :].strip()
@@ -133,7 +143,11 @@ def substitute_labels(data_lines: list[str], text_lines: list[str], labels):
             continue
         for i in labels.items():
             if re.search(r'\b' + re.escape(i[0]) + r'\b', line):
-                line = re.sub(r'\b' + re.escape(i[0]) + r'\b', hex(i[1]['address']), line)
+                addr = i[1]['address']
+                if i[1]["section"] == "text":
+                    addr -= text_address + 1
+                line = re.sub(r'\b' + re.escape(i[0]) + r'\b', str(addr), line)
+        text_address += 1
         text_section_processed.append(line)
 
     return text_section_processed, data_section

@@ -43,8 +43,12 @@ class tick_command(command):
     def get_command_desc(self) -> str:
         return "perform pipeline tick"
     def handle(self, cmd: str, db_state: debug_state):
+        arg = int(cmd[cmd.find(" ") + 1:])
         os.system('clear')
-        db_state.pl_running = self.pl.tick()
+        counter = 0
+        while (counter <= arg) and db_state.pl_running:
+            db_state.pl_running = self.pl.tick()
+            counter += 1
         if db_state.performed_tick:
             db_state.log_blocks[0] = self.pl.last_tick_logs
             db_state.log_blocks[1] = self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0], db_state.last_data_mem_cut[1])

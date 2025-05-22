@@ -51,7 +51,7 @@ funct: 1st bit - is interruption
 | +- |                                                      imm                                          |           rd           |     funct    |       cn     | 4d  type
 | +- |                                                      imm                                          |           rd           |     funct    |       cn     | spec
 
-
+DATA_FORWARDING DESCRIPTION
 IF      |   ID  |   EX  |   MEM     |   WB
 li t0   |   x   |   x   |   x       |   x
 li t1   | li t0 |   x   |   x       |   x
@@ -63,3 +63,7 @@ add t2  | li t1 | li t0 |   x       |   x
                     DF
 
 binary file structure
+
+ENTRY_POINT | DATA_CLASTERS_COUNT | ... | CLUSTER_SIZE | CLUSTER_ADDRESS | ACTUAL_DATA | ... | TEXT_SECTION
+  4 bytes           4 bytes                 4 bytes          4 bytes         n bytes
+                                      (including address)

@@ -43,7 +43,7 @@ def get_replacement(token: str, arg_desc: str):
 
 
 def get_replacement_substitution_rules(replacement: list[[int, int]], args: list[str], type_desc,
-                                       translated_instruction) -> int:
+                                       translated_instruction, shift_me, shifting_var, lower_upper) -> int:
     for i in replacement:
         for j in args:
             if not i[0] in j:
@@ -51,6 +51,11 @@ def get_replacement_substitution_rules(replacement: list[[int, int]], args: list
             arg_name = j[j.find('%') + 1:]
             try:
                 val = parse_int(i[1])
+                if shift_me and (shifting_var in j):
+                    mask = (1 << (lower_upper[1] - lower_upper[0] + 1)) - 1
+                    mask <<= lower_upper[0]
+                    val &= mask
+                    val >>= lower_upper[0]
                 bits = type_desc[arg_name]["bits"]
                 translated_instruction = set_int_cut(translated_instruction, bits, val)
             except ValueError as e:
@@ -58,7 +63,7 @@ def get_replacement_substitution_rules(replacement: list[[int, int]], args: list
     return translated_instruction
 
 
-def build_command(instruction: str, instructions_format) -> int:
+def build_command(instruction: str, instructions_format, lower_upper) -> int:
     token_separator = instructions_format["token_separator"]
     if token_separator == " ":
         while "  " in instruction:
@@ -66,10 +71,11 @@ def build_command(instruction: str, instructions_format) -> int:
     else:
         instruction.replace(" ", "")
     tokens = instruction.split(token_separator)
-    mnemonic = tokens[0]
+    mnemonic: str = tokens[0]
+    mnemonic = mnemonic.lower()
     dec_rule = ""
     for current_dec_rule in instructions_format["decoding_rules"]:
-        if current_dec_rule["mnemonic"] == mnemonic:
+        if current_dec_rule["mnemonic"].lower() == mnemonic:
             dec_rule = current_dec_rule
             break
     if dec_rule == "":
@@ -112,11 +118,15 @@ def build_command(instruction: str, instructions_format) -> int:
         raise SyntaxError(
             f"token count doesn't match with config's arguments count: conf_args: {command_arguments}, tokens: {tokens[1:]} for instruction: {instruction}")
 
+    need_shift = "shift_me" in dec_rule
+    shifting_var = ""
+    if need_shift:
+        shifting_var = dec_rule["shift_me"]
     replacements = []
     for i in range(len(command_arguments)):
         replacements.append(get_replacement(tokens[i + 1], command_arguments[i][0]))
         replacement = replacements[-1]
         translated_instruction = get_replacement_substitution_rules(replacement, command_arguments[i][1:], type_desc,
-                                                                    translated_instruction)
+                                                                    translated_instruction, need_shift, shifting_var, lower_upper)
 
     return translated_instruction

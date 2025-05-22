@@ -1,7 +1,7 @@
 registers:
   register_count: 36
-  upper: [ 0, 20 ]
-  lower: [ 21, 31 ]
+  lower: [ 0, 20 ]
+  upper: [ 21, 31 ]
   common_registers: [ 0, 30 ]
   special_registers:
     - { name: "SP", number: 31 } # stack pointer
@@ -333,7 +333,7 @@ instructions:
         - [ "t$", "$%r1" ]
         - [ "t$", "$%r2" ]
       type: 0
-      functional_bits_match: [ 0, 1, 1, 0, 0, 0 ]
+      functional_bits_match: [ 0, 1, 1, 0, 0, 1 ]
       signals:
         - name: "EX_signal"
           args: [ "r1%reg1", "r2%reg2", "mul" ]
@@ -346,7 +346,7 @@ instructions:
         - [ "t%", "r1" ]
         - [ "t%", "r2" ]
       type: 0
-      functional_bits_match: [ 1, 0, 1, 0, 0, 0 ]
+      functional_bits_match: [ 1, 0, 1, 0, 0, 1 ]
       signals:
         - name: "EX_signal"
           args: [ "r1%reg1", "r2%reg2", "div" ]
@@ -359,7 +359,7 @@ instructions:
         - [ "t$", "$%r1" ]
         - [ "t$", "$%r2" ]
       type: 0
-      functional_bits_match: [ 1, 1, 1, 0, 0, 0 ]
+      functional_bits_match: [ 1, 1, 1, 0, 0, 1 ]
       signals:
         - name: "EX_signal"
           args: [ "r1%reg1", "r2%reg2", "rem" ]
@@ -423,6 +423,7 @@ instructions:
         - [ "$", "$%imm" ]
       type: 2
       functional_bits_match: [ 0, 0, 1 ]
+      shift_me: "imm"
       signals:
         - name: "EX_signal"
           args: [ "imm%reg1", "add" ]
@@ -446,7 +447,7 @@ instructions:
       functional_bits_match: [ 0, 0, 0 ]
       signals:
         - name: "EX_signal"
-          args: [ "PC%reg1", "imm%reg2", "add", "FORCE_DISCARD_FORWARDING" ]
+          args: [ "PC%reg1", "imm%reg2", "add", "FORCE_DISCARD_FORWARDING", "discard_nzvc" ]
         - name: "stall"
           args: [ "stall_fst", "stall_snd" ]
         - name: "WB_signal"
@@ -458,7 +459,7 @@ instructions:
       functional_bits_match: [ 0, 1, 0 ]
       signals:
         - name: "EX_signal"
-          args: [ "rd%reg1", "imm%reg2", "add", "FORCE_DISCARD_FORWARDING" ]
+          args: [ "rd%reg1", "imm%reg2", "add", "FORCE_DISCARD_FORWARDING", "discard_nzvc" ]
         - name: "stall"
           args: [ "stall_fst", "stall_snd" ]
         - name: "WB_signal"
@@ -470,7 +471,7 @@ instructions:
       functional_bits_match: [ 0, 0, 1 ]
       signals:
         - name: "EX_signal"
-          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp" ]
+          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "discard_nzvc" ]
         - name: "stall"
           args: [ "stall_fst", "stall_snd" ]
         - name: "WB_signal"
@@ -482,7 +483,7 @@ instructions:
       functional_bits_match: [ 0, 1, 1 ]
       signals:
         - name: "EX_signal"
-          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "comp_num_fst" ]
+          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "comp_num_fst", "discard_nzvc" ]
         - name: "stall"
           args: [ "stall_fst", "stall_snd" ]
         - name: "WB_signal"
@@ -494,7 +495,7 @@ instructions:
       functional_bits_match: [ 1, 0, 1 ]
       signals:
         - name: "EX_signal"
-          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "comp_num_snd" ]
+          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "comp_num_snd", "discard_nzvc" ]
         - name: "stall"
           args: [ "stall_fst", "stall_snd" ]
         - name: "WB_signal"
@@ -506,7 +507,7 @@ instructions:
       functional_bits_match: [ 1, 1, 1 ]
       signals:
         - name: "EX_signal"
-          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "comp_num_fst", "comp_num_snd" ]
+          args: [ "PC%reg1", "imm%reg2", "FORCE_DISCARD_FORWARDING", "comp", "comp_num_fst", "comp_num_snd", "discard_nzvc" ]
         - name: "stall"
           args: [ "stall_fst", "stall_snd" ]
         - name: "WB_signal"
@@ -516,7 +517,8 @@ instructions:
       type: 4
       functional_bits_match: [ 0, 0, 0 ]
       signals:
-        - [ ]
+        - name: "EX_signal"
+          args: [ "FORCE_DISCARD_FORWARDING", "discard_nzvc" ]
     - mnemonic: "HALT"
       args:
       type: 4
