@@ -103,6 +103,11 @@ def build_command(instruction: str, instructions_format) -> int:
 
     command_arguments = dec_rule["args"]
 
+    if tokens == None:
+        tokens = []
+    if command_arguments == None:
+        command_arguments = []
+
     if len(tokens) - 1 != len(command_arguments):
         raise SyntaxError(
             f"token count doesn't match with config's arguments count: conf_args: {command_arguments}, tokens: {tokens[1:]} for instruction: {instruction}")
@@ -114,6 +119,4 @@ def build_command(instruction: str, instructions_format) -> int:
         translated_instruction = get_replacement_substitution_rules(replacement, command_arguments[i][1:], type_desc,
                                                                     translated_instruction)
 
-    print(replacements)
-    print(bin(translated_instruction))
     return translated_instruction
