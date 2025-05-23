@@ -27,5 +27,7 @@ class instruction_memory:
                 ret.append(f"0x{i:08X} | 0x{self.inst_mnemonics[i]}")
         else:
             for i in range(data_start, data_end):
+                if i >= len(self.instructions):
+                    break
                 ret.append(f"0x{i:08X} | 0x{self.inst_mnemonics[i]}")
         return ret

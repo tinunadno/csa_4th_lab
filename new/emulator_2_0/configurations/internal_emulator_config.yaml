@@ -5,10 +5,10 @@ registers:
   common_registers: [ 0, 31 ]
   special_registers:
     - { name: "SP", number: 31 } # stack pointer
-    - { name: "PC", number: 32 } # program counter
+    - { name: "PC", number: 29 } # program counter
     - { name: "IR", number: 33 } # instruction register
     - { name: "PS", number: 34 } # program state
-    - { name: "IC", number: 35 } # interruption context register
+    - { name: "IC", number: 30 } # interruption context register
 pipeline:
   pipeline_signals:
     - name: "EX_signal"
@@ -583,7 +583,28 @@ instructions:
         - name: "EX_signal"
           args: [ "set_nzvc", "rd%reg1", "discard_nzvc"]
   complex_decoding_rules:
-
+   - mnemonic: "INT"
+     args:
+       - ["$"]
+     unwrap_rules:
+       - "SET_INT 1"
+       - "PUSH t29"
+       - "GET_NZVC t30"
+       - "PUSH t30"
+       - "XOR t30 t30 t30"
+       - "LLI t30 $"
+       - "LW t30 0(t30)"
+       - "LJMP 0(t30)"
+   - mnemonic: "IRET"
+     args:
+     unwrap_rules:
+       - "LW IC 0(t31)"
+       - "SET_NZVC t35"
+       - "POP"
+       - "LW IC 0(SP)"
+       - "POP"
+       - "SET_INT 0"
+       - "LJMP 0(IC)"
 # FEW TICKS COMMANDS
 # INT
 # SET_INT_FLAG 1    ; setting interruption mode

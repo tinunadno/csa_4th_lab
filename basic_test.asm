@@ -19,5 +19,5 @@ _start:
         GET_NZVC t1
         addi t0 t0 1
         SET_NZVC t1
-
+        INT 0x80
         halt
