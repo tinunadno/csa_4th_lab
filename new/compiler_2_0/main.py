@@ -7,8 +7,10 @@ if __name__ == "__main__":
     try:
         inst_desc, lower_upper = load_config("../emulator_2_0/configurations/internal_emulator_config.yaml")
         some_code = open("../../basic_test.asm").read()
-        labels, txt_lines, data_lines = find_labels(some_code, "\n")
-        text_section_proceed, data_section = substitute_labels(data_lines, txt_lines, labels)
+        l_cmd = {"INT": 10, "IRET": 7}
+        labels, txt_lines, data_lines = find_labels(some_code, "\n", l_cmd)
+        text_section_proceed, data_section = substitute_labels(data_lines, txt_lines, labels, l_cmd)
+        print('\n'.join(text_section_proceed))
         compiled_code = []
         for i in text_section_proceed:
             compiled_code.extend(unwrap_command(i, inst_desc, lower_upper))
@@ -20,5 +22,6 @@ if __name__ == "__main__":
         else:
             ep: int = labels["_start"]["address"]
         write_file(ep, data_section, compiled_code)
+        print(labels)
     except SyntaxError as e:
         print(str(e))           # handling parsing errors that I raised, other will kill the compiler :D

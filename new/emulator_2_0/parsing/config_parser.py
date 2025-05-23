@@ -52,7 +52,7 @@ def parse_config(config_path: str, executable_bin_stuff: bytearray) -> pipeline:
     #                                                                  0b000000000000000000000_00000_010_011,
     #                                                                  0b_00001_00010_00011_000001_000, 0b100100]
 
-    data_mem_ = data_mem(32, loaded_data['data_clusters'])
+    data_mem_ = data_mem(64, loaded_data['data_clusters'])
 
     regs = registers(data["registers"], data_mem_.size)
     regs.set_reg("PC", loaded_data['entry_point'])

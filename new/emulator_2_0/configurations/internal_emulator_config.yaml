@@ -588,7 +588,9 @@ instructions:
        - ["$"]
      unwrap_rules:
        - "SET_INT 1"
-       - "PUSH t29"
+       - "XOR t30 t30 t30"
+       - "ADDI t30 t29 7"
+       - "PUSH t30"
        - "GET_NZVC t30"
        - "PUSH t30"
        - "XOR t30 t30 t30"

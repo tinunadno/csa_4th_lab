@@ -1,6 +1,8 @@
     .data
 input_val:  .word   0x5
 output_val: .word   0x00
+.org 0x16
+interrupt: int16
     .text
 _start:
     lui t0 input_val
@@ -14,11 +16,8 @@ _start:
         addi t1 t1 -1
         jmp factorial_while
     factorial_end:
-        SET_INT 1
-        addi t0 t0 0
-        GET_NZVC t1
-        addi t0 t0 1
-        SET_NZVC t1
-        INT 0x80
-        IRET
+        INT 0x16
         halt
+int16:
+   addi t7 t7 0xFF
+   IRET
