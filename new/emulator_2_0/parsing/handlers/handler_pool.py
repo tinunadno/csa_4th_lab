@@ -179,7 +179,8 @@ class instruction_decoder_handler(handler):
             "MEM_signal": args[4],
             "WB_signal": args[5],
             "stall": args[6],
-            "terminate": args[7]
+            "terminate": args[7],
+            "INTERRUPT_signal": args[8]
         }
 
         for i in self.commands_desc:
@@ -269,6 +270,17 @@ class ALU_execution_handler(handler):
             self.flags['V'] = ((a ^ res) & (b ^ res)) < 0
             # Carry flag
             self.flags['C'] = (result >> 32) & 1
+    def get_nzvc(self) -> int:
+        ret = 0
+        for i in self.flags.items():
+            ret <<= 4
+            ret |= int(i[1] == 1) & 0xF
+        return ret
+    def set_nzvc(self, nzvc: int):
+        temp = list(self.flags.items())
+        for i in temp[::-1]:
+            self.flags[i[0]] = nzvc & 0xF != 0
+            nzvc >>= 4
 
     # args: [ "EX_signal", "ALU_output", "WB_signal", "DF_signal", "MEM_signal", "registers" ]
     def handle(self, args: list[any], is_valid: bool, tick_logs: list[str]) -> bool:
@@ -307,9 +319,13 @@ class ALU_execution_handler(handler):
             'mul': ex_signal.get_signal("mul"),
             'div': ex_signal.get_signal("div"),
             'rem': ex_signal.get_signal("rem"),
+            'get_nzvc': ex_signal.get_signal('get_nzvc'),
+            'set_nzvc': ex_signal.get_signal('set_nzvc'),
             "FORCE_DISCARD_FORWARDING": ex_signal.get_signal("FORCE_DISCARD_FORWARDING"),
             "FORCE_ENABLE_FORWARDING": ex_signal.get_signal("FORCE_ENABLE_FORWARDING")
         }
+
+
 
         need_mem = mem_signals.get_signal("need_mem")
         need_wb = wb_signals.get_signal("need_wb")
@@ -324,6 +340,18 @@ class ALU_execution_handler(handler):
         reg1 = self._to_unsigned32(signals['reg1'])
         reg2 = self._to_unsigned32(signals['reg2'])
         result = 0
+
+        if signals['set_nzvc'] != 0:
+            self.set_nzvc(signals['reg1'])
+            tick_logs.append(f"[EX] setting nzvc: {self.flags["N"], self.flags["Z"], self.flags["V"], self.flags["C"]}")
+            return True
+
+        if signals['get_nzvc'] != 0:
+            tick_logs.append(f"[EX] returning nzvc: {self.flags["N"], self.flags["Z"], self.flags["V"], self.flags["C"]}")
+            alu_output.set_signal("value", self._to_unsigned32(self.get_nzvc()))
+            tick_logs.append(f"setted this value to ALU output signal: {self._to_unsigned32(self.get_nzvc())}")
+            do_data_forward(df_signals, df_destination, self._to_unsigned32(self.get_nzvc()), "EX", tick_logs)
+            return True
 
         try:
             # Арифметические операции

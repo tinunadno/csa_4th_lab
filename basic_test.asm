@@ -14,13 +14,10 @@ _start:
         addi t1 t1 -1
         jmp factorial_while
     factorial_end:
-        lui t4 output_val
-        lli t4 output_val
-        sw 0(t4) t2
-        push t2
-        lw t5 0(t31)
-        addi t6 t5 0xF
-        push t6
-        pop
-        pop
+        SET_INT 1
+        addi t0 t0 0
+        GET_NZVC t1
+        addi t0 t0 1
+        SET_NZVC t1
+
         halt

@@ -1,4 +1,4 @@
-from csa_4th_lab.new.common_utils.bitwise_utils import set_int_cut
+from csa_4th_lab.new.common_utils.bitwise_utils import set_int_cut, get_int_cut
 from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
 from csa_4th_lab.new.emulator_2_0.core.memory.data_mem import data_mem
 from csa_4th_lab.new.emulator_2_0.core.memory.instruction_memory import instruction_memory
@@ -102,6 +102,11 @@ class pipeline:
                     range(len(self.stages))]
         return '->'.join(pl_mnems)
 
+    def get_static_signal(self, signal_name: str, signal_range_name: str) -> int:
+        for i in self.static_signals.items():
+            if i[0] == signal_name:
+                tmp: pipeline_signal = i[1]
+                return tmp.get_signal(signal_range_name)
     # def print_logs_for_each_stage(self):
     #     print("TICK: ", self.tick_)
     #     print(" PIPELINE STATE:")

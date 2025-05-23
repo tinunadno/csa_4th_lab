@@ -29,8 +29,10 @@ pipeline:
         - { name: "mul",          bits: [ 75 ],      description: "multiplication signal" }
         - { name: "div",          bits: [ 76 ],      description: "division signal" }
         - { name: "rem",          bits: [ 77 ],      description: "remainder signal" }
-        - { name: "FORCE_DISCARD_FORWARDING",          bits: [ 78 ],      description: "we really don't wanna do forward" }
-        - { name: "FORCE_ENABLE_FORWARDING",           bits: [ 79 ],      description: "we really wanna do forward" }
+        - { name: "get_nzvc",     bits: [ 78 ],      description: "get_nzvc_flag"}
+        - { name: "set_nzvc",     bits: [ 79 ],      description: "set_nzvc_flag"}
+        - { name: "FORCE_DISCARD_FORWARDING",          bits: [ 80 ],      description: "we really don't wanna do forward" }
+        - { name: "FORCE_ENABLE_FORWARDING",           bits: [ 81 ],      description: "we really wanna do forward" }
     - name: "MEM_signal"
       bit_layout:
         - { name: "value",      bits: [ 0, 5 ],  description: "value register" }
@@ -54,6 +56,10 @@ pipeline:
         - { name: "snd_reg_num",      bits: [ 38, 42 ], description: "second forwarded register number (5 бит)" }
         - { name: "snd_reg_val",      bits: [ 43, 74 ], description: "second forwarded register value (32 бита)" }
         - { name: "is_snd_forwarded", bits: [ 75 ],     description: "is second register forwarded" }
+    - name: "INTERRUPT_signal"
+      static: 1
+      bit_layout:
+        - { name: "is_interrupted", bits: [0], description: "interruption flag"}
     - name: "terminate"
       bit_layout:
         - { name: "TERMINATE", bits: [ 0 ], description: "is pipeline working" }
@@ -77,11 +83,11 @@ pipeline:
 
     - name: "ID"  # instruction decoding
       need_non_static_signals: 1
-      dependencies: [ "registers", "EX_signal", "MEM_signal", "WB_signal", "stall", "DF_signal", "terminate" ]
+      dependencies: [ "registers", "EX_signal", "MEM_signal", "WB_signal", "stall", "DF_signal", "terminate", "INTERRUPT_signal" ]
       behaviour:
         name: "decode"
         handler: "INSTRUCTION_DECODER_HANDLER"
-        args: [ "DF_signal", "registers", "IR", "EX_signal", "MEM_signal", "WB_signal", "stall", "terminate" ]
+        args: [ "DF_signal", "registers", "IR", "EX_signal", "MEM_signal", "WB_signal", "stall", "terminate", "INTERRUPT_signal" ]
 
     - name: "EX"  # execution
       need_non_static_signals: 1
@@ -550,3 +556,48 @@ instructions:
           args: [ "stall_fst", "stall_snd", "stall_thd" ]
         - name: "terminate"
           args: [ "TERMINATE" ]
+    - mnemonic: "SET_INT"
+      args:
+        - [ "$", "$%imm" ]
+      type: 4
+      functional_bits_match: [0, 1, 0]
+      signals:
+        - name: "INTERRUPT_signal"
+          args: [ "imm%is_interrupted" ]
+    - mnemonic: "GET_NZVC"
+      args:
+        - [ "t$", "$%rd" ]
+      type: 4
+      functional_bits_match: [1, 1, 0]
+      signals:
+        - name: "EX_signal"
+          args: [ "get_nzvc", "discard_nzvc"]
+        - name: "WB_signal"
+          args: [ "need_wb", "$rd%reg_dest" ]
+    - mnemonic: "SET_NZVC"
+      args:
+        - ["t$", "$%rd"]
+      type: 4
+      functional_bits_match: [1, 1, 1]
+      signals:
+        - name: "EX_signal"
+          args: [ "set_nzvc", "rd%reg1", "discard_nzvc"]
+  complex_decoding_rules:
+
+# FEW TICKS COMMANDS
+# INT
+# SET_INT_FLAG 1    ; setting interruption mode
+# PUSH PC           ; saving program counter
+# NZVC->IC          ; getting nzvc flags
+# PUSH IC           ; saving nzvc flags
+# LW IC 0(int_num)  ; getting interruption handler address
+# LJMP 0(IC)        ; jumping into it
+
+# IRET
+# LW IC 0(SP)       ; loading nzvc flags
+# IC->NZVC          ; restoring nzvc flags
+# POP               ; popping nzvc flags
+# LW IC 0(SP)       ; loading PC
+# POP               ; popping PC
+# SET_INT_FLAG 0    ; quiting interruption
+# LJMP 0(IC)        ; returning back

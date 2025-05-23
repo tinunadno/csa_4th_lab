@@ -31,6 +31,7 @@ class command(ABC):
 
     def print_default(self, db_state):
         print("TICK: ", self.pl.tick_)
+        print(f"IS INTERRUPTION: {self.pl.get_static_signal("INTERRUPT_signal", "is_interrupted") != 0}")
         print(" PIPELINE STATE:")
         glue_string_lists(db_state.log_blocks, [150, 30, 30])
         print("\nPIPELINE_STAGES_MNEMONICS:")
@@ -124,10 +125,10 @@ def process_command(cmd, db_state: debug_state):
         cmd_name = cmd
     for i in db_state.commands:
         if i.get_command_name() == cmd_name:
-            try:
-                i.handle(cmd, db_state)
-            except Exception as e:
-                print(f"oops, got an exception: {e}")
+            # try:
+            i.handle(cmd, db_state)
+            # except Exception as e:
+            #     print(f"oops, got an exception: {e}")
 
 
 
