@@ -482,7 +482,7 @@ instructions:
           args: [ "need_wb", "$PC%reg_dest" ]
     - mnemonic: "LJMP"
       args:
-        - [ "$1(t$0)", "$0%rd", "$1%imm" ]
+        - [ "$0(t$1)", "$1%rd", "$0%imm" ]
       type: 3
       functional_bits_match: [ 0, 1, 0 ]
       signals:
@@ -598,13 +598,13 @@ instructions:
    - mnemonic: "IRET"
      args:
      unwrap_rules:
-       - "LW IC 0(t31)"
-       - "SET_NZVC t35"
+       - "LW t30 0(t31)"
+       - "SET_NZVC t30"
        - "POP"
-       - "LW IC 0(SP)"
+       - "LW t30 0(t31)"
        - "POP"
        - "SET_INT 0"
-       - "LJMP 0(IC)"
+       - "LJMP 0(t30)"
 # FEW TICKS COMMANDS
 # INT
 # SET_INT_FLAG 1    ; setting interruption mode

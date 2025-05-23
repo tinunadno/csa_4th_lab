@@ -20,8 +20,9 @@ def unwrap_command(instruction: str, instructions_format, lower_upper) -> list[i
     tokens = instruction.split(token_separator)[1:]
     replacements = []
     command_arguments = unwrapping_rule["args"]
-    for i in range(len(command_arguments)):
-        replacements.append(get_replacement(tokens[i], command_arguments[i][0]))
+    if command_arguments != None:
+        for i in range(len(command_arguments)):
+            replacements.append(get_replacement(tokens[i], command_arguments[i][0]))
     unwrapped_command = []
     for i in unwrapping_rule["unwrap_rules"]:
         for arg_replacement in replacements:
