@@ -50,13 +50,20 @@ class define:
             match = re.search(r'\b' + re.escape(self.name) + r'\b', code)
         return code
 
-def preprocess_macros(code: str) -> str:
+def preprocess_macros(code: str, code_file_path: str) -> str:
     lines = code.split("\n")
     defines = []
     i = 0
     current_lines_size = len(lines)
+    file_dir_path = code_file_path[:code_file_path.rfind("/") + 1]
     while i < current_lines_size:
-        if "define" in lines[i]:
+        if "#include" in lines[i]:
+            include_path = lines[i][lines[i].find("\"") + 1 : lines[i].rfind("\"")]
+            include_path = file_dir_path + include_path
+            included_lines = open(include_path).read().split("\n")
+            lines.pop(i)
+            lines[i:i] = included_lines
+        if "#define" in lines[i]:
             defines.append(define(lines, i))
         i += 1
         current_lines_size = len(lines)

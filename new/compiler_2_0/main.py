@@ -1,3 +1,5 @@
+import os
+
 from csa_4th_lab.new.compiler_2_0.config_loader import load_config
 from csa_4th_lab.new.compiler_2_0.io.io import write_file
 from csa_4th_lab.new.compiler_2_0.preprocessor.macro_preprocessor import preprocess_macros
@@ -7,11 +9,13 @@ from csa_4th_lab.new.compiler_2_0.translator.command_unwrapper import unwrap_com
 if __name__ == "__main__":
     try:
         inst_desc, lower_upper = load_config("../emulator_2_0/configurations/internal_emulator_config.yaml")
-        some_code = open("../../basic_test.asm").read()
+        code_file_path = "../../basic_test.asm"
+        some_code = open(code_file_path).read()
         l_cmd = {}
         for i in inst_desc["complex_decoding_rules"]:
             l_cmd[i["mnemonic"]] = len(i["unwrap_rules"])
-        some_code = preprocess_macros(some_code)
+        abs_code_path = os.path.abspath(code_file_path)
+        some_code = preprocess_macros(some_code, abs_code_path)
         labels, txt_lines, data_lines = find_labels(some_code, "\n", l_cmd)
         text_section_proceed, data_section = substitute_labels(data_lines, txt_lines, labels, l_cmd)
         print('\n'.join(text_section_proceed))

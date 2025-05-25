@@ -1,9 +1,11 @@
+#include "basic_include_test.asm"
     .data
 output_val:  .word   0x0
 .org 0x16
 interrupt: int16
     .text
 _start:
+    im_included(t0, t1, t2){}
     read_loop:
         addi t3 t1 0
         bnez read_loop_end
