@@ -84,6 +84,17 @@ class logger:
             "output": output_asserter
         }
 
+    def start(self, max_tick):
+        if "debug" in self.log_conf:
+            self.debug_mode()
+        else:
+            self.print_initial_logs()
+            while self.running:
+                if self.pl.tick_ >= max_tick:
+                    break
+                self.perform_tick()
+            self.print_assertion()
+
     def debug_mode(self):
         print("\n".join(self.pl.print_initial_logs()))
         init_debug(self.pl)
