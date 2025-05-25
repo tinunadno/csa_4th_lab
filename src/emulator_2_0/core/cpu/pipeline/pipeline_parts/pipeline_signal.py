@@ -1,4 +1,4 @@
-from csa_4th_lab.new.common_utils.bitwise_utils import *
+from csa_4th_lab.src.common_utils.bitwise_utils import *
 
 
 class pipeline_signal:

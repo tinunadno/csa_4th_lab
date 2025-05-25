@@ -1,4 +1,4 @@
-from csa_4th_lab.new.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
+from csa_4th_lab.src.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
 
 
 class instruction_memory:

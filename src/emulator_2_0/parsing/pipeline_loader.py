@@ -1,12 +1,12 @@
-from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
+from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
 import yaml
 
-from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
+from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
     interruption_controller
-from csa_4th_lab.new.emulator_2_0.core.cpu.registers import registers
-from csa_4th_lab.new.emulator_2_0.core.memory.data_mem import data_mem
-from csa_4th_lab.new.emulator_2_0.core.memory.instruction_memory import instruction_memory
-from csa_4th_lab.new.emulator_2_0.debugger.logger import logger
+from csa_4th_lab.src.emulator_2_0.core.cpu.registers import registers
+from csa_4th_lab.src.emulator_2_0.core.memory.data_mem import data_mem
+from csa_4th_lab.src.emulator_2_0.core.memory.instruction_memory import instruction_memory
+from csa_4th_lab.src.emulator_2_0.debugger.logger import logger
 
 
 # returns ep, data-section_clusters, text_section
@@ -70,7 +70,8 @@ def parse_config(config_path: str, user_config_path: str, executable_bin_stuff: 
             pref_size = max(pref_size, input_addr + 4)
             interruptions = u_conf["io_mem_map"]["input"]["interruptions"]
             for i in interruptions:
-                i[1] = ord(i[1])
+                if isinstance(i[1], str):
+                    i[1] = ord(i[1])
         if "output" in u_conf["io_mem_map"]:
             output_addr = u_conf["io_mem_map"]["output"]["port"]
             pref_size = max(pref_size, output_addr + 4)

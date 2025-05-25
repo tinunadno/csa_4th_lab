@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 
-from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
+from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
     interruption_controller
-from csa_4th_lab.new.emulator_2_0.core.memory.data_mem import data_mem
-from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
-from csa_4th_lab.new.emulator_2_0.core.cpu.registers import registers
-from csa_4th_lab.new.emulator_2_0.core.memory.instruction_memory import instruction_memory
-from csa_4th_lab.new.emulator_2_0.parsing.commands.command_types import command_types
-from csa_4th_lab.new.common_utils.bitwise_utils import get_int_cut, cast_immediate
+from csa_4th_lab.src.emulator_2_0.core.memory.data_mem import data_mem
+from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
+from csa_4th_lab.src.emulator_2_0.core.cpu.registers import registers
+from csa_4th_lab.src.emulator_2_0.core.memory.instruction_memory import instruction_memory
+from csa_4th_lab.src.emulator_2_0.parsing.commands.command_types import command_types
+from csa_4th_lab.src.common_utils.bitwise_utils import get_int_cut, cast_immediate
 
 
 def do_data_forward(df_signals: pipeline_signal, r_dest, value, stage, tick_logs):
@@ -135,7 +135,7 @@ class instruction_load_handler(handler):
         int_controller: interruption_controller = args[6]
         if int_controller.is_interruption():
             tick_logs.append(f"[IF] got an interruption on tick: {int_controller.current_tick}")
-            self.inserted_commands = int_controller.interruption_code
+            self.inserted_commands = int_controller.interruption_code.copy()
             stall_signal.set_signal("stall_size", 0)
         stall_value = stall_signal.get_signal("stall_size")
         if stall_value > 0:
@@ -382,10 +382,11 @@ class ALU_execution_handler(handler):
             elif signals['and']:
                 if signals['neg_second']:
                     result = reg1 | reg2
+                    tick_logs.append(f"[EX] AND operation: {reg1} | {reg2} = {result}")
                 else:
                     result = reg1 & reg2
+                    tick_logs.append(f"[EX] AND operation: {reg1} & {reg2} = {result}")
                 self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
-                tick_logs.append(f"[EX] AND operation: {reg1} & {reg2} = {result}")
 
             elif signals['xor']:
                 result = reg1 ^ reg2

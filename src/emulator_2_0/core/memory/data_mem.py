@@ -15,9 +15,10 @@ class data_mem:
                 self.data[j + addr] = i[1][j]
     def write(self, address: int, value: int, is_int_controller = False) -> None:
         if address <= self.size - 4:
+            tmp_val = value
             for i in range(4):
-                self.data[address + i] = (value & 0xFF)
-                value >>= 8
+                self.data[address + i] = (tmp_val & 0xFF)
+                tmp_val >>= 8
             if (not is_int_controller) and address == self.io_mem_cell:
                 self.output.append(value)
         else:
@@ -27,6 +28,7 @@ class data_mem:
             self.data[address] = (value & 0xFF)
             if (not is_int_controller) and address == self.io_mem_cell:
                 self.output.append(value & 0xFF)
+                print("WRITING TO PORT")
         else:
             raise ValueError("Attempting to write memory out of address space")
     def read_byte(self, address: int) -> int:

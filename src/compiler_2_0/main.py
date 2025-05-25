@@ -1,11 +1,11 @@
 import os
 
-from csa_4th_lab.new.compiler_2_0.config_loader import load_config
-from csa_4th_lab.new.compiler_2_0.io.io import write_file
-from csa_4th_lab.new.compiler_2_0.preprocessor.macro_preprocessor import preprocess_macros
-from csa_4th_lab.new.compiler_2_0.preprocessor.preprocessor import find_labels, substitute_labels
-from csa_4th_lab.new.compiler_2_0.translator.command_unwrapper import unwrap_command
-from csa_4th_lab.new.emulator_2_0.core.utils.log_utils import glue_string_lists
+from csa_4th_lab.src.compiler_2_0.config_loader import load_config
+from csa_4th_lab.src.compiler_2_0.io.io import write_file
+from csa_4th_lab.src.compiler_2_0.preprocessor.macro_preprocessor import preprocess_macros
+from csa_4th_lab.src.compiler_2_0.preprocessor.preprocessor import find_labels, substitute_labels
+from csa_4th_lab.src.compiler_2_0.translator.command_unwrapper import unwrap_command
+from csa_4th_lab.src.emulator_2_0.core.utils.log_utils import glue_string_lists
 
 
 def print_compilation_info(text_section: list[str], labels_: dict, mem: list[int, bytearray]):
@@ -28,7 +28,7 @@ def print_compilation_info(text_section: list[str], labels_: dict, mem: list[int
 if __name__ == "__main__":
     try:
         inst_desc, lower_upper = load_config("../emulator_2_0/configurations/internal_emulator_config.yaml")
-        code_file_path = "../../basic_test.asm"
+        code_file_path = "../../get_put_char.asm"
         some_code = open(code_file_path).read()
         l_cmd = {}
         for i in inst_desc["complex_decoding_rules"]:

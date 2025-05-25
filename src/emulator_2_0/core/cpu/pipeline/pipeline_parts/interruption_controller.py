@@ -1,5 +1,5 @@
-from csa_4th_lab.new.compiler_2_0.translator.command_unwrapper import unwrap_command
-from csa_4th_lab.new.emulator_2_0.core.memory.data_mem import data_mem
+from csa_4th_lab.src.compiler_2_0.translator.command_unwrapper import unwrap_command
+from csa_4th_lab.src.emulator_2_0.core.memory.data_mem import data_mem
 
 
 class interruption_controller:

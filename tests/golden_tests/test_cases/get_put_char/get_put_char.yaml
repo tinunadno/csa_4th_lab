@@ -1,0 +1,13 @@
+limit: 200
+mem_size: 0x90
+io_mem_map:
+  int_vector: 0x16
+  input:
+    port: 0x80
+    interruptions: [ [ 16, 'H' ], [40, 'e'], [70, 'l'], [100, 'l'], [130, 'o'], [164, 0] ]
+  output:
+    port: 0x84
+log_fmt:
+  assertion:
+    - name: "output"
+      expected: [ 'Hello\0' ]

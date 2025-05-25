@@ -415,8 +415,8 @@ instructions:
           args: [ "need_mem", "$rd%reg_dest", "need_write" ]
     - mnemonic: "SB"
       args:
-        - [ "t$", "$%rd" ]
         - [ "$0(t$1)", "$1%r", "$0%imm" ]
+        - [ "t$", "$%rd" ]
       type: 1
       functional_bits_match: [ 1, 1, 1 ]
       signals:
@@ -433,9 +433,9 @@ instructions:
       shift_me: "imm"
       signals:
         - name: "EX_signal"
-          args: [ "imm%reg1", "add" ]
+          args: [ "imm%reg1", "rd%reg2", "and", "neg_second" ]
         - name: "WB_signal"
-          args: [ "need_wb", "$rd%reg_dest", "write_upper" ]
+          args: [ "need_wb", "$rd%reg_dest" ]
     - mnemonic: "LLI"
       args:
         - [ "t$", "$%rd" ]
@@ -444,9 +444,9 @@ instructions:
       functional_bits_match: [ 1, 0, 1 ]
       signals:
         - name: "EX_signal"
-          args: [ "imm%reg1", "add" ]
+          args: [ "imm%reg1", "rd%reg2", "and", "neg_second" ]
         - name: "WB_signal"
-          args: [ "need_wb", "$rd%reg_dest", "write_lower" ]
+          args: [ "need_wb", "$rd%reg_dest" ]
     - mnemonic: "PUSH"
       args:
         - ["t$", "$%rd"]

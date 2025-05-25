@@ -4,31 +4,40 @@ import re
 class define:
     def __init__(self, lines, idx):
         #eg simple define
-        if "{" not in lines[idx]:
+        if "{" not in lines[idx] and "(" not in lines[idx]:
             line = lines[idx].split(" ")
             self.is_simple = True
             self.name = line[1]
             self.val = line[2]
             lines[idx] = ""
         else:
+            if "(" not in lines[idx] or ")" not in lines[idx]:
+                raise SyntaxError(f"no arguments brackets in define: {lines[idx]}")
             self.is_simple = False
             line = lines[idx]
             self.name = line[line.find("#define ") + 8 : line.find("(")].strip()
             self.args = line[line.find("(") + 1 : line.find(")")].replace(" ", "").split(",")
             self.body = ""
             idx_macro_start = idx
-            while "{" not in lines[idx]:
+            while idx < len(lines) and "{" not in lines[idx]:
                 idx += 1
+            if idx == len(lines):
+                raise SyntaxError(f"no opening bracket in define: {lines[idx_macro_start]}")
             if lines[idx].strip() != "{":
                 self.body += lines[idx][lines[idx].find("{") + 1 : lines[idx].find("}")]
-            while "}" not in lines[idx]:
+            while idx < len(lines) and "}" not in lines[idx]:
                 if not "{" in lines[idx]:
                     self.body += "\n" + lines[idx]
                 idx+=1
+            if idx == len(lines):
+                raise SyntaxError(f"no closing brackets in define: {lines[idx_macro_start]}")
+            if "#define" not in lines[idx]:
+                self.body += "\n" + lines[idx][:lines[idx].find("}")]
             # removing macro definition
             for i in range(idx_macro_start, idx + 1):
                 if "}" in lines[idx_macro_start]:
                     lines[idx_macro_start] = lines[idx_macro_start][lines[idx_macro_start].find("}")+1 : ]
+                    break
                 else:
                     lines.pop(idx_macro_start)
     def substitute(self, code):
@@ -60,7 +69,10 @@ def preprocess_macros(code: str, code_file_path: str) -> str:
         if "#include" in lines[i]:
             include_path = lines[i][lines[i].find("\"") + 1 : lines[i].rfind("\"")]
             include_path = file_dir_path + include_path
-            included_lines = open(include_path).read().split("\n")
+            try:
+                included_lines = open(include_path).read().split("\n")
+            except:
+                raise SyntaxError("included file doesn't exist: " + lines[i])
             lines.pop(i)
             lines[i:i] = included_lines
         if "#define" in lines[i]:
@@ -68,6 +80,6 @@ def preprocess_macros(code: str, code_file_path: str) -> str:
         i += 1
         current_lines_size = len(lines)
     code = "\n".join(lines)
-    for i in defines:
+    for i in defines[::-1]:
         code = i.substitute(code)
     return code

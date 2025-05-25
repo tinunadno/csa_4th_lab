@@ -1,0 +1,27 @@
+limit: 200
+mem_size: 0x90
+io_mem_map:
+  output:
+    port: 0x84
+log_fmt:
+#  debug:
+  only_start:
+    data:
+      mem:
+        slice:
+          - [ 0, 16 ]
+      decompiled:
+        slice:
+          - [ 0, 40 ]
+    view: "mem-|-decompiled"
+  each_tick:
+    data:
+      regs:
+        slice: "all"
+      pl_stage_mnemonics:
+      tick:
+      is_interruption:
+    view: "tick- -is_interruption-regs-pl_stage_mnemonics"
+  assertion:
+    - name: "output"
+      expected: [ 'Hello, World!' ]

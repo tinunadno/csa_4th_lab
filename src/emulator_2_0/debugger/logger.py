@@ -1,6 +1,6 @@
-from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
-from csa_4th_lab.new.emulator_2_0.core.utils.log_utils import glue_string_lists
-from csa_4th_lab.new.emulator_2_0.debugger.debugger import init_debug
+from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
+from csa_4th_lab.src.emulator_2_0.core.utils.log_utils import glue_string_lists
+from csa_4th_lab.src.emulator_2_0.debugger.debugger import init_debug
 
 
 # mem_logger
@@ -60,9 +60,11 @@ def regs_asserter(pl:pipeline, assert_):
     basic_assert(reg_number_vals, reg_number_vals, expected, "REGS")
 
 def output_asserter(pl:pipeline, assert_):
-    output_indexes = range(len(pl.data_mem.output))
-    output_vals = pl.data_mem.output
     expected = assert_["expected"]
+    output_vals = pl.data_mem.output
+    if isinstance(expected[0], str):
+        output_vals = [''.join([chr(i) for i in output_vals]).replace("\x00", "\\0")]
+    output_indexes = range(len(output_vals))
     basic_assert(output_indexes, output_vals, expected, "OUTPUT")
 
 class logger:
@@ -100,9 +102,9 @@ class logger:
         init_debug(self.pl)
 
     def print_initial_logs(self):
-        print("INITIAL LOGS:")
         if not "only_start" in self.log_conf:
             return
+        print("INITIAL LOGS:")
         log_format = self.log_conf["only_start"]["view"].split("-")
         log_blocks: list[list[str]] = []
         i = 0
@@ -121,9 +123,9 @@ class logger:
         print("\n".join(["\n".join(i) for i in log_blocks]))
     def perform_tick(self):
         self.running = self.pl.tick()
-        print("TICK LOGS:")
         if not "each_tick" in self.log_conf:
             return
+        print("TICK LOGS:")
         log_format = self.log_conf["each_tick"]["view"].split("-")
         log_blocks: list[list[str]] = []
         i = 0

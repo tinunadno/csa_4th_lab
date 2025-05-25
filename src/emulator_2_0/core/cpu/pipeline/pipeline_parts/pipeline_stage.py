@@ -1,4 +1,4 @@
-from csa_4th_lab.new.emulator_2_0.parsing.handlers.handler_pool import handler, handler_pool
+from csa_4th_lab.src.emulator_2_0.parsing.handlers.handler_pool import handler, handler_pool
 
 
 class pipeline_stage:

@@ -1,4 +1,4 @@
-from csa_4th_lab.new.compiler_2_0.translator.primitive_parsers import parse_int
+from csa_4th_lab.src.compiler_2_0.translator.primitive_parsers import parse_int
 import re
 
 def process_type_size(line: str):
@@ -64,7 +64,7 @@ def parse_buffer(line: str) -> list[int]:
         return [int(b, 16) for b in bytes_str]
     else:
         try:
-            return list(buf_data[1:-1].encode('utf-8').decode('unicode_escape').encode('latin1'))
+            return list(buf_data.encode('utf-8').decode('unicode_escape').encode('latin1'))
         except UnicodeError:
             raise ValueError(f"Invalid byte string: {buf_data}")
 
