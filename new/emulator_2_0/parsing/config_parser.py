@@ -1,6 +1,8 @@
 from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
 import yaml
 
+from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
+    interruption_controller
 from csa_4th_lab.new.emulator_2_0.core.cpu.registers import registers
 from csa_4th_lab.new.emulator_2_0.core.memory.data_mem import data_mem
 from csa_4th_lab.new.emulator_2_0.core.memory.instruction_memory import instruction_memory
@@ -52,7 +54,12 @@ def parse_config(config_path: str, executable_bin_stuff: bytearray) -> pipeline:
     #                                                                  0b000000000000000000000_00000_010_011,
     #                                                                  0b_00001_00010_00011_000001_000, 0b100100]
 
-    data_mem_ = data_mem(64, loaded_data['data_clusters'])
+    # eg we wanna 64 mem size, and 0x80 - io mem mapped port
+    pref_size = max(64, 0x80)
+
+    data_mem_ = data_mem(pref_size, loaded_data['data_clusters'])
+
+    int_controller = interruption_controller([[16, ord('a')]], 0x16, 0x80, data)
 
     regs = registers(data["registers"], data_mem_.size)
     regs.set_reg("PC", loaded_data['entry_point'])

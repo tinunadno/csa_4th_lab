@@ -1,4 +1,6 @@
 from csa_4th_lab.new.common_utils.bitwise_utils import set_int_cut, get_int_cut
+from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
+    interruption_controller
 from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
 from csa_4th_lab.new.emulator_2_0.core.memory.data_mem import data_mem
 from csa_4th_lab.new.emulator_2_0.core.memory.instruction_memory import instruction_memory
@@ -30,15 +32,17 @@ def reconstruct_nop(inst_desc) -> int:
 
 class pipeline:
     def __init__(self, data_mem_: data_mem, instruction_mem: instruction_memory, registers_: registers,
-                 stages_descriptions, signals_descriptions, instructions_desc):
+                 stages_descriptions, signals_descriptions, instructions_desc, int_controller: interruption_controller):
         self.regs = registers_
         self.data_mem = data_mem_
         self.inst_mem = instruction_mem
         self.nop = reconstruct_nop(instructions_desc)
+        self.int_controller = int_controller
         self.possible_dependencies = {"registers": self.regs,
                                       "data_memory": self.data_mem,
                                       "instruction_memory": self.inst_mem,
-                                      "NOP_CMD": self.nop}
+                                      "NOP_CMD": self.nop,
+                                      "int_controller": self.int_controller}
         self.static_signals = {}
         for item in signals_descriptions:
             if "static" in item:
@@ -71,11 +75,13 @@ class pipeline:
         if last_term_signal.get_signal("TERMINATE"):
             return False
         self.tick_ += 1
+        self.int_controller.current_tick = self.tick_
         # performing signals rotation and signals flushing
         self.signals_for_each_tick = [self.signals_for_each_tick[-1]] + self.signals_for_each_tick[:-1]
         for i in self.signals_for_each_tick[0][0]:
             signal: pipeline_signal = self.signals_for_each_tick[0][0][i]
             signal.flush_signal()
+
         signals_idx = len(self.signals_for_each_tick) - 1
         self.last_tick_logs = []
         for i in self.stages[::-1]:

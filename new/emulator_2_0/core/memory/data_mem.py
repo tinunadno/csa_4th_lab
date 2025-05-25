@@ -7,26 +7,32 @@ class data_mem:
     #         self.data = bytearray([randint(0, 255) for _ in range(size)])
     #     else:
     #         self.data = bytearray(size)
-    def __init__(self, prefered_size, data_clusters: list[int, bytearray]):
+    def __init__(self, prefered_size, data_clusters: list[int, bytearray], io_mem_cell: int):
         max_size = prefered_size
         for i in data_clusters:
             max_size = max(i[0] + len(i[1]), max_size)
         self.size = max_size
         self.data = bytearray(max_size)
+        self.io_mem_cell = io_mem_cell
+        self.output = []
         for i in data_clusters:
             addr = i[0]
             for j in range(len(i[1])):
                 self.data[j + addr] = i[1][j]
-    def write(self, address: int, value: int) -> None:
+    def write(self, address: int, value: int, is_int_controller = False) -> None:
         if address <= self.size - 4:
             for i in range(4):
                 self.data[address + i] = (value & 0xFF)
                 value >>= 8
+            if (not is_int_controller) and address == self.io_mem_cell:
+                self.output.append(value)
         else:
             raise ValueError("Attempting to write memory out of address space")
-    def write_byte(self, address: int, value: int) -> None:
+    def write_byte(self, address: int, value: int, is_int_controller = False) -> None:
         if address < self.size:
             self.data[address] = (value & 0xFF)
+            if (not is_int_controller) and address == self.io_mem_cell:
+                self.output.append(value & 0xFF)
         else:
             raise ValueError("Attempting to write memory out of address space")
     def read_byte(self, address: int) -> int:
