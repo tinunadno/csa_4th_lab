@@ -8,7 +8,9 @@ if __name__ == "__main__":
     try:
         inst_desc, lower_upper = load_config("../emulator_2_0/configurations/internal_emulator_config.yaml")
         some_code = open("../../basic_test.asm").read()
-        l_cmd = {"INT": 10, "IRET": 7}
+        l_cmd = {}
+        for i in inst_desc["complex_decoding_rules"]:
+            l_cmd[i["mnemonic"]] = len(i["unwrap_rules"])
         some_code = preprocess_macros(some_code)
         labels, txt_lines, data_lines = find_labels(some_code, "\n", l_cmd)
         text_section_proceed, data_section = substitute_labels(data_lines, txt_lines, labels, l_cmd)
