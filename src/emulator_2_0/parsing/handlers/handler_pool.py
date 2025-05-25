@@ -233,7 +233,7 @@ class instruction_decoder_handler(handler):
                     else:
                         reg_arg_bits = cmd_desc["bit_layout"][reg_arg]["bits"]
                         value = get_int_cut(command, reg_arg_bits)
-                        if reg_arg == 'imm':
+                        if reg_arg == 'imm' and ("dont_cast_my_immediate" not in c_desc):
                             value = cast_immediate(value, reg_arg_bits)
                         if reg_arg != 'imm' and not need_reg_num:
                             value = get_data_forward(df_signals, int(value), regs.get_reg(value), "ID", tick_logs)

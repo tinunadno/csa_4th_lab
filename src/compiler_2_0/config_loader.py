@@ -5,5 +5,5 @@ def load_config(config_path) -> [dict, list]:
         data = yaml.safe_load(conf)
 
     instructions_description = data["instructions"]
-    lower_upper = [data["registers"]["upper"][0], data["registers"]["upper"][1]]
+    lower_upper = [data["registers"]["lower"], data["registers"]["upper"]]
     return instructions_description, lower_upper

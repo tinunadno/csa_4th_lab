@@ -429,24 +429,27 @@ instructions:
         - [ "t$", "$%rd" ]
         - [ "$", "$%imm" ]
       type: 2
+      dont_cast_my_immediate:
       functional_bits_match: [ 0, 0, 1 ]
-      shift_me: "imm"
+      crop_me: "imm%upper"
       signals:
         - name: "EX_signal"
           args: [ "imm%reg1", "rd%reg2", "and", "neg_second" ]
         - name: "WB_signal"
-          args: [ "need_wb", "$rd%reg_dest" ]
+          args: [ "need_wb", "$rd%reg_dest", "write_upper" ]
     - mnemonic: "LLI"
       args:
         - [ "t$", "$%rd" ]
         - [ "$", "$%imm" ]
       type: 2
+      dont_cast_my_immediate:
       functional_bits_match: [ 1, 0, 1 ]
+      crop_me: "imm%lower"
       signals:
         - name: "EX_signal"
           args: [ "imm%reg1", "rd%reg2", "and", "neg_second" ]
         - name: "WB_signal"
-          args: [ "need_wb", "$rd%reg_dest" ]
+          args: [ "need_wb", "$rd%reg_dest", "write_lower" ]
     - mnemonic: "PUSH"
       args:
         - ["t$", "$%rd"]

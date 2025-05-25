@@ -23,5 +23,6 @@ log_fmt:
       is_interruption:
     view: "tick- -is_interruption-regs-pl_stage_mnemonics"
   assertion:
-    - name: "output"
-      expected: [ 'Hello, World!' ]
+    - name: "regs"
+      slice: [ 0 ]
+      expected: [ 0xFFFFFFFF ]

@@ -1,0 +1,10 @@
+limit: 200
+mem_size: 0x90
+io_mem_map:
+  output:
+    port: 0x84
+log_fmt:
+  assertion:
+    - name: "regs"
+      slice: [ 0 ]
+      expected: [ 0xFFFFFFFF ]

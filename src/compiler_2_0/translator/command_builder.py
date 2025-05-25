@@ -1,3 +1,5 @@
+from soupsieve.util import lower
+
 from csa_4th_lab.src.common_utils.bitwise_utils import set_int_cut
 from csa_4th_lab.src.compiler_2_0.translator.primitive_parsers import parse_int
 
@@ -117,15 +119,22 @@ def build_command(instruction: str, instructions_format, lower_upper) -> int:
         raise SyntaxError(
             f"token count doesn't match with config's arguments count: conf_args: {command_arguments}, tokens: {tokens[1:]} for instruction: {instruction}")
 
-    need_shift = "shift_me" in dec_rule
+    need_crop = "crop_me" in dec_rule
     shifting_var = ""
-    if need_shift:
-        shifting_var = dec_rule["shift_me"]
+    shifting_range = []
+    if need_crop:
+        temp = dec_rule["crop_me"].split("%")
+        shifting_var = temp[0]
+        if temp[1] == "upper":
+            shifting_range = lower_upper[1]
+        else:
+            shifting_range = lower_upper[0]
+
     replacements = []
     for i in range(len(command_arguments)):
         replacements.append(get_replacement(tokens[i + 1], command_arguments[i][0]))
         replacement = replacements[-1]
         translated_instruction = get_replacement_substitution_rules(replacement, command_arguments[i][1:], type_desc,
-                                                                    translated_instruction, need_shift, shifting_var, lower_upper)
+                                                                    translated_instruction, need_crop, shifting_var, shifting_range)
 
     return translated_instruction
