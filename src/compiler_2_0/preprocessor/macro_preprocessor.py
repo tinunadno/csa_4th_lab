@@ -66,6 +66,8 @@ def preprocess_macros(code: str, code_file_path: str) -> str:
     current_lines_size = len(lines)
     file_dir_path = code_file_path[:code_file_path.rfind("/") + 1]
     while i < current_lines_size:
+        if ";" in lines[i]:
+            lines[i] = lines[i][: lines[i].find(";")].strip()
         if "#include" in lines[i]:
             include_path = lines[i][lines[i].find("\"") + 1 : lines[i].rfind("\"")]
             include_path = file_dir_path + include_path

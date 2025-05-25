@@ -37,20 +37,26 @@ def int_logger(pl: pipeline, fmt)  -> list[str]:
 def basic_assert(addr, vals, expected, assert_name) -> None:
     print(f"{assert_name} ASSERT:")
     print("actual data")
-    print("\t".join(list(map(str, addr))))
+    if len(expected) != 1:
+        print("\t".join(list(map(str, addr))))
     print("\t".join(list(map(str, vals))))
     print("expected")
     print("\t".join(list(map(str, expected))))
-    for i in range(len(addr)):
+    for i in range(len(expected)):
         if vals[i] != expected[i]:
             print(f"{assert_name} ASSERTION FAILED: {assert_name}[{addr[i]}] {vals[i]} != {expected[i]}")
             return
     print(f"{assert_name} ASSERTION PASSED")
 
 def mem_asserter(pl: pipeline, assert_):
-    assert_address_slice = range(assert_["slice"][0], assert_["slice"][1])
-    assert_slice = [pl.data_mem.read(i) for i in assert_address_slice]
+    assert_address_slice = list(range(assert_["slice"][0], assert_["slice"][1] + 1))
+    if "byte" in assert_:
+        assert_slice = [pl.data_mem.read_byte(i) for i in assert_address_slice]
+    else:
+        assert_slice = [pl.data_mem.read(i) for i in assert_address_slice]
     expected = assert_["expected"]
+    if isinstance(expected[0], str):
+        assert_slice = [''.join([chr(i) for i in assert_slice]).replace("\x00", "\\0")]
     basic_assert(assert_address_slice, assert_slice, expected, "MEM")
 
 def regs_asserter(pl:pipeline, assert_):
