@@ -1,12 +1,6 @@
 from random import randint
 
 class data_mem:
-    # def __init__(self, size: int, trash = False):
-    #     self.size = size
-    #     if trash:
-    #         self.data = bytearray([randint(0, 255) for _ in range(size)])
-    #     else:
-    #         self.data = bytearray(size)
     def __init__(self, prefered_size, data_clusters: list[int, bytearray], io_mem_cell: int):
         max_size = prefered_size
         for i in data_clusters:

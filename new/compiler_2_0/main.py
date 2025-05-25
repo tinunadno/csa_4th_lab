@@ -5,6 +5,25 @@ from csa_4th_lab.new.compiler_2_0.io.io import write_file
 from csa_4th_lab.new.compiler_2_0.preprocessor.macro_preprocessor import preprocess_macros
 from csa_4th_lab.new.compiler_2_0.preprocessor.preprocessor import find_labels, substitute_labels
 from csa_4th_lab.new.compiler_2_0.translator.command_unwrapper import unwrap_command
+from csa_4th_lab.new.emulator_2_0.core.utils.log_utils import glue_string_lists
+
+
+def print_compilation_info(text_section: list[str], labels_: dict, mem: list[int, bytearray]):
+    text_section = [f"_start label: {labels_["_start"]}", "preprocessed_code"] + text_section
+    mem_list = ["MEMORY CHUNKS"]
+    for chunk in mem:
+        current_pointer = chunk[0]
+        for j in chunk[1]:
+            mem_list.append(f"0x{current_pointer:08X} | 0x{j:02X}")
+            current_pointer += 1
+        mem_list.append("...")
+    labels_list = ["other labels:"]
+    for i in labels_.items():
+        labels_list.append(str(i[0]))
+        labels_list.append(f"\t{i[1]}")
+
+    print("\n".join(glue_string_lists([text_section, mem_list, labels_list])))
+
 
 if __name__ == "__main__":
     try:
@@ -18,18 +37,15 @@ if __name__ == "__main__":
         some_code = preprocess_macros(some_code, abs_code_path)
         labels, txt_lines, data_lines = find_labels(some_code, "\n", l_cmd)
         text_section_proceed, data_section = substitute_labels(data_lines, txt_lines, labels, l_cmd)
-        print('\n'.join(text_section_proceed))
+
         compiled_code = []
         for i in text_section_proceed:
             compiled_code.extend(unwrap_command(i, inst_desc, lower_upper))
-        print(labels["_start"])
-        print([bin(i) for i in compiled_code])
-        print(data_section)
         if "_start" not in labels:
             ep = 0
         else:
             ep: int = labels["_start"]["address"]
+        print_compilation_info(text_section_proceed, labels, data_section)
         write_file(ep, data_section, compiled_code)
-        print(labels)
     except SyntaxError as e:
         print(str(e))           # handling parsing errors that I raised, other will kill the compiler :D
