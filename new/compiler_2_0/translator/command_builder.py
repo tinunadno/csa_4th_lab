@@ -1,6 +1,5 @@
 from csa_4th_lab.new.common_utils.bitwise_utils import set_int_cut
 from csa_4th_lab.new.compiler_2_0.translator.primitive_parsers import parse_int
-from csa_4th_lab.new.emulator_2_0.debugger.debugger import command
 
 
 def get_replacement(token: str, arg_desc: str):

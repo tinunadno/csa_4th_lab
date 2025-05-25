@@ -55,18 +55,18 @@ def parse_config(config_path: str, executable_bin_stuff: bytearray) -> pipeline:
     #                                                                  0b_00001_00010_00011_000001_000, 0b100100]
 
     # eg we wanna 64 mem size, and 0x80 - io mem mapped port
-    pref_size = max(64, 0x80)
+    pref_size = max(64, 40)
 
-    data_mem_ = data_mem(pref_size, loaded_data['data_clusters'])
-
-    int_controller = interruption_controller([[16, ord('a')]], 0x16, 0x80, data)
+    data_mem_ = data_mem(pref_size, loaded_data['data_clusters'], 0x80)
+    # __init__(self, interruptions: list[list[int]], interruption_vector: int, mem_cell, conf, data_mem_: data_mem):
+    int_controller = interruption_controller([[16, ord('a')]], 0x16, 40, data, data_mem_)
 
     regs = registers(data["registers"], data_mem_.size)
     regs.set_reg("PC", loaded_data['entry_point'])
     instruction_memory_ = instruction_memory(loaded_data["text_section"], data["instructions"])
 
     pl = pipeline(data_mem_, instruction_memory_, regs, data["pipeline"]["stages"],
-                  data["pipeline"]["pipeline_signals"], data["instructions"])
+                  data["pipeline"]["pipeline_signals"], data["instructions"], int_controller)
     instruction_memory_.nop = pl.nop
 
     return pl

@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
+    interruption_controller
 from csa_4th_lab.new.emulator_2_0.core.memory.data_mem import data_mem
 from csa_4th_lab.new.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
 from csa_4th_lab.new.emulator_2_0.core.cpu.registers import registers
@@ -124,11 +126,17 @@ class MEM_handler(handler):
 
 # args: [ "instruction_memory", "registers", "stall", "PC", "IR", "NOP_CMD" ]
 class instruction_load_handler(handler):
+    inserted_commands = []
     def handle(self, args: list[any], is_valid, tick_logs: list[str]) -> bool:
         tick_logs.append("[IF] Started instruction fetch stage")
         regs: registers = args[1]
         ir_reg_name = args[4]
         stall_signal: pipeline_signal = args[2]
+        int_controller: interruption_controller = args[6]
+        if int_controller.is_interruption():
+            tick_logs.append(f"[IF] got an interruption on tick: {int_controller.current_tick}")
+            self.inserted_commands = int_controller.interruption_code
+            stall_signal.set_signal("stall_size", 0)
         stall_value = stall_signal.get_signal("stall_size")
         if stall_value > 0:
             tick_logs.append(f"[IF] Stalled signal is {stall_value}")
@@ -136,6 +144,15 @@ class instruction_load_handler(handler):
             nop_command: int = args[5]
             regs.set_reg(ir_reg_name, nop_command)
             tick_logs.append(f"[IF] Setting NOP_CMD {nop_command} to {ir_reg_name}")
+            return True
+        if len(self.inserted_commands) != 0:
+            regs.set_reg(ir_reg_name, self.inserted_commands[0])
+            ir_val = self.inserted_commands[0]
+            tick_logs.append(f"[IF] inserting an interruption instruction: {ir_val}")
+            tick_logs.append(
+                f"[IF] Fetched instruction, {ir_reg_name} = {hex(ir_val)} | {bin(ir_val)}, didn't touch PC")
+            self.inserted_commands.pop(0)
+            tick_logs.append(f"[IF] left interruption instructions: {self.inserted_commands}")
             return True
         pc_reg_name = args[3]
         i_mem: instruction_memory = args[0]
@@ -314,8 +331,8 @@ class ALU_execution_handler(handler):
             'cycl': ex_signal.get_signal("cycl"),
             'discard_nzvc': ex_signal.get_signal("discard_nzvc"),
             'comp': ex_signal.get_signal("comp"),
-            'comp_num': (ex_signal.get_signal("comp_num_fst") << 1) |
-                        ex_signal.get_signal("comp_num_snd"),
+            'comp_num': (ex_signal.get_signal("comp_num_snd") << 1) |
+                        ex_signal.get_signal("comp_num_fst"),
             'mul': ex_signal.get_signal("mul"),
             'div': ex_signal.get_signal("div"),
             'rem': ex_signal.get_signal("rem"),
@@ -397,14 +414,14 @@ class ALU_execution_handler(handler):
             elif signals['comp']:
                 result = reg1  # По умолчанию - не изменяем адрес
                 condition_met = False
-
-                if signals['comp_num'] == 0b00 and self.flags['Z']:
+                comp_num = signals['comp_num']
+                if comp_num == 0 and self.flags['Z']:
                     condition_met = True
-                elif signals['comp_num'] == 0b01 and self.flags['N']:
+                elif comp_num == 1 and self.flags['N']:
                     condition_met = True
-                elif signals['comp_num'] == 0b10 and not self.flags['Z']:
+                elif comp_num == 2 and not self.flags['Z']:
                     condition_met = True
-                elif signals['comp_num'] == 0b11 and not self.flags['N']:
+                elif comp_num == 3 and not self.flags['N']:
                     condition_met = True
 
                 if condition_met:

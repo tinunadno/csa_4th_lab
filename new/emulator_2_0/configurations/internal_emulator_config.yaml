@@ -75,11 +75,11 @@ pipeline:
         - { name: "value", bits: [ 0, 31 ], description: "ALU output value" }
   stages:
     - name: "IF"  # instruction fetch
-      dependencies: [ "registers", "instruction_memory", "NOP_CMD", "stall" ]
+      dependencies: [ "registers", "instruction_memory", "NOP_CMD", "stall", "int_controller" ]
       behaviour:
         name: "load_stage"
         handler: "INSTRUCTION_LOAD_HANDLER"
-        args: [ "instruction_memory", "registers", "stall", "PC", "IR", "NOP_CMD" ]
+        args: [ "instruction_memory", "registers", "stall", "PC", "IR", "NOP_CMD", "int_controller" ]
 
     - name: "ID"  # instruction decoding
       need_non_static_signals: 1
@@ -590,6 +590,20 @@ instructions:
        - "SET_INT 1"
        - "XOR t30 t30 t30"
        - "ADDI t30 t29 7"
+       - "PUSH t30"
+       - "GET_NZVC t30"
+       - "PUSH t30"
+       - "XOR t30 t30 t30"
+       - "LLI t30 $"
+       - "LW t30 0(t30)"
+       - "LJMP 0(t30)"
+   - mnemonic: "INT_INNR"
+     args:
+       - [ "$" ]
+     unwrap_rules:
+       - "SET_INT 1"
+       - "XOR t30 t30 t30"
+       - "ADDI t30 t29 0"
        - "PUSH t30"
        - "GET_NZVC t30"
        - "PUSH t30"

@@ -14,7 +14,7 @@ class interruption_controller:
 
     def init_interruption_code(self, config):
         # compiling interruption instruction to force plug it in the pipeline
-        self.interruption_code = unwrap_command("INT " + str(self.interruption_vector), config["instructions"], config["registers"]["upper"])
+        self.interruption_code = unwrap_command("INT_INNR " + str(self.interruption_vector), config["instructions"], config["registers"]["upper"])
 
     def is_interruption(self) -> bool:
         for i in self.interruptions:
