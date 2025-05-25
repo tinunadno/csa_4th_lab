@@ -1,4 +1,4 @@
-def glue_string_lists(log: list[list[str]], max_widths: list[int] = None, max_line_length: int = 150):
+def glue_string_lists(log: list[list[str]], max_widths: list[int] = None, max_line_length: int = 150) -> list[str]:
     # Разбиваем длинные строки во всех блоках
     split_log = []
     for i in range(len(log)):
@@ -36,10 +36,11 @@ def glue_string_lists(log: list[list[str]], max_widths: list[int] = None, max_li
         padded_stage = [''] * top_padding + stage + [''] * bottom_padding
         aligned_log.append(padded_stage)
 
-    # Выводим результат с разделителями
+    ret = []
     for lines in zip(*aligned_log):
         formatted_lines = [
             line.ljust(width)
             for line, width in zip(lines, stage_widths)
         ]
-        print(' | '.join(formatted_lines))
+        ret.append(' | '.join(formatted_lines))
+    return ret

@@ -68,7 +68,7 @@ class pipeline:
     def print_initial_logs(self):
         print(" PIPELINE SETUP:")
         stages_data = [stage.get_stage_info_as_lines() for stage in self.stages]
-        glue_string_lists(stages_data)
+        return glue_string_lists(stages_data)
 
     def tick(self) -> bool:
         last_term_signal: pipeline_signal = self.signals_for_each_tick[-1][0]["terminate"]

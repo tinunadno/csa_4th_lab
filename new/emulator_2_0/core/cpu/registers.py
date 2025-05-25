@@ -52,11 +52,13 @@ class registers:
         mask = (1 << (self.lower[1] - self.lower[0] + 1)) - 1
         shifted_value = (value & mask) << self.lower[0]
         return shifted_value
-    def print_logs(self):
-        print("\nREGISTERS:")
+    def get_logs(self):
+        ret = ["REGISTERS:"]
         reg_count = len(self.regs)
 
         for chunk_start in range(0, reg_count, 16):
+            regs_line = ""
+            vals_line = ""
             chunk_end = min(chunk_start + 16, reg_count)
 
             for i in range(chunk_start, chunk_end):
@@ -65,9 +67,10 @@ class registers:
                     if i == num:
                         reg_name = f" ({name})"
                 line = f"t{i}{reg_name}"
-                print(line.ljust(12), end='')
-            print()
+                regs_line += line.ljust(12)
 
             for i in range(chunk_start, chunk_end):
-                print(f"0x{self.regs[i]:08X}".ljust(12), end='')
-            print("\n")
+                vals_line += f"0x{self.regs[i]:08X}".ljust(12)
+            ret.append(regs_line)
+            ret.append(vals_line)
+        return ret

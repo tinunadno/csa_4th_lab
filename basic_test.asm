@@ -17,7 +17,7 @@ int16:
    xor t1 t1 t1
    addi t1 t1 0x1
    push t3
-   LLI t3 40
+   LLI t3 0x80
    LW t0 0(t3)
    LW t3 0(t31)
    pop
