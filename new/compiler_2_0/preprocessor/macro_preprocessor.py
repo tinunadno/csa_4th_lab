@@ -1,0 +1,66 @@
+import re
+
+
+class define:
+    def __init__(self, lines, idx):
+        #eg simple define
+        if "{" not in lines[idx]:
+            line = lines[idx].split(" ")
+            self.is_simple = True
+            self.name = line[1]
+            self.val = line[2]
+            lines[idx] = ""
+        else:
+            self.is_simple = False
+            line = lines[idx]
+            self.name = line[line.find("#define ") + 8 : line.find("(")].strip()
+            self.args = line[line.find("(") + 1 : line.find(")")].replace(" ", "").split(",")
+            self.body = ""
+            idx_macro_start = idx
+            while "{" not in lines[idx]:
+                idx += 1
+            if lines[idx].strip() != "{":
+                self.body += lines[idx][lines[idx].find("{") + 1 : lines[idx].find("}")]
+            while "}" not in lines[idx]:
+                if not "{" in lines[idx]:
+                    self.body += "\n" + lines[idx]
+                idx+=1
+            # removing macro definition
+            for i in range(idx_macro_start, idx + 1):
+                if "}" in lines[idx_macro_start]:
+                    lines[idx_macro_start] = lines[idx_macro_start][lines[idx_macro_start].find("}")+1 : ]
+                else:
+                    lines.pop(idx_macro_start)
+    def substitute(self, code):
+        if self.is_simple:
+            code = re.sub(r'\b' + re.escape(self.name) + r'\b', self.val, code)
+
+        match = re.search(r'\b' + re.escape(self.name) + r'\b', code)
+        while match:
+            start, end = match.span()
+            macro_usage_end = code.find("}", start)
+            macro_usage = code[start : macro_usage_end]
+            macro_body = macro_usage[macro_usage.find("{") + 1 : macro_usage.find("}")]
+            args = macro_usage[macro_usage.find("(") + 1 : macro_usage.find(")")].replace(" ", "").split(",")
+            processed_macro = self.body
+            for i in range(len(self.args)):
+                processed_macro = re.sub(r'\b' + re.escape(self.args[i]) + r'\b', str(args[i]), processed_macro)
+            processed_macro =  re.sub(r'\b' + re.escape("body") + r'\b', str(macro_body), processed_macro)
+            code = code[:start] + processed_macro + code[macro_usage_end + 1:]
+            match = re.search(r'\b' + re.escape(self.name) + r'\b', code)
+        return code
+
+def preprocess_macros(code: str) -> str:
+    lines = code.split("\n")
+    defines = []
+    i = 0
+    current_lines_size = len(lines)
+    while i < current_lines_size:
+        if "define" in lines[i]:
+            defines.append(define(lines, i))
+        i += 1
+        current_lines_size = len(lines)
+    code = "\n".join(lines)
+    for i in defines:
+        code = i.substitute(code)
+    return code
