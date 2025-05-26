@@ -1,26 +1,19 @@
-from src.compiler_2_0.translator.command_builder import build_command, get_replacement
+from src.compiler_2_0.translator.command_builder import build_command, get_replacement, get_mnemonic
 
 
 def unwrap_command(instruction: str, instructions_format, lower_upper) -> list[int]:
     token_separator = instructions_format["token_separator"]
-    if token_separator == " ":
-        while "  " in instruction:
-            instruction = instruction.replace("  ", " ")
-    else:
-        instruction.replace(" ", "")
-    tokens = instruction.split(token_separator)
-    mnemonic: str = tokens[0]
-    mnemonic = mnemonic.lower()
+    mnemonic, tokens = get_mnemonic(instruction, token_separator)
     unwrapping_rule = None
     for i in instructions_format["complex_decoding_rules"]:
         if i["mnemonic"].lower() == mnemonic:
             unwrapping_rule = i
-    if unwrapping_rule == None:
+    if unwrapping_rule is None:
         return [build_command(instruction, instructions_format, lower_upper)]
     tokens = instruction.split(token_separator)[1:]
     replacements = []
     command_arguments = unwrapping_rule["args"]
-    if command_arguments != None:
+    if command_arguments is not None:
         for i in range(len(command_arguments)):
             replacements.append(get_replacement(tokens[i], command_arguments[i][0]))
     unwrapped_command = []

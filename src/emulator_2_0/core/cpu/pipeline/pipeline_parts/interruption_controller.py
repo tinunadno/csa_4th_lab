@@ -1,13 +1,13 @@
 from src.compiler_2_0.translator.command_unwrapper import unwrap_command
-from src.emulator_2_0.core.memory.data_mem import data_mem
+from src.emulator_2_0.core.memory.data_mem import DataMem
 
 
-class interruption_controller:
-    def __init__(self, interruptions: list[list[int]], interruption_vector: int, mem_cell, conf, data_mem_: data_mem):
+class InterruptionController:
+    def __init__(self, interruptions: list[list[int]], interruption_vector: int, mem_cell, conf, data_mem_: DataMem):
         self.interruptions = interruptions
         self.interruption_vector = interruption_vector
         self.mem_cell = mem_cell
-        self.interruption_code = []
+        self.interruption_code: list[int] = []
         self.init_interruption_code(conf)
         self.data_mem_ = data_mem_
         self.current_tick = 0

@@ -1,8 +1,10 @@
-def glue_string_lists(log: list[list[str]], max_widths: list[int] = None, max_line_length: int = 150) -> list[str]:
+def glue_string_lists(log: list[list[str]], max_widths=None, max_line_length: int = 150) -> list[str]:
+    if max_widths is None:
+        max_widths = []
     split_log = []
     for i in range(len(log)):
         stage = log[i]
-        if max_widths != None:
+        if max_widths is not None:
             width = max_widths[i]
             max_size = max(max_line_length, width)
         else:
@@ -20,7 +22,7 @@ def glue_string_lists(log: list[list[str]], max_widths: list[int] = None, max_li
     for i in range(len(split_log)):
         stage = split_log[i]
         stage_width = max(len(line) for line in stage) if stage else 0
-        if max_widths != None:
+        if max_widths is not None:
             stage_width = max(stage_width, max_widths[i])
         stage_widths.append(stage_width)
 

@@ -1,6 +1,16 @@
 from src.common_utils.bitwise_utils import set_int_cut
 from src.compiler_2_0.translator.primitive_parsers import parse_int
 
+def get_mnemonic(instruction, token_separator: str):
+    if token_separator == " ":
+        while "  " in instruction:
+            instruction = instruction.replace("  ", " ")
+    else:
+        instruction.replace(" ", "")
+    tokens = instruction.split(token_separator)
+    mnemonic: str = tokens[0]
+    mnemonic = mnemonic.lower()
+    return mnemonic, tokens
 
 def get_replacement(token: str, arg_desc: str):
     if arg_desc == "":
@@ -41,15 +51,15 @@ def get_replacement(token: str, arg_desc: str):
     return replacements
 
 
-def get_replacement_substitution_rules(replacement: list[[int, int]], args: list[str], type_desc,
+def get_replacement_substitution_rules(replacement: list[tuple[int, int]], args: list[str], type_desc,
                                        translated_instruction, shift_me, shifting_var, lower_upper) -> int:
     for i in replacement:
         for j in args:
-            if not i[0] in j:
+            if not str(i[0]) in j:
                 continue
             arg_name = j[j.find('%') + 1:]
             try:
-                val = parse_int(i[1])
+                val = parse_int(str(i[1]))
                 if shift_me and (shifting_var in j):
                     mask = (1 << (lower_upper[1] - lower_upper[0] + 1)) - 1
                     mask <<= lower_upper[0]
@@ -64,30 +74,23 @@ def get_replacement_substitution_rules(replacement: list[[int, int]], args: list
 
 def build_command(instruction: str, instructions_format, lower_upper) -> int:
     token_separator = instructions_format["token_separator"]
-    if token_separator == " ":
-        while "  " in instruction:
-            instruction = instruction.replace("  ", " ")
-    else:
-        instruction.replace(" ", "")
-    tokens = instruction.split(token_separator)
-    mnemonic: str = tokens[0]
-    mnemonic = mnemonic.lower()
-    dec_rule = ""
+    mnemonic, tokens = get_mnemonic(instruction, token_separator)
+    dec_rule: dict = {}
     for current_dec_rule in instructions_format["decoding_rules"]:
         if current_dec_rule["mnemonic"].lower() == mnemonic:
             dec_rule = current_dec_rule
             break
-    if dec_rule == "":
+    if dec_rule == {}:
         raise SyntaxError(f"Can't find this mnemonic in internal config: {mnemonic} in instruction {instruction}")
 
     c_type = dec_rule["type"]
-    type_desc = ""
+    type_desc: dict = {}
     type_bits = instructions_format["instructions_format"]["command_number_bits"]
     for current_type_desc in instructions_format["instructions_format"]["types"]:
         if current_type_desc["command_number"] == c_type:
             type_desc = current_type_desc
             break
-    if type_desc == "":
+    if type_desc == {}:
         raise SyntaxError(f"found command description with invalid type: {instruction}, description: {dec_rule}")
     type_desc = type_desc["bit_layout"]
     translated_instruction = 0
@@ -108,9 +111,9 @@ def build_command(instruction: str, instructions_format, lower_upper) -> int:
 
     command_arguments = dec_rule["args"]
 
-    if tokens == None:
+    if tokens is None:
         tokens = []
-    if command_arguments == None:
+    if command_arguments is None:
         command_arguments = []
 
     if len(tokens) - 1 != len(command_arguments):

@@ -1,7 +1,7 @@
 from src.common_utils.bitwise_utils import get_int_cut
 
 
-class command_types:
+class CommandTypes:
     def __init__(self, command_description):
         self.cmd_desc = command_description
 
@@ -11,3 +11,4 @@ class command_types:
         for i in self.cmd_desc["types"]:
             if c_type == i["command_number"]:
                 return i
+        return None

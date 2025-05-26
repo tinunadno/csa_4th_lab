@@ -1,15 +1,15 @@
 from src.common_utils.bitwise_utils import set_int_cut
 from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
-    interruption_controller
-from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
-from src.emulator_2_0.core.memory.data_mem import data_mem
-from src.emulator_2_0.core.memory.instruction_memory import instruction_memory
-from src.emulator_2_0.core.cpu.registers import registers
+    InterruptionController
+from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipelinesignal import PipelineSignal
+from src.emulator_2_0.core.memory.data_mem import DataMem
+from src.emulator_2_0.core.memory.instruction_memory import InstructionMemory
+from src.emulator_2_0.core.cpu.registers import Registers
 from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_stage import pipeline_stage
 from src.common_utils.log_utils import *
 from src.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
-from src.emulator_2_0.core.commands.command_types import command_types
-from src.emulator_2_0.core.handlers.handler_pool import handler_pool
+from src.emulator_2_0.core.commands.commandtypes import CommandTypes
+from src.emulator_2_0.core.handlers.handlerpool import HandlerPool
 
 
 def reconstruct_nop(inst_desc) -> int:
@@ -30,9 +30,9 @@ def reconstruct_nop(inst_desc) -> int:
     raise ValueError("NO NOP OPERATION DEFINED IN CONFIG!")
 
 
-class pipeline:
-    def __init__(self, data_mem_: data_mem, instruction_mem: instruction_memory, registers_: registers,
-                 stages_descriptions, signals_descriptions, instructions_desc, int_controller: interruption_controller):
+class Pipeline:
+    def __init__(self, data_mem_: DataMem, instruction_mem: InstructionMemory, registers_: Registers,
+                 stages_descriptions, signals_descriptions, instructions_desc, int_controller: InterruptionController):
         self.regs = registers_
         self.data_mem = data_mem_
         self.inst_mem = instruction_mem
@@ -47,8 +47,8 @@ class pipeline:
         for item in signals_descriptions:
             if "static" in item:
                 key_value = item["name"]
-                self.static_signals[key_value] = pipeline_signal(item)
-        self.signals_for_each_tick = []
+                self.static_signals[key_value] = PipelineSignal(item)
+        self.signals_for_each_tick: list[list[object]] = []
         self.signal_count = 0
         for stage_desc in stages_descriptions:
             if "need_non_static_signals" in stage_desc:
@@ -56,10 +56,10 @@ class pipeline:
                 for item in signals_descriptions:
                     if not "static" in item:
                         key_value = item["name"]
-                        self.signals_for_each_tick[-1][0][key_value] = pipeline_signal(item)
-        c_types = command_types(instructions_desc["instructions_format"])
-        self.last_tick_logs = []
-        hp = handler_pool(c_types, instructions_desc["decoding_rules"])
+                        self.signals_for_each_tick[-1][0][key_value] = PipelineSignal(item)  # type: ignore
+        c_types = CommandTypes(instructions_desc["instructions_format"])
+        self.last_tick_logs: list[str] = []
+        hp = HandlerPool(c_types, instructions_desc["decoding_rules"])
         self.stages = [pipeline_stage(i, hp) for i in stages_descriptions]
         self.stages_mnemonics = ["NOP" for _ in range(len(self.stages))]
         self.instruction_desc = instructions_desc
@@ -71,15 +71,15 @@ class pipeline:
         return glue_string_lists(stages_data)
 
     def tick(self) -> bool:
-        last_term_signal: pipeline_signal = self.signals_for_each_tick[-1][0]["terminate"]
+        last_term_signal: PipelineSignal = self.signals_for_each_tick[-1][0]["terminate"]  # type: ignore
         if last_term_signal.get_signal("TERMINATE"):
             return False
         self.tick_ += 1
         self.int_controller.current_tick = self.tick_
         # performing signals rotation and signals flushing
         self.signals_for_each_tick = [self.signals_for_each_tick[-1]] + self.signals_for_each_tick[:-1]
-        for i in self.signals_for_each_tick[0][0]:
-            signal: pipeline_signal = self.signals_for_each_tick[0][0][i]
+        for i in self.signals_for_each_tick[0][0]:  # type: ignore
+            signal: PipelineSignal = self.signals_for_each_tick[0][0][i]  # type: ignore
             signal.flush_signal()
 
         signals_idx = len(self.signals_for_each_tick) - 1
@@ -92,11 +92,11 @@ class pipeline:
                     args.append(self.possible_dependencies[j])
                 elif j in self.static_signals:
                     args.append(self.static_signals[j])
-                elif j in self.signals_for_each_tick[signals_idx][0]:
-                    args.append(self.signals_for_each_tick[signals_idx][0][j])
+                elif j in self.signals_for_each_tick[signals_idx][0]:  # type: ignore
+                    args.append(self.signals_for_each_tick[signals_idx][0][j])  # type: ignore
                 else:
                     args.append(j)
-            valid_stage = stage.stage_handler.handle(args, self.signals_for_each_tick[signals_idx][1],
+            valid_stage = stage.stage_handler.handle(args, self.signals_for_each_tick[signals_idx][1],   # type: ignore
                                                      self.last_tick_logs)
             self.signals_for_each_tick[signals_idx][1] = valid_stage
             signals_idx -= 1
@@ -112,8 +112,9 @@ class pipeline:
     def get_static_signal(self, signal_name: str, signal_range_name: str) -> int:
         for i in self.static_signals.items():
             if i[0] == signal_name:
-                tmp: pipeline_signal = i[1]
+                tmp: PipelineSignal = i[1]
                 return tmp.get_signal(signal_range_name)
+        return -1
     # def print_logs_for_each_stage(self):
     #     print("TICK: ", self.tick_)
     #     print(" PIPELINE STATE:")

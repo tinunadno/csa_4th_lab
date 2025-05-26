@@ -1,7 +1,7 @@
 import yaml
 
 
-def load_config(config_path) -> [dict, list]:
+def load_config(config_path) -> tuple[dict, list]:
     with open(config_path) as conf:
         data = yaml.safe_load(conf)
 

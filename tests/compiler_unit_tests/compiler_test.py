@@ -23,24 +23,24 @@ def test_not_simple_define():
 
 
 def test_no_closing_bracket_define():
-    code = ("#define asd (){")
+    code = "#define asd (){"
     with pytest.raises(SyntaxError) as bad_define:
-        preprocessed_code = preprocess_macros(code, "")
-    assert (bad_define)
+        _preprocessed_code = preprocess_macros(code, "")
+    assert bad_define
 
 
 def test_no_opening_bracket_define():
-    code = ("#define asd ()}")
+    code = "#define asd ()}"
     with pytest.raises(SyntaxError) as bad_define:
-        preprocessed_code = preprocess_macros(code, "")
-    assert (bad_define)
+        _preprocessed_code = preprocess_macros(code, "")
+    assert bad_define
 
 
 def test_no_arg_brackets_define():
-    code = ("#define asd {}")
+    code = "#define asd {}"
     with pytest.raises(SyntaxError) as bad_define:
-        preprocessed_code = preprocess_macros(code, "")
-    assert (bad_define)
+        _preprocessed_code = preprocess_macros(code, "")
+    assert bad_define
 
 
 def test_define_overloading():
@@ -70,7 +70,7 @@ def test_include_normal():
 def test_bad_include():
     code = open("tests/compiler_unit_tests/include_tests_files/bad.asm").read()
     with pytest.raises(SyntaxError) as bad_include:
-        included = preprocess_macros(code, "tests/compiler_unit_tests/include_tests_files/")
-    assert (bad_include)
+        _included = preprocess_macros(code, "tests/compiler_unit_tests/include_tests_files/")
+    assert bad_include
 
 # TODO finish preprocessor killing tests

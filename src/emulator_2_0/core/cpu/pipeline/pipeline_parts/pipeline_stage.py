@@ -1,20 +1,16 @@
-from src.emulator_2_0.core.handlers.handler_pool import handler, handler_pool
+from src.emulator_2_0.core.handlers.handlerpool import Handler, HandlerPool
 
 
 class pipeline_stage:
-    def __init__(self, stage_description, hp: handler_pool):
+    def __init__(self, stage_description, hp: HandlerPool):
         self.stage_name = stage_description["name"]
         self.dependencies = stage_description["dependencies"]
         self.behaviour = stage_description["behaviour"]
-        self.stage_handler: handler = hp.get_handler(stage_description["behaviour"]["handler"])
+        self.stage_handler: Handler = hp.get_handler(stage_description["behaviour"]["handler"])
 
     def get_stage_info_as_lines(self) -> list[str]:
-        content_lines = []
+        content_lines = [f"STAGE: {self.stage_name}", "", "DEPENDENCIES:"]
 
-        content_lines.append(f"STAGE: {self.stage_name}")
-        content_lines.append("")
-
-        content_lines.append("DEPENDENCIES:")
         content_lines.extend(f"  • {dep}" for dep in self.dependencies)
         content_lines.append("")
 

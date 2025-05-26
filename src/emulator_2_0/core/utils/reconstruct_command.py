@@ -4,12 +4,12 @@ from src.common_utils.bitwise_utils import get_int_cut, cast_immediate
 def reconstruct_command(instruction: int, inst_desc):
     c_type = inst_desc["instructions_format"]["command_number_bits"]
     current_c_type = get_int_cut(instruction, c_type)
-    type_desc = ""
+    type_desc = {}
     for i in inst_desc["instructions_format"]["types"]:
         if i["command_number"] == current_c_type:
             type_desc = i
             break
-    if type_desc == "":
+    if type_desc == {}:
         return "NOP"
     for i in inst_desc["decoding_rules"]:
         if i["type"] == current_c_type:
@@ -18,7 +18,7 @@ def reconstruct_command(instruction: int, inst_desc):
                                                                         type_desc["bit_layout"]["funct"]["bits"]):
                 mnemonic = i["mnemonic"]
                 args: list[list[str]] = i["args"]
-                if args == None:
+                if args is None:
                     return mnemonic
                 command_parts = [mnemonic]
                 for arg in args:
@@ -44,3 +44,4 @@ def reconstruct_command(instruction: int, inst_desc):
                                 result_arg = result_arg.replace(current_subst, str(val))
                     command_parts.append(result_arg)
                 return ' '.join(command_parts)
+    return None

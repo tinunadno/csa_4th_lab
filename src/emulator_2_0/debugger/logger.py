@@ -1,24 +1,24 @@
-from src.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
+from src.emulator_2_0.core.cpu.pipeline.pipeline import Pipeline
 from src.common_utils.log_utils import glue_string_lists
 from src.emulator_2_0.debugger.debugger import init_debug
 
 
 # mem_logger
-def mem_logger(pl: pipeline, fmt) -> list[str]:
+def mem_logger(pl: Pipeline, fmt) -> list[str]:
     ret = []
     for i in fmt["slice"]:
         ret.extend(pl.data_mem.get_memory_view(i[0], i[1]))
     return ret
 
 
-def decomp_logger(pl: pipeline, fmt) -> list[str]:
+def decomp_logger(pl: Pipeline, fmt) -> list[str]:
     ret = []
     for i in fmt["slice"]:
         ret.extend(pl.inst_mem.get_decompiled_memory_view(i[0], i[1]))
     return ret
 
 
-def reg_logger(pl: pipeline, fmt) -> list[str]:
+def reg_logger(pl: Pipeline, fmt) -> list[str]:
     ret = []
     if fmt["slice"] == "all":
         ret.extend(pl.regs.get_logs())
@@ -28,15 +28,15 @@ def reg_logger(pl: pipeline, fmt) -> list[str]:
     return ret
 
 
-def pl_stage_mnems_logger(pl: pipeline, fmt) -> list[str]:
+def pl_stage_mnems_logger(pl: Pipeline, _fmt) -> list[str]:
     return ["PIPELINE_STAGES:", pl.get_stages_mnemonics()]
 
 
-def tick_logger(pl: pipeline, fmt) -> list[str]:
+def tick_logger(pl: Pipeline, _fmt) -> list[str]:
     return ["TICK: " + str(pl.tick_)]
 
 
-def int_logger(pl: pipeline, fmt) -> list[str]:
+def int_logger(pl: Pipeline, _fmt) -> list[str]:
     return ["IN INTERRUPTION: " + str(pl.get_static_signal("INTERRUPT_signal", "is_interrupted") != 0)]
 
 
@@ -55,7 +55,7 @@ def basic_assert(addr, vals, expected, assert_name) -> None:
     print(f"{assert_name} ASSERTION PASSED")
 
 
-def mem_asserter(pl: pipeline, assert_):
+def mem_asserter(pl: Pipeline, assert_):
     assert_address_slice = list(range(assert_["slice"][0], assert_["slice"][1] + 1))
     if "byte" in assert_:
         assert_slice = [pl.data_mem.read_byte(i) for i in assert_address_slice]
@@ -67,14 +67,14 @@ def mem_asserter(pl: pipeline, assert_):
     basic_assert(assert_address_slice, assert_slice, expected, "MEM")
 
 
-def regs_asserter(pl: pipeline, assert_):
+def regs_asserter(pl: Pipeline, assert_):
     reg_number_slice = assert_["slice"]
     reg_number_vals = [pl.regs.get_reg(i) for i in reg_number_slice]
     expected = assert_["expected"]
     basic_assert(reg_number_vals, reg_number_vals, expected, "REGS")
 
 
-def output_asserter(pl: pipeline, assert_):
+def output_asserter(pl: Pipeline, assert_):
     expected = assert_["expected"]
     output_vals = pl.data_mem.output
     if isinstance(expected[0], str):
@@ -83,8 +83,8 @@ def output_asserter(pl: pipeline, assert_):
     basic_assert(output_indexes, output_vals, expected, "OUTPUT")
 
 
-class logger:
-    def __init__(self, log_conf, pl: pipeline):
+class Logger:
+    def __init__(self, log_conf, pl: Pipeline):
         self.log_conf = log_conf
         self.pl = pl
         self.running = True
@@ -122,7 +122,7 @@ class logger:
             return
         print("INITIAL LOGS:")
         log_format = self.log_conf["only_start"]["view"].split("-")
-        log_blocks: list[list[str]] = []
+        log_blocks: list[list[str]] = []  # type: ignore
         i = 0
         while i < len(log_format):
             if log_format[i] in self.loggers:
@@ -145,7 +145,7 @@ class logger:
             return
         print("TICK LOGS:")
         log_format = self.log_conf["each_tick"]["view"].split("-")
-        log_blocks: list[list[str]] = []
+        log_blocks: list[list[str]] = []  # type: ignore
         i = 0
         while i < len(log_format):
             if log_format[i] in self.loggers:

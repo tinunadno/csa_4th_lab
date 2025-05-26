@@ -1,12 +1,12 @@
-class data_mem:
-    def __init__(self, prefered_size, data_clusters: list[int, bytearray], io_mem_cell: int):
+class DataMem:
+    def __init__(self, prefered_size, data_clusters: list[tuple[int, bytearray]], io_mem_cell: int):
         max_size = prefered_size
         for i in data_clusters:
             max_size = max(i[0] + len(i[1]), max_size)
         self.size = max_size
         self.data = bytearray(max_size)
         self.io_mem_cell = io_mem_cell
-        self.output = []
+        self.output: list[int] = []
         for i in data_clusters:
             addr = i[0]
             for j in range(len(i[1])):

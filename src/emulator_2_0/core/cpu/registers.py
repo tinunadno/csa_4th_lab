@@ -1,7 +1,7 @@
 from typing import Union
 
 
-class registers:
+class Registers:
     def __init__(self, reg_conf, mem_size):
         self.regs = [0] * reg_conf["register_count"]
         self.common_regs = reg_conf["common_registers"]
@@ -49,7 +49,7 @@ class registers:
 
     def convert_to_upper(self, value: int) -> int:
         mask = (1 << (self.upper[1] - self.upper[0] + 1)) - 1
-        return ((value & mask) << self.upper[0])
+        return (value & mask) << self.upper[0]
 
     def convert_to_lower(self, value: int) -> int:
         mask = (1 << (self.lower[1] - self.lower[0] + 1)) - 1

@@ -1,7 +1,7 @@
 from src.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
 
 
-class instruction_memory:
+class InstructionMemory:
     def __init__(self, instructions: list[int], cmd_desc):
         self.instructions = instructions.copy()
         self.inst_mnemonics = [reconstruct_command(i, cmd_desc) for i in self.instructions]

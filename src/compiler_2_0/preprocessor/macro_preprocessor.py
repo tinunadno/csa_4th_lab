@@ -1,7 +1,7 @@
 import re
 
 
-class define:
+class Define:
     def __init__(self, lines, idx):
         # eg simple define
         if "{" not in lines[idx] and "(" not in lines[idx]:
@@ -79,10 +79,10 @@ def preprocess_macros(code: str, file_dir_path: str) -> str:
             lines.pop(i)
             lines[i:i] = included_lines
         if "#define" in lines[i]:
-            defines.append(define(lines, i))
+            defines.append(Define(lines, i))
         i += 1
         current_lines_size = len(lines)
     code = "\n".join(lines)
-    for i in defines[::-1]:
-        code = i.substitute(code)
+    for j in defines[::-1]:
+        code = j.substitute(code)
     return code

@@ -10,7 +10,7 @@ from src.compiler_2_0.translator.command_unwrapper import unwrap_command
 from src.common_utils.log_utils import glue_string_lists
 
 
-def print_compilation_info(text_section: list[str], labels_: dict, mem: list[int, bytearray]):
+def print_compilation_info(text_section: list[str], labels_: dict[str, dict[str, int]], mem: list[tuple[int, bytearray]]):
     text_section = [f"_start label: {labels_["_start"]}", "preprocessed_code"] + text_section
     mem_list = ["MEMORY CHUNKS"]
     for chunk in mem:
@@ -20,9 +20,9 @@ def print_compilation_info(text_section: list[str], labels_: dict, mem: list[int
             current_pointer += 1
         mem_list.append("...")
     labels_list = ["other labels:"]
-    for i in labels_.items():
-        labels_list.append(str(i[0]))
-        labels_list.append(f"\t{i[1]}")
+    for k in labels_.items():
+        labels_list.append(str(k[0]))
+        labels_list.append(f"\t{k[1]}")
 
     print("\n".join(glue_string_lists([text_section, mem_list, labels_list])))
 
@@ -46,12 +46,13 @@ if __name__ == "__main__":
         text_section_proceed, data_section = substitute_labels(data_lines, txt_lines, labels, l_cmd)
 
         compiled_code = []
+        ep: int = 0
         for i in text_section_proceed:
             compiled_code.extend(unwrap_command(i, inst_desc, lower_upper))
         if "_start" not in labels:
             ep = 0
         else:
-            ep: int = labels["_start"]["address"]
+            ep = labels["_start"]["address"]
         print_compilation_info(text_section_proceed, labels, data_section)
         write_file(ep, data_section, compiled_code, abs_code_path + "/exec")
     except SyntaxError as e:

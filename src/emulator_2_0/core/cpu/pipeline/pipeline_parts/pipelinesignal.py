@@ -1,7 +1,7 @@
 from src.common_utils.bitwise_utils import *
 
 
-class pipeline_signal:
+class PipelineSignal:
     def __init__(self, signal_config):
         self.signal_conf = signal_config
         self.signal = []

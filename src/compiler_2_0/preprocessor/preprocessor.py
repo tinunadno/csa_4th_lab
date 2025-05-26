@@ -32,7 +32,6 @@ def parse_byte_line(line: str) -> list[int]:
 
 
 def parse_word_line(line: str, labels) -> int:
-    # Очистка строки от лишних символов
     if ":" in line:
         line = line[line.find(":") + 1:]
     line = line.replace(".word", "").strip()
@@ -44,7 +43,7 @@ def parse_word_line(line: str, labels) -> int:
                 ((value >> 16 & 0xFF) << 8) |
                 (value >> 24 & 0xFF)
         )
-    except:
+    except ValueError:
         addr = labels[line]["address"]
         return (
                 ((addr & 0xFF) << 24) |
@@ -69,14 +68,14 @@ def parse_buffer(line: str) -> list[int]:
 
 
 def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]):
-    code = code.split(line_splitter)
+    code_lines = code.split(line_splitter)
     current_section = None
     text_address = 0
     data_address = 0
     labels = {}
     text_lines = []
     data_lines = []
-    for line in code:
+    for line in code_lines:
         line = line.strip()
         if line == '':
             continue
@@ -129,17 +128,17 @@ def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]):
 
 
 def substitute_labels(data_lines: list[str], text_lines: list[str], labels, long_commands: dict[str, int]):
-    data_section: list[int, bytearray] = []
+    data_section: list[tuple[int, bytearray]] = []
     current_address = 0
     if len(data_lines) > 0:
         if not ".org" in data_lines[0]:
-            data_section.append([current_address, bytearray()])
+            data_section.append((current_address, bytearray()))
         for line in data_lines:
             if ".org" in line:
                 line = line[line.find(".org") + 4:]
                 value = parse_int(line.strip())
                 current_address = value
-                data_section.append([current_address, bytearray()])
+                data_section.append((current_address, bytearray()))
                 continue
             if ".byte" in line:
                 bytes_data = parse_byte_line(line)
