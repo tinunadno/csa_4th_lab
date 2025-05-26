@@ -3,9 +3,6 @@ from pathlib import Path
 from csa_4th_lab.src.emulator_2_0.parsing.pipeline_loader import parse_config
 import sys
 
-# TODO debug interruption and io system         ('gonna take a while)
-# TODO write unit tests                         (it's gonna be sad to fix all this)
-# TODO write integral tests    (MUST BE GOLDEN) (it's gonna be sad to fix all this)
 # TODO add code quality control                 (a 'don 'nou 'wat is it)
 # TODO add CI                                   (probably hard)
 # TODO may be clean code up

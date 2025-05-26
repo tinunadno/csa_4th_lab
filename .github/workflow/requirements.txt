@@ -1,0 +1,3 @@
+pytest
+pytest-golden==0.2.2
+pyyaml
