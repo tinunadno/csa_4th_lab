@@ -150,5 +150,7 @@ class logger:
             i += 1
         print("\n".join(["\n".join(i) for i in log_blocks]))
     def print_assertion(self):
+        if not "assertion" in self.log_conf:
+            return
         for i in self.log_conf["assertion"]:
             self.asserters[i["name"]](self.pl, i)

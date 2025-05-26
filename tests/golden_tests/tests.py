@@ -67,3 +67,8 @@ def test_load_immediate(golden: GoldenTestFixture):
 def test_not(golden: GoldenTestFixture):
     name = "not"
     run_default(name, golden)
+
+@pytest.mark.golden_test("test_cases/euler2/test_conf.yaml")
+def test_euler2(golden: GoldenTestFixture):
+    name = "euler2"
+    run_default(name, golden)

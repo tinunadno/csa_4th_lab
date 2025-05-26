@@ -449,7 +449,7 @@ instructions:
         - name: "EX_signal"
           args: [ "imm%reg1", "rd%reg2", "and", "neg_second" ]
         - name: "WB_signal"
-          args: [ "need_wb", "$rd%reg_dest", "write_lower" ]
+          args: [ "need_wb", "$rd%reg_dest", "write_lower"]
     - mnemonic: "PUSH"
       args:
         - ["t$", "$%rd"]
