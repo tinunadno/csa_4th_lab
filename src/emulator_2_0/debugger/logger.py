@@ -1,6 +1,6 @@
-from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
-from csa_4th_lab.src.emulator_2_0.core.utils.log_utils import glue_string_lists
-from csa_4th_lab.src.emulator_2_0.debugger.debugger import init_debug
+from src.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
+from src.common_utils.log_utils import glue_string_lists
+from src.emulator_2_0.debugger.debugger import init_debug
 
 
 # mem_logger

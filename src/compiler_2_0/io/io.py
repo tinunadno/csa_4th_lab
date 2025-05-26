@@ -1,4 +1,3 @@
-import yaml
 
 def int_to_4bytes(value):
     return bytearray(value.to_bytes(4, signed=False))

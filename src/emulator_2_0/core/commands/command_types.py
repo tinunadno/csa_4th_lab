@@ -1,4 +1,4 @@
-from csa_4th_lab.src.common_utils.bitwise_utils import get_int_cut
+from src.common_utils.bitwise_utils import get_int_cut
 
 class command_types:
     def __init__(self, command_description):

@@ -1,10 +1,9 @@
 import os
-from xxlimited_35 import error
 
-from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
+from src.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
 from abc import ABC, abstractmethod
 
-from csa_4th_lab.src.emulator_2_0.core.utils.log_utils import glue_string_lists
+from src.common_utils.log_utils import glue_string_lists
 
 class debug_state:
     def __init__(self, commands):

@@ -73,7 +73,7 @@ def preprocess_macros(code: str, file_dir_path: str) -> str:
             try:
                 included_lines = open(include_path).read().split("\n")
             except:
-                raise SyntaxError("included file doesn't exist: " + lines[i])
+                raise SyntaxError("included file doesn't exist: " + lines[i] + "  " + include_path)
             lines.pop(i)
             lines[i:i] = included_lines
         if "#define" in lines[i]:

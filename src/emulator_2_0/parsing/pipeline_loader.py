@@ -1,12 +1,12 @@
-from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
+from src.emulator_2_0.core.cpu.pipeline.pipeline import pipeline
 import yaml
 
-from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
+from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
     interruption_controller
-from csa_4th_lab.src.emulator_2_0.core.cpu.registers import registers
-from csa_4th_lab.src.emulator_2_0.core.memory.data_mem import data_mem
-from csa_4th_lab.src.emulator_2_0.core.memory.instruction_memory import instruction_memory
-from csa_4th_lab.src.emulator_2_0.debugger.logger import logger
+from src.emulator_2_0.core.cpu.registers import registers
+from src.emulator_2_0.core.memory.data_mem import data_mem
+from src.emulator_2_0.core.memory.instruction_memory import instruction_memory
+from src.emulator_2_0.debugger.logger import logger
 
 
 # returns ep, data-section_clusters, text_section

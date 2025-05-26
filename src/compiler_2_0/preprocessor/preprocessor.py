@@ -1,4 +1,4 @@
-from csa_4th_lab.src.compiler_2_0.translator.primitive_parsers import parse_int
+from src.compiler_2_0.translator.primitive_parsers import parse_int
 import re
 
 def process_type_size(line: str):

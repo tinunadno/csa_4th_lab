@@ -1,4 +1,3 @@
-from random import randint
 
 class data_mem:
     def __init__(self, prefered_size, data_clusters: list[int, bytearray], io_mem_cell: int):

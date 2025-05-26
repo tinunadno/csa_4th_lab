@@ -1,15 +1,15 @@
-from csa_4th_lab.src.common_utils.bitwise_utils import set_int_cut, get_int_cut
-from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
+from src.common_utils.bitwise_utils import set_int_cut, get_int_cut
+from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
     interruption_controller
-from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
-from csa_4th_lab.src.emulator_2_0.core.memory.data_mem import data_mem
-from csa_4th_lab.src.emulator_2_0.core.memory.instruction_memory import instruction_memory
-from csa_4th_lab.src.emulator_2_0.core.cpu.registers import registers
-from csa_4th_lab.src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_stage import pipeline_stage
-from csa_4th_lab.src.emulator_2_0.core.utils.log_utils import *
-from csa_4th_lab.src.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
-from csa_4th_lab.src.emulator_2_0.parsing.commands.command_types import command_types
-from csa_4th_lab.src.emulator_2_0.parsing.handlers.handler_pool import handler_pool
+from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
+from src.emulator_2_0.core.memory.data_mem import data_mem
+from src.emulator_2_0.core.memory.instruction_memory import instruction_memory
+from src.emulator_2_0.core.cpu.registers import registers
+from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_stage import pipeline_stage
+from src.common_utils.log_utils import *
+from src.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
+from src.emulator_2_0.core.commands.command_types import command_types
+from src.emulator_2_0.core.handlers.handler_pool import handler_pool
 
 
 def reconstruct_nop(inst_desc) -> int:

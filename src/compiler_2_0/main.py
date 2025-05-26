@@ -2,12 +2,12 @@ import os
 import sys
 from pathlib import Path
 
-from csa_4th_lab.src.compiler_2_0.config_loader import load_config
-from csa_4th_lab.src.compiler_2_0.io.io import write_file
-from csa_4th_lab.src.compiler_2_0.preprocessor.macro_preprocessor import preprocess_macros
-from csa_4th_lab.src.compiler_2_0.preprocessor.preprocessor import find_labels, substitute_labels
-from csa_4th_lab.src.compiler_2_0.translator.command_unwrapper import unwrap_command
-from csa_4th_lab.src.emulator_2_0.core.utils.log_utils import glue_string_lists
+from src.compiler_2_0.config_loader import load_config
+from src.compiler_2_0.io.io import write_file
+from src.compiler_2_0.preprocessor.macro_preprocessor import preprocess_macros
+from src.compiler_2_0.preprocessor.preprocessor import find_labels, substitute_labels
+from src.compiler_2_0.translator.command_unwrapper import unwrap_command
+from src.common_utils.log_utils import glue_string_lists
 
 
 def print_compilation_info(text_section: list[str], labels_: dict, mem: list[int, bytearray]):
@@ -29,7 +29,7 @@ def print_compilation_info(text_section: list[str], labels_: dict, mem: list[int
 
 if __name__ == "__main__":
     try:
-        config_path = "../emulator_2_0/configurations/internal_emulator_config.yaml"
+        config_path = "../configurations/internal_emulator_config.yaml"
         base_dir = Path(__file__).parent
         abs_config_path = (base_dir / config_path).resolve()
         inst_desc, lower_upper = load_config(str(abs_config_path))

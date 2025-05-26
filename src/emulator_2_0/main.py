@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from csa_4th_lab.src.emulator_2_0.parsing.pipeline_loader import parse_config
+from src.emulator_2_0.parsing.pipeline_loader import parse_config
 import sys
 
 # TODO add code quality control                 (a 'don 'nou 'wat is it)
@@ -12,7 +12,7 @@ if __name__ == "__main__":
     exec_path = sys.argv[1]
     with open(exec_path, 'rb') as bin_file:
         bin_data = bytearray(bin_file.read())
-    config_path = "../emulator_2_0/configurations/internal_emulator_config.yaml"
+    config_path = "../configurations/internal_emulator_config.yaml"
     base_dir = Path(__file__).parent
     abs_config_path = (base_dir / config_path).resolve()
     internal_conf_path = str(abs_config_path)

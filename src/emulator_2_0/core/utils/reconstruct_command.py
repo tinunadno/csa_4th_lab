@@ -1,4 +1,4 @@
-from csa_4th_lab.src.common_utils.bitwise_utils import get_int_cut, cast_immediate
+from src.common_utils.bitwise_utils import get_int_cut, cast_immediate
 
 
 def reconstruct_command(instruction: int, inst_desc):

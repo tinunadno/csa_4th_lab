@@ -1,4 +1,4 @@
-from csa_4th_lab.src.compiler_2_0.translator.command_builder import build_command, get_replacement
+from src.compiler_2_0.translator.command_builder import build_command, get_replacement
 
 
 def unwrap_command(instruction: str, instructions_format, lower_upper) -> list[int]:

@@ -1,6 +1,6 @@
 import pytest
 
-from csa_4th_lab.src.compiler_2_0.preprocessor.macro_preprocessor import preprocess_macros
+from src.compiler_2_0.preprocessor.macro_preprocessor import preprocess_macros
 
 
 def test_simple_define():
@@ -53,3 +53,16 @@ def test_complex_define_overload():
     preprocessed_code = preprocess_macros(code, "")
     expected = "addi t0 t0 2"
     assert (preprocessed_code.strip() == expected)
+
+def test_include_normal():
+    code = open("tests/compiler_unit_tests/include_tests_files/norm.asm").read()
+    included = preprocess_macros(code, "tests/compiler_unit_tests/include_tests_files/")
+    assert(included == "im_included:D")
+
+def test_bad_include():
+    code = open("tests/compiler_unit_tests/include_tests_files/bad.asm").read()
+    with pytest.raises(SyntaxError) as bad_include:
+        included = preprocess_macros(code, "tests/compiler_unit_tests/include_tests_files/")
+    assert (bad_include)
+
+# TODO finish preprocessor killing tests
