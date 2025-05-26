@@ -1,0 +1,15 @@
+input: |-
+  load_immediate
+output_compiler: |
+  _start label: {'address': 0, 'section': 'text'} |               |                                   
+  preprocessed_code                               |               | other labels:                     
+  lui t0 0xFFFFFFFF                               | MEMORY CHUNKS | _start                            
+  lli t0 0xFFFFFFFF                               |               | 	{'address': 0, 'section': 'text'}
+  halt                                            |               |                                   
+output: |
+  REGS ASSERT:
+  actual data
+  4294967295
+  expected
+  4294967295
+  REGS ASSERTION PASSED

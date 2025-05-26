@@ -1,0 +1,27 @@
+input: |-
+  hello
+output_compiler: |
+  _start label: {'address': 0, 'section': 'text'} |                   |                                    
+  preprocessed_code                               | MEMORY CHUNKS     |                                    
+  lui t0 0x84                                     | 0x00000000 | 0x48 |                                    
+  lli t0 0x84                                     | 0x00000001 | 0x65 |                                    
+  lui t1 0                                        | 0x00000002 | 0x6C | other labels:                      
+  lli t1 0                                        | 0x00000003 | 0x6C | buf                                
+  lui t2 13                                       | 0x00000004 | 0x6F | 	{'address': 0, 'section': 'data'} 
+  lli t2 13                                       | 0x00000005 | 0x2C | _start                             
+  xor t3 t3 t3                                    | 0x00000006 | 0x20 | 	{'address': 0, 'section': 'text'} 
+  addi t3 t2 0                                    | 0x00000007 | 0x57 | while                              
+  beqz 5                                          | 0x00000008 | 0x6F | 	{'address': 6, 'section': 'text'} 
+  addi t2 t2 -1                                   | 0x00000009 | 0x72 | end                                
+  lb t3 0(t1)                                     | 0x0000000A | 0x6C | 	{'address': 14, 'section': 'text'}
+  sb 0(t0) t3                                     | 0x0000000B | 0x64 |                                    
+  addi t1 t1 1                                    | 0x0000000C | 0x21 |                                    
+  jmp -8                                          | ...               |                                    
+  halt                                            |                   |                                    
+output: |
+  OUTPUT ASSERT:
+  actual data
+  Hello, World!
+  expected
+  Hello, World!
+  OUTPUT ASSERTION PASSED

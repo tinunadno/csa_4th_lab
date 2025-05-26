@@ -1,0 +1,25 @@
+input: |-
+  get_put_char
+output_compiler: |
+  _start label: {'address': 0, 'section': 'text'} |                   |                                    
+  preprocessed_code                               |                   |                                    
+  addi t0 t0 1                                    |                   |                                    
+  lui t5 0x80                                     |                   | other labels:                      
+  lli t5 0x80                                     | MEMORY CHUNKS     | _start                             
+  lui t4 0x84                                     | 0x00000016 | 0x0A | 	{'address': 0, 'section': 'text'} 
+  lli t4 0x84                                     | 0x00000017 | 0x00 | read_loop                          
+  xor t3 t3 t3                                    | 0x00000018 | 0x00 | 	{'address': 5, 'section': 'text'} 
+  addi t3 t0 0                                    | 0x00000019 | 0x00 | read_end                           
+  beqz 1                                          | ...               | 	{'address': 9, 'section': 'text'} 
+  jmp -4                                          |                   | int16                              
+  halt                                            |                   | 	{'address': 10, 'section': 'text'}
+  lw t0 0(t5)                                     |                   |                                    
+  sw 0(t4) t0                                     |                   |                                    
+  IRET                                            |                   |                                    
+output: |
+  OUTPUT ASSERT:
+  actual data
+  Hello\0
+  expected
+  Hello\0
+  OUTPUT ASSERTION PASSED

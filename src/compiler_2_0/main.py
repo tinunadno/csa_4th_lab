@@ -2,9 +2,6 @@ import os
 import sys
 from pathlib import Path
 
-project_root = Path(__file__).parent.parent  # Поднимаемся до csa_4th_lab/
-sys.path.append(str(project_root))
-
 from csa_4th_lab.src.compiler_2_0.config_loader import load_config
 from csa_4th_lab.src.compiler_2_0.io.io import write_file
 from csa_4th_lab.src.compiler_2_0.preprocessor.macro_preprocessor import preprocess_macros

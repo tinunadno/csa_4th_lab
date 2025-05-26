@@ -28,7 +28,6 @@ class data_mem:
             self.data[address] = (value & 0xFF)
             if (not is_int_controller) and address == self.io_mem_cell:
                 self.output.append(value & 0xFF)
-                print("WRITING TO PORT")
         else:
             raise ValueError("Attempting to write memory out of address space")
     def read_byte(self, address: int) -> int:

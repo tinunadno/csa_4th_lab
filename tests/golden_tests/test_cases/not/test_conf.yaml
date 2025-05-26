@@ -1,0 +1,27 @@
+input: |-
+  not
+output_compiler: |
+  _start label: {'address': 0, 'section': 'text'} |                   |                                    
+  preprocessed_code                               |                   |                                    
+  xor t3 t3 t3                                    |                   |                                    
+  addi t3 t1 0                                    |                   |                                    
+  bnez 1                                          |                   | other labels:                      
+  jmp -4                                          | MEMORY CHUNKS     | _start                             
+  addi t2 t2 -1                                   | 0x00000016 | 0x0A | 	{'address': 0, 'section': 'text'} 
+  xor t0 t0 t2                                    | 0x00000017 | 0x00 | read_loop                          
+  lui t3 0x84                                     | 0x00000018 | 0x00 | 	{'address': 0, 'section': 'text'} 
+  lli t3 0x84                                     | 0x00000019 | 0x00 | end_loop                           
+  sw 0(t3) t0                                     | ...               | 	{'address': 4, 'section': 'text'} 
+  halt                                            |                   | int16                              
+  lui t3 0x80                                     |                   | 	{'address': 10, 'section': 'text'}
+  lli t3 0x80                                     |                   |                                    
+  lw t0 0(t3)                                     |                   |                                    
+  addi t1 t1 1                                    |                   |                                    
+  iret                                            |                   |                                    
+output: |
+  OUTPUT ASSERT:
+  actual data
+  252645135
+  expected
+  252645135
+  OUTPUT ASSERTION PASSED
