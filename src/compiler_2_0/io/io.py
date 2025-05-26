@@ -7,7 +7,7 @@ def write_bin_file(bin_data, filename):
     with open(filename, 'wb') as f:
         f.write(bin_data)
 
-def write_file(entry_point: int, data_section: list[int, bytearray], text_section: list[int]) -> None:
+def write_file(entry_point: int, data_section: list[int, bytearray], text_section: list[int], filename: str) -> None:
     bin_file: bytearray = int_to_4bytes(entry_point)
     bin_file.extend(int_to_4bytes(len(data_section)))
     for i in data_section:
@@ -16,4 +16,4 @@ def write_file(entry_point: int, data_section: list[int, bytearray], text_sectio
         bin_file.extend(tmp)
     for i in text_section:
         bin_file.extend(int_to_4bytes(i))
-    write_bin_file(bin_file, "exec")
+    write_bin_file(bin_file, filename)

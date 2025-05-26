@@ -1,4 +1,9 @@
 import os
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).parent.parent  # Поднимаемся до csa_4th_lab/
+sys.path.append(str(project_root))
 
 from csa_4th_lab.src.compiler_2_0.config_loader import load_config
 from csa_4th_lab.src.compiler_2_0.io.io import write_file
@@ -27,13 +32,18 @@ def print_compilation_info(text_section: list[str], labels_: dict, mem: list[int
 
 if __name__ == "__main__":
     try:
-        inst_desc, lower_upper = load_config("../emulator_2_0/configurations/internal_emulator_config.yaml")
-        code_file_path = "../../get_put_char.asm"
+        config_path = "../emulator_2_0/configurations/internal_emulator_config.yaml"
+        base_dir = Path(__file__).parent
+        abs_config_path = (base_dir / config_path).resolve()
+        inst_desc, lower_upper = load_config(str(abs_config_path))
+
+        code_file_path = sys.argv[1]
         some_code = open(code_file_path).read()
         l_cmd = {}
         for i in inst_desc["complex_decoding_rules"]:
             l_cmd[i["mnemonic"]] = len(i["unwrap_rules"])
         abs_code_path = os.path.abspath(code_file_path)
+        abs_code_path = abs_code_path[:abs_code_path.rfind("/") + 1]
         some_code = preprocess_macros(some_code, abs_code_path)
         labels, txt_lines, data_lines = find_labels(some_code, "\n", l_cmd)
         text_section_proceed, data_section = substitute_labels(data_lines, txt_lines, labels, l_cmd)
@@ -46,6 +56,6 @@ if __name__ == "__main__":
         else:
             ep: int = labels["_start"]["address"]
         print_compilation_info(text_section_proceed, labels, data_section)
-        write_file(ep, data_section, compiled_code)
+        write_file(ep, data_section, compiled_code, abs_code_path + "/exec")
     except SyntaxError as e:
         print(str(e))           # handling parsing errors that I raised, other will kill the compiler :D

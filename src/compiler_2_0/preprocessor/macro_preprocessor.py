@@ -59,12 +59,11 @@ class define:
             match = re.search(r'\b' + re.escape(self.name) + r'\b', code)
         return code
 
-def preprocess_macros(code: str, code_file_path: str) -> str:
+def preprocess_macros(code: str, file_dir_path: str) -> str:
     lines = code.split("\n")
     defines = []
     i = 0
     current_lines_size = len(lines)
-    file_dir_path = code_file_path[:code_file_path.rfind("/") + 1]
     while i < current_lines_size:
         if ";" in lines[i]:
             lines[i] = lines[i][: lines[i].find(";")].strip()
