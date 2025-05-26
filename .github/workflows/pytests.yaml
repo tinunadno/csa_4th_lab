@@ -26,4 +26,4 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest tests/golden_tests
+        pytest csa_4th_lab/tests/golden
