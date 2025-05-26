@@ -162,7 +162,7 @@ class Run(Command):
     def handle(self, cmd: str, db_state: DebugState):
         os.system('clear')
         current_pc = self.pl.regs.get_reg("PC")
-        while (not current_pc in db_state.break_points) and db_state.pl_running:
+        while (current_pc not in db_state.break_points) and db_state.pl_running:
             db_state.pl_running = self.pl.tick()
             current_pc = self.pl.regs.get_reg("PC")
         perform_tick(db_state, self.pl)

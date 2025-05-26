@@ -131,7 +131,7 @@ def substitute_labels(data_lines: list[str], text_lines: list[str], labels, long
     data_section: list[tuple[int, bytearray]] = []
     current_address = 0
     if len(data_lines) > 0:
-        if not ".org" in data_lines[0]:
+        if ".org" not in data_lines[0]:
             data_section.append((current_address, bytearray()))
         for line in data_lines:
             if ".org" in line:

@@ -26,7 +26,7 @@ class Define:
             if lines[idx].strip() != "{":
                 self.body += lines[idx][lines[idx].find("{") + 1: lines[idx].find("}")]
             while idx < len(lines) and "}" not in lines[idx]:
-                if not "{" in lines[idx]:
+                if "{" not in lines[idx]:
                     self.body += "\n" + lines[idx]
                 idx += 1
             if idx == len(lines):

@@ -55,7 +55,7 @@ def get_replacement_substitution_rules(replacement: list[tuple[int, int]], args:
                                        translated_instruction, shift_me, shifting_var, lower_upper) -> int:
     for i in replacement:
         for j in args:
-            if not str(i[0]) in j:
+            if str(i[0]) not in j:
                 continue
             arg_name = j[j.find('%') + 1:]
             try:

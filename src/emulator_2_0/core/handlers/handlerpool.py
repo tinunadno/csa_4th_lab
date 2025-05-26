@@ -62,10 +62,10 @@ class MemHandler(Handler):
     def handle(self, args: list[object], is_valid: bool, tick_logs: list[str]) -> bool:
         """Обработчик стадии MEM с forwarding-очередью и логированием"""
         if not is_valid:
-            tick_logs.append(f"[MEM] Not a valid stage")
+            tick_logs.append("[MEM] Not a valid stage")
             return False
 
-        tick_logs.append(f"[MEM] Starting memory stage processing")
+        tick_logs.append("[MEM] Starting memory stage processing")
 
         mem: DataMem = args[0]   # type: ignore
         regs: Registers = args[1] # type: ignore
@@ -163,7 +163,7 @@ class InstructionDecoderHandler(Handler):
 
     def handle(self, args: list[object], is_valid, tick_logs: list[str]) -> bool:
         if not is_valid:
-            tick_logs.append(f"[ID] Not a valid stage")
+            tick_logs.append("[ID] Not a valid stage")
             return False
         tick_logs.append("[ID] Started instruction decode stage")
         regs: Registers = args[1] # type: ignore
@@ -300,7 +300,7 @@ class AluExecutionHandler(Handler):
         - args[1]: ALU_output (pipeline_signal)
         """
         if not is_valid:
-            tick_logs.append(f"[EX] Not a valid stage")
+            tick_logs.append("[EX] Not a valid stage")
             return False
         ex_signal: PipelineSignal = args[0] # type: ignore
         alu_output: PipelineSignal = args[1] # type: ignore
@@ -422,7 +422,7 @@ class AluExecutionHandler(Handler):
                     result = self._to_unsigned32(reg1 + reg2)
                     tick_logs.append(f"[EX] Branch taken: PC = {reg1} + {reg2} = {result}")
                 else:
-                    tick_logs.append(f"[EX] Branch not taken (condition not met)")
+                    tick_logs.append("[EX] Branch not taken (condition not met)")
 
 
             elif signals['mul']:
@@ -479,7 +479,7 @@ class AluExecutionHandler(Handler):
 class RegisterHandler(Handler):
     def handle(self, args: list[object], is_valid: bool, tick_logs: list[str]) -> bool:
         if not is_valid:
-            tick_logs.append(f"[WB] Not a valid stage")
+            tick_logs.append("[WB] Not a valid stage")
             return False
         tick_logs.append("[WB] Started write back stage")
         wb_signal: PipelineSignal = args[1] # type: ignore

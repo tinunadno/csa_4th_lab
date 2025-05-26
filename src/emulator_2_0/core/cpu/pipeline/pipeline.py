@@ -54,7 +54,7 @@ class Pipeline:
             if "need_non_static_signals" in stage_desc:
                 self.signals_for_each_tick.append([{}, False])
                 for item in signals_descriptions:
-                    if not "static" in item:
+                    if "static" not in item:
                         key_value = item["name"]
                         self.signals_for_each_tick[-1][0][key_value] = PipelineSignal(item)  # type: ignore
         c_types = CommandTypes(instructions_desc["instructions_format"])

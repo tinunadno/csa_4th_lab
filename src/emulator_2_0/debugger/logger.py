@@ -118,7 +118,7 @@ class Logger:
         init_debug(self.pl)
 
     def print_initial_logs(self):
-        if not "only_start" in self.log_conf:
+        if "only_start" not in self.log_conf:
             return
         print("INITIAL LOGS:")
         log_format = self.log_conf["only_start"]["view"].split("-")
@@ -141,7 +141,7 @@ class Logger:
 
     def perform_tick(self):
         self.running = self.pl.tick()
-        if not "each_tick" in self.log_conf:
+        if "each_tick" not in self.log_conf:
             return
         print("TICK LOGS:")
         log_format = self.log_conf["each_tick"]["view"].split("-")
@@ -163,7 +163,7 @@ class Logger:
         print("\n".join(["\n".join(i) for i in log_blocks]))
 
     def print_assertion(self):
-        if not "assertion" in self.log_conf:
+        if "assertion" not in self.log_conf:
             return
         for i in self.log_conf["assertion"]:
             self.asserters[i["name"]](self.pl, i)
