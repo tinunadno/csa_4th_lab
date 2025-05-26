@@ -1,6 +1,4 @@
 def glue_string_lists(log: list[list[str]], max_widths=None, max_line_length: int = 150) -> list[str]:
-    if max_widths is None:
-        max_widths = []
     split_log = []
     for i in range(len(log)):
         stage = log[i]
