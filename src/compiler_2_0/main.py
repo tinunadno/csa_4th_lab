@@ -55,4 +55,4 @@ if __name__ == "__main__":
         print_compilation_info(text_section_proceed, labels, data_section)
         write_file(ep, data_section, compiled_code, abs_code_path + "/exec")
     except SyntaxError as e:
-        print(str(e))           # handling parsing errors that I raised, other will kill the compiler :D
+        print(str(e))  # handling parsing errors that I raised, other will kill the compiler :D

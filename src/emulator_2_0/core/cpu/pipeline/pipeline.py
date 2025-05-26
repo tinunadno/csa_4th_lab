@@ -1,4 +1,4 @@
-from src.common_utils.bitwise_utils import set_int_cut, get_int_cut
+from src.common_utils.bitwise_utils import set_int_cut
 from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
     interruption_controller
 from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_signal import pipeline_signal
@@ -96,7 +96,8 @@ class pipeline:
                     args.append(self.signals_for_each_tick[signals_idx][0][j])
                 else:
                     args.append(j)
-            valid_stage = stage.stage_handler.handle(args, self.signals_for_each_tick[signals_idx][1], self.last_tick_logs)
+            valid_stage = stage.stage_handler.handle(args, self.signals_for_each_tick[signals_idx][1],
+                                                     self.last_tick_logs)
             self.signals_for_each_tick[signals_idx][1] = valid_stage
             signals_idx -= 1
         self.stages_mnemonics[-1] = reconstruct_command(self.regs.get_reg("IR"), self.instruction_desc)

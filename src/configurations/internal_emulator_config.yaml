@@ -29,8 +29,8 @@ pipeline:
         - { name: "mul",          bits: [ 75 ],      description: "multiplication signal" }
         - { name: "div",          bits: [ 76 ],      description: "division signal" }
         - { name: "rem",          bits: [ 77 ],      description: "remainder signal" }
-        - { name: "get_nzvc",     bits: [ 78 ],      description: "get_nzvc_flag"}
-        - { name: "set_nzvc",     bits: [ 79 ],      description: "set_nzvc_flag"}
+        - { name: "get_nzvc",     bits: [ 78 ],      description: "get_nzvc_flag" }
+        - { name: "set_nzvc",     bits: [ 79 ],      description: "set_nzvc_flag" }
         - { name: "FORCE_DISCARD_FORWARDING",          bits: [ 80 ],      description: "we really don't wanna do forward" }
         - { name: "FORCE_ENABLE_FORWARDING",           bits: [ 81 ],      description: "we really wanna do forward" }
     - name: "MEM_signal"
@@ -59,7 +59,7 @@ pipeline:
     - name: "INTERRUPT_signal"
       static: 1
       bit_layout:
-        - { name: "is_interrupted", bits: [0], description: "interruption flag"}
+        - { name: "is_interrupted", bits: [ 0 ], description: "interruption flag" }
     - name: "terminate"
       bit_layout:
         - { name: "TERMINATE", bits: [ 0 ], description: "is pipeline working" }
@@ -449,19 +449,19 @@ instructions:
         - name: "EX_signal"
           args: [ "imm%reg1", "rd%reg2", "and", "neg_second" ]
         - name: "WB_signal"
-          args: [ "need_wb", "$rd%reg_dest", "write_lower"]
+          args: [ "need_wb", "$rd%reg_dest", "write_lower" ]
     - mnemonic: "PUSH"
       args:
-        - ["t$", "$%rd"]
+        - [ "t$", "$%rd" ]
       type: 2
       functional_bits_match: [ 0, 0, 0 ]
       signals:
         - name: "EX_signal"
-          args: ["SP%reg1", "4%reg2", "add", "neg_second", "discard_nzvc", "FORCE_ENABLE_FORWARDING" ]
+          args: [ "SP%reg1", "4%reg2", "add", "neg_second", "discard_nzvc", "FORCE_ENABLE_FORWARDING" ]
         - name: "MEM_signal"
           args: [ "need_mem", "$rd%reg_dest", "need_write" ]
         - name: "WB_signal"
-          args: [ "need_wb", "$SP%reg_dest"]
+          args: [ "need_wb", "$SP%reg_dest" ]
     - mnemonic: "POP"
       args:
       type: 2
@@ -473,7 +473,7 @@ instructions:
           args: [ "need_wb", "$SP%reg_dest" ]
     - mnemonic: "JMP"
       args:
-        - ["$", "$%imm"]
+        - [ "$", "$%imm" ]
       type: 3
       functional_bits_match: [ 0, 0, 0 ]
       signals:
@@ -563,7 +563,7 @@ instructions:
       args:
         - [ "$", "$%imm" ]
       type: 4
-      functional_bits_match: [0, 1, 0]
+      functional_bits_match: [ 0, 1, 0 ]
       signals:
         - name: "INTERRUPT_signal"
           args: [ "imm%is_interrupted" ]
@@ -571,59 +571,59 @@ instructions:
       args:
         - [ "t$", "$%rd" ]
       type: 4
-      functional_bits_match: [1, 1, 0]
+      functional_bits_match: [ 1, 1, 0 ]
       signals:
         - name: "EX_signal"
-          args: [ "get_nzvc", "discard_nzvc"]
+          args: [ "get_nzvc", "discard_nzvc" ]
         - name: "WB_signal"
           args: [ "need_wb", "$rd%reg_dest" ]
     - mnemonic: "SET_NZVC"
       args:
-        - ["t$", "$%rd"]
+        - [ "t$", "$%rd" ]
       type: 4
-      functional_bits_match: [1, 1, 1]
+      functional_bits_match: [ 1, 1, 1 ]
       signals:
         - name: "EX_signal"
-          args: [ "set_nzvc", "rd%reg1", "discard_nzvc"]
+          args: [ "set_nzvc", "rd%reg1", "discard_nzvc" ]
   complex_decoding_rules:
-   - mnemonic: "INT"
-     args:
-       - ["$"]
-     unwrap_rules:
-       - "SET_INT 1"
-       - "XOR t30 t30 t30"
-       - "ADDI t30 t29 7"
-       - "PUSH t30"
-       - "GET_NZVC t30"
-       - "PUSH t30"
-       - "XOR t30 t30 t30"
-       - "LLI t30 $"
-       - "LW t30 0(t30)"
-       - "LJMP 0(t30)"
-   - mnemonic: "INT_INNR"
-     args:
-       - [ "$" ]
-     unwrap_rules:
-       - "SET_INT 1"
-       - "XOR t30 t30 t30"
-       - "ADDI t30 t29 0"
-       - "PUSH t30"
-       - "GET_NZVC t30"
-       - "PUSH t30"
-       - "XOR t30 t30 t30"
-       - "LLI t30 $"
-       - "LW t30 0(t30)"
-       - "LJMP 0(t30)"
-   - mnemonic: "IRET"
-     args:
-     unwrap_rules:
-       - "LW t30 0(t31)"
-       - "SET_NZVC t30"
-       - "POP"
-       - "LW t30 0(t31)"
-       - "POP"
-       - "SET_INT 0"
-       - "LJMP 0(t30)"
+    - mnemonic: "INT"
+      args:
+        - [ "$" ]
+      unwrap_rules:
+        - "SET_INT 1"
+        - "XOR t30 t30 t30"
+        - "ADDI t30 t29 7"
+        - "PUSH t30"
+        - "GET_NZVC t30"
+        - "PUSH t30"
+        - "XOR t30 t30 t30"
+        - "LLI t30 $"
+        - "LW t30 0(t30)"
+        - "LJMP 0(t30)"
+    - mnemonic: "INT_INNR"
+      args:
+        - [ "$" ]
+      unwrap_rules:
+        - "SET_INT 1"
+        - "XOR t30 t30 t30"
+        - "ADDI t30 t29 0"
+        - "PUSH t30"
+        - "GET_NZVC t30"
+        - "PUSH t30"
+        - "XOR t30 t30 t30"
+        - "LLI t30 $"
+        - "LW t30 0(t30)"
+        - "LJMP 0(t30)"
+    - mnemonic: "IRET"
+      args:
+      unwrap_rules:
+        - "LW t30 0(t31)"
+        - "SET_NZVC t30"
+        - "POP"
+        - "LW t30 0(t31)"
+        - "POP"
+        - "SET_INT 0"
+        - "LJMP 0(t30)"
 # FEW TICKS COMMANDS
 # INT
 # SET_INT_FLAG 1    ; setting interruption mode

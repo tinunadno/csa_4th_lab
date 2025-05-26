@@ -15,11 +15,13 @@ MAIN_EMULATOR_PATH = (TEST_DIR / "../../src/emulator_2_0/main.py").resolve()
 assert MAIN_COMPILER_PATH.exists(), f"File {MAIN_COMPILER_PATH} doesn't exist!"
 assert MAIN_EMULATOR_PATH.exists(), f"File {MAIN_EMULATOR_PATH} doesn't exist!"
 
+
 def run_command(cmd):
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         pytest.fail(f"Command failed: {result.stderr}")
     return result.stdout
+
 
 def run_default(name, golden) -> [str, str]:
     test_cases_path = Path("tests/golden_tests/test_cases/")
@@ -36,7 +38,6 @@ def run_default(name, golden) -> [str, str]:
     return out_comp, out_emul
 
 
-
 @pytest.mark.golden_test("test_cases/factorial/test_conf.yaml")
 def test_factorial(golden: GoldenTestFixture):
     name = "factorial"
@@ -44,6 +45,8 @@ def test_factorial(golden: GoldenTestFixture):
 
     assert out_comp == golden.out["output_compiler"]
     assert out_emul == golden.out["output"]
+
+
 @pytest.mark.golden_test("test_cases/get_put_char/test_conf.yaml")
 def test_get_put_char(golden: GoldenTestFixture):
     name = "get_put_char"
@@ -52,6 +55,7 @@ def test_get_put_char(golden: GoldenTestFixture):
     assert out_comp == golden.out["output_compiler"]
     assert out_emul == golden.out["output"]
 
+
 @pytest.mark.golden_test("test_cases/hello/test_conf.yaml")
 def test_hello(golden: GoldenTestFixture):
     name = "hello"
@@ -59,6 +63,7 @@ def test_hello(golden: GoldenTestFixture):
 
     assert out_comp == golden.out["output_compiler"]
     assert out_emul == golden.out["output"]
+
 
 @pytest.mark.golden_test("test_cases/inserted_interruptions/test_conf.yaml")
 def test_inserted_interruptions(golden: GoldenTestFixture):
@@ -77,6 +82,7 @@ def test_load_immediate(golden: GoldenTestFixture):
     assert out_comp == golden.out["output_compiler"]
     assert out_emul == golden.out["output"]
 
+
 @pytest.mark.golden_test("test_cases/not/test_conf.yaml")
 def test_not(golden: GoldenTestFixture):
     name = "not"
@@ -85,6 +91,7 @@ def test_not(golden: GoldenTestFixture):
     assert out_comp == golden.out["output_compiler"]
     assert out_emul == golden.out["output"]
 
+
 @pytest.mark.golden_test("test_cases/euler2/test_conf.yaml")
 def test_euler2(golden: GoldenTestFixture):
     name = "euler2"
@@ -92,6 +99,7 @@ def test_euler2(golden: GoldenTestFixture):
 
     assert out_comp == golden.out["output_compiler"]
     assert out_emul == golden.out["output"]
+
 
 @pytest.mark.golden_test("test_cases/log_test/test_conf.yaml")
 def test_log(golden: GoldenTestFixture):

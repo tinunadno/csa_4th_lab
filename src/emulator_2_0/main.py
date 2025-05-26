@@ -4,8 +4,6 @@ from src.emulator_2_0.parsing.pipeline_loader import parse_config
 import sys
 
 # TODO add code quality control                 (a 'don 'nou 'wat is it)
-# TODO add CI                                   (probably hard)
-# TODO may be clean code up
 # TODO add report
 
 if __name__ == "__main__":
@@ -17,5 +15,5 @@ if __name__ == "__main__":
     abs_config_path = (base_dir / config_path).resolve()
     internal_conf_path = str(abs_config_path)
     user_conf_path = sys.argv[2]
-    max_tick, logger_ = parse_config(internal_conf_path,  user_conf_path, bin_data)
+    max_tick, logger_ = parse_config(internal_conf_path, user_conf_path, bin_data)
     logger_.start(max_tick)

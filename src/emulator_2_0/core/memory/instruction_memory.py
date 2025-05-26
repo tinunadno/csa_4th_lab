@@ -6,10 +6,12 @@ class instruction_memory:
         self.instructions = instructions.copy()
         self.inst_mnemonics = [reconstruct_command(i, cmd_desc) for i in self.instructions]
         self.nop = 0
+
     def get_instruction(self, address: int) -> int:
         if address >= len(self.instructions):
             return self.nop
         return self.instructions[address]
+
     def get_memory_view(self, data_start, data_end) -> list[str]:
         ret = ["INSTRUCTION MEMORY:", "ADDRESS    | INSTRUCTION"]
         if len(self.instructions) < 16:

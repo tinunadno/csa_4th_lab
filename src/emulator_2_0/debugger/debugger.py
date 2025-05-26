@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 
 from src.common_utils.log_utils import glue_string_lists
 
+
 class debug_state:
     def __init__(self, commands):
         self.log_blocks = [[], [], []]
@@ -15,16 +16,20 @@ class debug_state:
         self.commands = commands
         self.break_points = []
 
+
 class command(ABC):
 
     def __init__(self, pl: pipeline):
         self.pl = pl
+
     @abstractmethod
     def get_command_name(self) -> str:
         pass
+
     @abstractmethod
     def get_command_desc(self) -> str:
         pass
+
     @abstractmethod
     def handle(self, cmd: str, db_state: debug_state):
         pass
@@ -39,11 +44,14 @@ class command(ABC):
         print("\n".join(self.pl.regs.get_logs()))
         db_state.performed_tick = True
 
+
 class tick_command(command):
     def get_command_name(self) -> str:
         return "tick"
+
     def get_command_desc(self) -> str:
         return "perform pipeline tick"
+
     def handle(self, cmd: str, db_state: debug_state):
         arg = int(cmd[cmd.find(" ") + 1:])
         os.system('clear')
@@ -53,53 +61,69 @@ class tick_command(command):
             counter += 1
         if db_state.performed_tick:
             db_state.log_blocks[0] = self.pl.last_tick_logs
-            db_state.log_blocks[1] = self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0], db_state.last_data_mem_cut[1])
+            db_state.log_blocks[1] = self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0],
+                                                                      db_state.last_data_mem_cut[1])
         else:
             db_state.log_blocks = [self.pl.last_tick_logs,
-                                   self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0], db_state.last_data_mem_cut[1]),
-                                   self.pl.inst_mem.get_memory_view(db_state.last_inst_mem_cut[0], db_state.last_inst_mem_cut[1])]
+                                   self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0],
+                                                                    db_state.last_data_mem_cut[1]),
+                                   self.pl.inst_mem.get_memory_view(db_state.last_inst_mem_cut[0],
+                                                                    db_state.last_inst_mem_cut[1])]
         self.print_default(db_state)
         db_state.performed_tick = True
+
 
 class mem_slice(command):
     def get_command_name(self) -> str:
         return "mem_slice"
+
     def get_command_desc(self) -> str:
         return "show memory slice"
+
     def handle(self, cmd: str, db_state: debug_state):
         if not db_state.performed_tick:
             print("PERFORM A TICK FIRST!")
         os.system('clear')
         db_state.last_data_mem_cut[0], db_state.last_data_mem_cut[1] = list(map(int, cmd.split(' ')[1:]))
-        db_state.log_blocks[1] = self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0], db_state.last_data_mem_cut[1])
+        db_state.log_blocks[1] = self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0],
+                                                                  db_state.last_data_mem_cut[1])
         self.print_default(db_state)
         db_state.performed_tick = True
+
 
 class inst_slice(command):
     def get_command_name(self) -> str:
         return "inst_slice"
+
     def get_command_desc(self) -> str:
         return "show instruction memory slice"
+
     def handle(self, cmd: str, db_state: debug_state):
         if not db_state.performed_tick:
             print("PERFORM A TICK FIRST!")
         os.system('clear')
         db_state.last_inst_mem_cut[0], db_state.last_inst_mem_cut[1] = list(map(int, cmd.split(' ')[1:]))
-        db_state.log_blocks[1] = self.pl.inst_mem.get_memory_view(db_state.last_inst_mem_cut[0], db_state.last_inst_mem_cut[1])
+        db_state.log_blocks[1] = self.pl.inst_mem.get_memory_view(db_state.last_inst_mem_cut[0],
+                                                                  db_state.last_inst_mem_cut[1])
         self.print_default(db_state)
+
 
 class decomp_slice(command):
     def get_command_name(self) -> str:
         return "dec_slice"
+
     def get_command_desc(self) -> str:
         return "show instruction memory slice but decompiled"
+
     def handle(self, cmd: str, db_state: debug_state):
         if not db_state.performed_tick:
             print("PERFORM A TICK FIRST!")
         os.system('clear')
         db_state.last_inst_mem_cut[0], db_state.last_inst_mem_cut[1] = list(map(int, cmd.split(' ')[1:]))
-        db_state.log_blocks[0] = self.pl.inst_mem.get_decompiled_memory_view(db_state.last_inst_mem_cut[0], db_state.last_inst_mem_cut[1])
+        db_state.log_blocks[0] = self.pl.inst_mem.get_decompiled_memory_view(db_state.last_inst_mem_cut[0],
+                                                                             db_state.last_inst_mem_cut[1])
         self.print_default(db_state)
+
 
 class break_cmd(command):
     def get_command_name(self) -> str:
@@ -112,21 +136,27 @@ class break_cmd(command):
         addr = int(cmd.split(' ')[1])
         db_state.break_points.append(addr)
 
+
 class show_bp(command):
     def get_command_name(self) -> str:
         return "show_bp"
+
     def get_command_desc(self) -> str:
         return "show break points"
+
     def handle(self, cmd: str, db_state: debug_state):
         os.system('clear')
         db_state.log_blocks[0] = list(map(str, db_state.break_points))
         self.print_default(db_state)
 
+
 class run(command):
     def get_command_name(self) -> str:
         return "run"
+
     def get_command_desc(self) -> str:
         return "perform ticks until end or break points"
+
     def handle(self, cmd: str, db_state: debug_state):
         os.system('clear')
         current_pc = self.pl.regs.get_reg("PC")
@@ -135,11 +165,14 @@ class run(command):
             current_pc = self.pl.regs.get_reg("PC")
         if db_state.performed_tick:
             db_state.log_blocks[0] = self.pl.last_tick_logs
-            db_state.log_blocks[1] = self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0], db_state.last_data_mem_cut[1])
+            db_state.log_blocks[1] = self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0],
+                                                                      db_state.last_data_mem_cut[1])
         else:
             db_state.log_blocks = [self.pl.last_tick_logs,
-                                   self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0], db_state.last_data_mem_cut[1]),
-                                   self.pl.inst_mem.get_memory_view(db_state.last_inst_mem_cut[0], db_state.last_inst_mem_cut[1])]
+                                   self.pl.data_mem.get_memory_view(db_state.last_data_mem_cut[0],
+                                                                    db_state.last_data_mem_cut[1]),
+                                   self.pl.inst_mem.get_memory_view(db_state.last_inst_mem_cut[0],
+                                                                    db_state.last_inst_mem_cut[1])]
         db_state.performed_tick = True
         self.print_default(db_state)
 
@@ -147,8 +180,10 @@ class run(command):
 class help(command):
     def get_command_name(self) -> str:
         return "help"
+
     def get_command_desc(self) -> str:
         return "show available commands_descriptions"
+
     def handle(self, cmd: str, db_state: debug_state):
         if not db_state.performed_tick:
             print("type 'tick' to start")
@@ -159,8 +194,8 @@ class help(command):
         db_state.log_blocks[0] = resulting_message
         self.print_default(db_state)
 
-def process_command(cmd, db_state: debug_state):
 
+def process_command(cmd, db_state: debug_state):
     if " " in cmd:
         cmd_name = cmd[:cmd.find(" ")]
     else:
@@ -173,9 +208,9 @@ def process_command(cmd, db_state: debug_state):
             #     print(f"oops, got an exception: {e}")
 
 
-
 def init_debug(pl: pipeline):
-    cmd_handlers = [tick_command(pl), mem_slice(pl), inst_slice(pl), decomp_slice(pl), help(pl), break_cmd(pl), show_bp(pl), run(pl)]
+    cmd_handlers = [tick_command(pl), mem_slice(pl), inst_slice(pl), decomp_slice(pl), help(pl), break_cmd(pl),
+                    show_bp(pl), run(pl)]
     db_state = debug_state(cmd_handlers)
     print("type help to start")
     while db_state.pl_running:

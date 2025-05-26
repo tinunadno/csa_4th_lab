@@ -14,7 +14,8 @@ def reconstruct_command(instruction: int, inst_desc):
     for i in inst_desc["decoding_rules"]:
         if i["type"] == current_c_type:
 
-            if int(''.join(list(map(str, i["functional_bits_match"]))), 2) == get_int_cut(instruction, type_desc["bit_layout"]["funct"]["bits"]):
+            if int(''.join(list(map(str, i["functional_bits_match"]))), 2) == get_int_cut(instruction,
+                                                                        type_desc["bit_layout"]["funct"]["bits"]):
                 mnemonic = i["mnemonic"]
                 args: list[list[str]] = i["args"]
                 if args == None:

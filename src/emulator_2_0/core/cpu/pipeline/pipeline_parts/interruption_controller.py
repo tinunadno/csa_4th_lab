@@ -14,11 +14,12 @@ class interruption_controller:
 
     def init_interruption_code(self, config):
         # compiling interruption instruction to force plug it in the pipeline
-        self.interruption_code = unwrap_command("INT_INNR " + str(self.interruption_vector), config["instructions"], [config["registers"]["lower"], config["registers"]["upper"]])
+        self.interruption_code = unwrap_command("INT_INNR " + str(self.interruption_vector), config["instructions"],
+                                                [config["registers"]["lower"], config["registers"]["upper"]])
 
     def is_interruption(self) -> bool:
         for i in self.interruptions:
             if i[0] == self.current_tick:
-                self.data_mem_.write(self.mem_cell, i[1], is_int_controller = True)
+                self.data_mem_.write(self.mem_cell, i[1], is_int_controller=True)
                 return True
         return False

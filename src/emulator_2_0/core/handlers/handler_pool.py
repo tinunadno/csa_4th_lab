@@ -18,20 +18,20 @@ def do_data_forward(df_signals: pipeline_signal, r_dest, value, stage, tick_logs
     )
     tick_logs.append(f"[{stage}] Current forwarding head: reg[{current_forward[0]}] = 0x{current_forward[1]:X}")
 
-    # Сдвигаем очередь:
-    # 1. Переносим первый элемент во второй
     df_signals.set_signal("snd_reg_num", current_forward[0])
     df_signals.set_signal("snd_reg_val", current_forward[1])
     df_signals.set_signal("is_snd_forwarded", current_forward[2])
 
-    # 2. Новое значение в начало очереди
     df_signals.set_signal("fst_reg_num", r_dest)
     df_signals.set_signal("fst_reg_val", value)
     df_signals.set_signal("is_fst_forwarded", 1)
 
     tick_logs.append(f"[{stage}] Updated forwarding queue:")
-    tick_logs.append(f"  [NEW] reg[{df_signals.get_signal("fst_reg_num")}] = 0x{df_signals.get_signal("fst_reg_val"):X}, valid = {df_signals.get_signal("is_fst_forwarded")}")
-    tick_logs.append(f"  [SHIFTED] reg[{df_signals.get_signal("snd_reg_num")}] = 0x{df_signals.get_signal("snd_reg_val"):X}, valid = {df_signals.get_signal("is_snd_forwarded")}")
+    tick_logs.append(
+        f"  [NEW] reg[{df_signals.get_signal("fst_reg_num")}] = 0x{df_signals.get_signal("fst_reg_val"):X}, valid = {df_signals.get_signal("is_fst_forwarded")}")
+    tick_logs.append(
+        f"  [SHIFTED] reg[{df_signals.get_signal("snd_reg_num")}] = 0x{df_signals.get_signal("snd_reg_val"):X}, valid = {df_signals.get_signal("is_snd_forwarded")}")
+
 
 def get_data_forward(df_signals: pipeline_signal, r_dest, value, stage, tick_logs):
     current_forward = (
@@ -43,8 +43,6 @@ def get_data_forward(df_signals: pipeline_signal, r_dest, value, stage, tick_log
         df_signals.get_signal("is_snd_forwarded")
     )
 
-
-
     if current_forward[0] == r_dest and current_forward[2] == 1:
         tick_logs.append(f"f[{stage}] Got forward {current_forward[1]} for reg[{r_dest}]")
         return current_forward[1]
@@ -52,45 +50,42 @@ def get_data_forward(df_signals: pipeline_signal, r_dest, value, stage, tick_log
         tick_logs.append(f"f[{stage}] Got forward {current_forward[1]} for reg[{r_dest}]")
         return current_forward[4]
     return value
+
+
 class handler(ABC):
     @abstractmethod
     def handle(self, args: list[any], is_valid: bool, tick_logs: list[str]) -> bool:
         pass
 
 
-# dependencies: [ "data_memory", "registers", "MEM_signal", "DF_signal", "WB_signal", "ALU_output" ]
 class MEM_handler(handler):
     def handle(self, args: list[any], is_valid: bool, tick_logs: list[str]) -> bool:
         """Обработчик стадии MEM с forwarding-очередью и логированием"""
         if not is_valid:
             tick_logs.append(f"[MEM] Not a valid stage")
             return False
-        # Логирование начала обработки
+
         tick_logs.append(f"[MEM] Starting memory stage processing")
 
-        # Распаковка аргументов
         mem: data_mem = args[0]
         regs: registers = args[1]
         mem_signals: pipeline_signal = args[2]
-        df_signals: pipeline_signal = args[3]  # Forwarding queue
+        df_signals: pipeline_signal = args[3]
         wb_signal: pipeline_signal = args[4]
         alu_output: pipeline_signal = args[5]
 
-        # Проверка необходимости работы с памятью
         if not mem_signals.get_signal("need_mem"):
             tick_logs.append("[MEM] Memory access not needed, skipping")
             return True
 
-        # Получение сигналов
         need_write = mem_signals.get_signal("need_write")
         write_byte = mem_signals.get_signal("wb")
         register_dest = mem_signals.get_signal("reg_dest")
         address = alu_output.get_signal("value")
 
         tick_logs.append(f"[MEM] Address: 0x{address:X}, Operation: {'WRITE' if need_write else 'READ'}, "
-              f"Type: {'BYTE' if write_byte else 'WORD'}, Reg: {register_dest}")
+                         f"Type: {'BYTE' if write_byte else 'WORD'}, Reg: {register_dest}")
 
-        # Операция записи
         if need_write:
             value = regs.get_reg(register_dest)
             if write_byte:
@@ -101,17 +96,13 @@ class MEM_handler(handler):
                 mem.write(address, value)
             return True
 
-        # Операция чтения
         value = mem.read(address) if not write_byte else mem.read_byte(address)
         tick_logs.append(f"[MEM] Read value: 0x{value:X} from 0x{address:X}")
 
-        # Подготовка для WB
         alu_output.set_signal("value", value)
         wb_signal.set_signal("reg_dest", register_dest)
         tick_logs.append(f"[MEM] Prepared WB: reg[{register_dest}] = 0x{value:X}")
 
-        # Работа с forwarding очередью (FIFO)
-        # Получаем текущее состояние
         current_forward = (
             df_signals.get_signal("fst_reg_num"),
             df_signals.get_signal("fst_reg_val"),
@@ -124,9 +115,9 @@ class MEM_handler(handler):
         return True
 
 
-# args: [ "instruction_memory", "registers", "stall", "PC", "IR", "NOP_CMD" ]
 class instruction_load_handler(handler):
     inserted_commands = []
+
     def handle(self, args: list[any], is_valid, tick_logs: list[str]) -> bool:
         tick_logs.append("[IF] Started instruction fetch stage")
         regs: registers = args[1]
@@ -160,11 +151,11 @@ class instruction_load_handler(handler):
         ir_val = i_mem.get_instruction(pc_value)
         regs.set_reg(ir_reg_name, ir_val)
         regs.set_reg(pc_reg_name, pc_value + 1)
-        tick_logs.append(f"[IF] Fetched instruction, {ir_reg_name} = {hex(ir_val)} | {bin(ir_val)}, {pc_reg_name} = {hex(pc_value + 1)}")
+        tick_logs.append(
+            f"[IF] Fetched instruction, {ir_reg_name} = {hex(ir_val)} | {bin(ir_val)}, {pc_reg_name} = {hex(pc_value + 1)}")
         return True
 
 
-# args: [ "instruction_memory", "registers", "stall", "PC", "IR", "NOP_CMD"]
 class instruction_decoder_handler(handler):
     def __init__(self, c_types: command_types, commands_desc):
         self.c_types = c_types
@@ -250,10 +241,10 @@ class instruction_decoder_handler(handler):
 class ALU_execution_handler(handler):
     def __init__(self):
         self.flags = {
-            'N': False,  # Negative
-            'Z': False,  # Zero
-            'V': False,  # Overflow
-            'C': False  # Carry
+            'N': False,
+            'Z': False,
+            'V': False,
+            'C': False
         }
         self.last_result = 0
 
@@ -283,23 +274,23 @@ class ALU_execution_handler(handler):
             b = self._to_signed32(b)
             res = self._to_signed32(result)
 
-            # Overflow flag
             self.flags['V'] = ((a ^ res) & (b ^ res)) < 0
-            # Carry flag
+
             self.flags['C'] = (result >> 32) & 1
+
     def get_nzvc(self) -> int:
         ret = 0
         for i in self.flags.items():
             ret <<= 4
             ret |= int(i[1] == 1) & 0xF
         return ret
+
     def set_nzvc(self, nzvc: int):
         temp = list(self.flags.items())
         for i in temp[::-1]:
             self.flags[i[0]] = nzvc & 0xF != 0
             nzvc >>= 4
 
-    # args: [ "EX_signal", "ALU_output", "WB_signal", "DF_signal", "MEM_signal", "registers" ]
     def handle(self, args: list[any], is_valid: bool, tick_logs: list[str]) -> bool:
         """
         Обработчик стадии выполнения (EX) с поддержкой флагов и кастов
@@ -317,8 +308,6 @@ class ALU_execution_handler(handler):
         df_signals: pipeline_signal = args[3]
         mem_signals: pipeline_signal = args[4]
 
-
-        # Получаем все управляющие сигналы
         signals = {
             'reg1': ex_signal.get_signal("reg1"),
             'reg2': ex_signal.get_signal("reg2"),
@@ -342,8 +331,6 @@ class ALU_execution_handler(handler):
             "FORCE_ENABLE_FORWARDING": ex_signal.get_signal("FORCE_ENABLE_FORWARDING")
         }
 
-
-
         need_mem = mem_signals.get_signal("need_mem")
         need_wb = wb_signals.get_signal("need_wb")
         df_destination = wb_signals.get_signal("reg_dest")
@@ -353,7 +340,6 @@ class ALU_execution_handler(handler):
 
         tick_logs.append(f"[EX] Starting execution with signals: {signals}")
 
-        # Приводим операнды к 32-битным значениям
         reg1 = self._to_unsigned32(signals['reg1'])
         reg2 = self._to_unsigned32(signals['reg2'])
         result = 0
@@ -364,21 +350,23 @@ class ALU_execution_handler(handler):
             return True
 
         if signals['get_nzvc'] != 0:
-            tick_logs.append(f"[EX] returning nzvc: {self.flags["N"], self.flags["Z"], self.flags["V"], self.flags["C"]}")
+            tick_logs.append(
+                f"[EX] returning nzvc: {self.flags["N"], self.flags["Z"], self.flags["V"], self.flags["C"]}")
             alu_output.set_signal("value", self._to_unsigned32(self.get_nzvc()))
             tick_logs.append(f"setted this value to ALU output signal: {self._to_unsigned32(self.get_nzvc())}")
             do_data_forward(df_signals, df_destination, self._to_unsigned32(self.get_nzvc()), "EX", tick_logs)
             return True
 
         try:
-            # Арифметические операции
+
             if signals['add']:
                 reg2 = -self._to_signed32(reg2) if signals['neg_second'] else self._to_signed32(reg2)
                 result = self._to_signed32(reg1) + reg2
                 self._update_flags(result, (reg1, reg2), signals['discard_nzvc'])
-                tick_logs.append(f"[EX] ADD operation: {reg1} {'-' if signals['neg_second'] else '+'} {reg2} = {result}")
+                tick_logs.append(
+                    f"[EX] ADD operation: {reg1} {'-' if signals['neg_second'] else '+'} {reg2} = {result}")
 
-            # Логические операции (беззнаковые)
+
             elif signals['and']:
                 if signals['neg_second']:
                     result = reg1 | reg2
@@ -393,27 +381,29 @@ class ALU_execution_handler(handler):
                 self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
                 tick_logs.append(f"[EX] XOR operation: {reg1} ^ {reg2} = {result}")
 
-            # Операции сдвига
+
             elif signals['need_shift']:
-                shift_amount = reg2  # Ограничиваем 5 битами
+                shift_amount = reg2
                 if signals['cycl']:
-                    if signals['sh_dir']:  # Циклический влево
+                    if signals['sh_dir']:
                         result = ((reg1 << shift_amount) | (reg1 >> (32 - shift_amount))) & 0xFFFFFFFF
-                    else:  # Циклический вправо
+                    else:
                         result = ((reg1 >> shift_amount) | (reg1 << (32 - shift_amount))) & 0xFFFFFFFF
-                    tick_logs.append(f"[EX] {'ROL' if signals['sh_dir'] else 'ROR'}: {reg1} by {shift_amount} = {result}")
+                    tick_logs.append(
+                        f"[EX] {'ROL' if signals['sh_dir'] else 'ROR'}: {reg1} by {shift_amount} = {result}")
                 else:
                     if signals['sh_dir']:
                         result = (reg1 >> shift_amount) & 0xFFFFFFFF
                     else:
                         result = (reg1 << shift_amount) & 0xFFFFFFFF
                         pass
-                    tick_logs.append(f"[EX] {'SHL' if signals['sh_dir'] else 'SHR'}: {reg1} by {shift_amount} = {result}")
+                    tick_logs.append(
+                        f"[EX] {'SHL' if signals['sh_dir'] else 'SHR'}: {reg1} by {shift_amount} = {result}")
                 self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
 
-            # Операции сравнения/перехода
+
             elif signals['comp']:
-                result = reg1  # По умолчанию - не изменяем адрес
+                result = reg1
                 condition_met = False
                 comp_num = signals['comp_num']
                 if comp_num == 0 and self.flags['Z']:
@@ -433,7 +423,7 @@ class ALU_execution_handler(handler):
                 else:
                     tick_logs.append(f"[EX] Branch not taken (condition not met)")
 
-            # Умножение/деление
+
             elif signals['mul']:
                 reg2 = self._to_signed32(reg2)
                 reg1 = self._to_signed32(reg1)
@@ -461,7 +451,6 @@ class ALU_execution_handler(handler):
                     tick_logs.append("[EX] Division by zero in REM!")
                 self._update_flags(result, discard_nzvc=signals['discard_nzvc'])
 
-            # Сохраняем результат
             self.last_result = result
             alu_output.set_signal("value", self._to_unsigned32(result))
 
@@ -486,7 +475,6 @@ class ALU_execution_handler(handler):
             raise
 
 
-# [ "registers", "WB_signal" ]
 class register_handler(handler):
     def handle(self, args: list[any], is_valid: bool, tick_logs: list[str]) -> bool:
         if not is_valid:
@@ -514,9 +502,6 @@ class register_handler(handler):
             tick_logs.append(f"[WB] writing t{reg_dest} = {value}")
             regs.set_reg(reg_dest, value)
         return True
-    # def __init__(self, c_types: command_types, commands_desc):
-    #     self.c_types = c_types
-    #     self.commands_desc = commands_desc
 
 
 class handler_pool:

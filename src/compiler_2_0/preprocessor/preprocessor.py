@@ -1,6 +1,7 @@
 from src.compiler_2_0.translator.primitive_parsers import parse_int
 import re
 
+
 def process_type_size(line: str):
     if ".word" in line:
         return 4
@@ -53,20 +54,19 @@ def parse_word_line(line: str, labels) -> int:
         )
 
 
-
-
 def parse_buffer(line: str) -> list[int]:
     if ":" in line:
         line = line[line.find(":") + 1:]
     buf_data = line.replace(".buf", "").replace("'", "").strip()
     if '/' in buf_data:
-        bytes_str = ['0x'+i for i in buf_data[1:].split("/")]
+        bytes_str = ['0x' + i for i in buf_data[1:].split("/")]
         return [int(b, 16) for b in bytes_str]
     else:
         try:
             return list(buf_data.encode('utf-8').decode('unicode_escape').encode('latin1'))
         except UnicodeError:
             raise ValueError(f"Invalid byte string: {buf_data}")
+
 
 def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]):
     code = code.split(line_splitter)
@@ -136,7 +136,7 @@ def substitute_labels(data_lines: list[str], text_lines: list[str], labels, long
             data_section.append([current_address, bytearray()])
         for line in data_lines:
             if ".org" in line:
-                line = line[line.find(".org") + 4 : ]
+                line = line[line.find(".org") + 4:]
                 value = parse_int(line.strip())
                 current_address = value
                 data_section.append([current_address, bytearray()])
@@ -157,9 +157,9 @@ def substitute_labels(data_lines: list[str], text_lines: list[str], labels, long
     text_address = 0
     for line in text_lines:
         if ":" in line:
-            line = line[line.find(":") + 1 :].strip()
+            line = line[line.find(":") + 1:].strip()
 
-        mnemonic = line[ : line.find(" ")]
+        mnemonic = line[: line.find(" ")]
         if line == '':
             continue
         for i in labels.items():

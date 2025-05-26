@@ -42,12 +42,12 @@ def parse_bin_file(bin_data: bytearray) -> dict:
 
     return result
 
+
 def parse_user_config(user_config_path) -> dict:
     with open(user_config_path) as conf:
         u_conf = yaml.safe_load(conf)
 
     return u_conf
-
 
 
 def parse_config(config_path: str, user_config_path: str, executable_bin_stuff: bytearray) -> [int, logger]:
@@ -75,7 +75,6 @@ def parse_config(config_path: str, user_config_path: str, executable_bin_stuff: 
         if "output" in u_conf["io_mem_map"]:
             output_addr = u_conf["io_mem_map"]["output"]["port"]
             pref_size = max(pref_size, output_addr + 4)
-
 
     data_mem_ = data_mem(pref_size, loaded_data['data_clusters'], output_addr)
     # __init__(self, interruptions: list[list[int]], interruption_vector: int, mem_cell, conf, data_mem_: data_mem):

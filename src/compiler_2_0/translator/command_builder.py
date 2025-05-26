@@ -1,4 +1,3 @@
-
 from src.common_utils.bitwise_utils import set_int_cut
 from src.compiler_2_0.translator.primitive_parsers import parse_int
 
@@ -134,6 +133,7 @@ def build_command(instruction: str, instructions_format, lower_upper) -> int:
         replacements.append(get_replacement(tokens[i + 1], command_arguments[i][0]))
         replacement = replacements[-1]
         translated_instruction = get_replacement_substitution_rules(replacement, command_arguments[i][1:], type_desc,
-                                                                    translated_instruction, need_crop, shifting_var, shifting_range)
+                                                                    translated_instruction, need_crop, shifting_var,
+                                                                    shifting_range)
 
     return translated_instruction

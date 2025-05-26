@@ -1,4 +1,3 @@
-
 class data_mem:
     def __init__(self, prefered_size, data_clusters: list[int, bytearray], io_mem_cell: int):
         max_size = prefered_size
@@ -12,7 +11,8 @@ class data_mem:
             addr = i[0]
             for j in range(len(i[1])):
                 self.data[j + addr] = i[1][j]
-    def write(self, address: int, value: int, is_int_controller = False) -> None:
+
+    def write(self, address: int, value: int, is_int_controller=False) -> None:
         if address <= self.size - 4:
             tmp_val = value
             for i in range(4):
@@ -22,18 +22,21 @@ class data_mem:
                 self.output.append(value)
         else:
             raise ValueError("Attempting to write memory out of address space")
-    def write_byte(self, address: int, value: int, is_int_controller = False) -> None:
+
+    def write_byte(self, address: int, value: int, is_int_controller=False) -> None:
         if address < self.size:
             self.data[address] = (value & 0xFF)
             if (not is_int_controller) and address == self.io_mem_cell:
                 self.output.append(value & 0xFF)
         else:
             raise ValueError("Attempting to write memory out of address space")
+
     def read_byte(self, address: int) -> int:
         if address < self.size:
             return self.data[address]
         else:
             raise ValueError("Attempting to read memory out of address space")
+
     def read(self, address: int) -> int:
         if address <= self.size - 4:
             ret = 0

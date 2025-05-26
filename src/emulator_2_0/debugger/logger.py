@@ -10,11 +10,13 @@ def mem_logger(pl: pipeline, fmt) -> list[str]:
         ret.extend(pl.data_mem.get_memory_view(i[0], i[1]))
     return ret
 
+
 def decomp_logger(pl: pipeline, fmt) -> list[str]:
     ret = []
     for i in fmt["slice"]:
         ret.extend(pl.inst_mem.get_decompiled_memory_view(i[0], i[1]))
     return ret
+
 
 def reg_logger(pl: pipeline, fmt) -> list[str]:
     ret = []
@@ -25,14 +27,18 @@ def reg_logger(pl: pipeline, fmt) -> list[str]:
         ret.append(f"{i}: {pl.regs.get_reg(i)}")
     return ret
 
+
 def pl_stage_mnems_logger(pl: pipeline, fmt) -> list[str]:
     return ["PIPELINE_STAGES:", pl.get_stages_mnemonics()]
 
-def tick_logger(pl: pipeline, fmt)  -> list[str]:
+
+def tick_logger(pl: pipeline, fmt) -> list[str]:
     return ["TICK: " + str(pl.tick_)]
 
-def int_logger(pl: pipeline, fmt)  -> list[str]:
+
+def int_logger(pl: pipeline, fmt) -> list[str]:
     return ["IN INTERRUPTION: " + str(pl.get_static_signal("INTERRUPT_signal", "is_interrupted") != 0)]
+
 
 def basic_assert(addr, vals, expected, assert_name) -> None:
     print(f"{assert_name} ASSERT:")
@@ -48,6 +54,7 @@ def basic_assert(addr, vals, expected, assert_name) -> None:
             return
     print(f"{assert_name} ASSERTION PASSED")
 
+
 def mem_asserter(pl: pipeline, assert_):
     assert_address_slice = list(range(assert_["slice"][0], assert_["slice"][1] + 1))
     if "byte" in assert_:
@@ -59,19 +66,22 @@ def mem_asserter(pl: pipeline, assert_):
         assert_slice = [''.join([chr(i) for i in assert_slice]).replace("\x00", "\\0")]
     basic_assert(assert_address_slice, assert_slice, expected, "MEM")
 
-def regs_asserter(pl:pipeline, assert_):
+
+def regs_asserter(pl: pipeline, assert_):
     reg_number_slice = assert_["slice"]
     reg_number_vals = [pl.regs.get_reg(i) for i in reg_number_slice]
     expected = assert_["expected"]
     basic_assert(reg_number_vals, reg_number_vals, expected, "REGS")
 
-def output_asserter(pl:pipeline, assert_):
+
+def output_asserter(pl: pipeline, assert_):
     expected = assert_["expected"]
     output_vals = pl.data_mem.output
     if isinstance(expected[0], str):
         output_vals = [''.join([chr(i) for i in output_vals]).replace("\x00", "\\0")]
     output_indexes = range(len(output_vals))
     basic_assert(output_indexes, output_vals, expected, "OUTPUT")
+
 
 class logger:
     def __init__(self, log_conf, pl: pipeline):
@@ -116,7 +126,8 @@ class logger:
         i = 0
         while i < len(log_format):
             if log_format[i] in self.loggers:
-                log_blocks.append(self.loggers[log_format[i]](self.pl, self.log_conf["only_start"]["data"][log_format[i]]))
+                log_blocks.append(
+                    self.loggers[log_format[i]](self.pl, self.log_conf["only_start"]["data"][log_format[i]]))
             else:
                 if log_format[i] != "|":
                     log_blocks[-1][-1] += log_format[i]
@@ -127,6 +138,7 @@ class logger:
                     i += 1
             i += 1
         print("\n".join(["\n".join(i) for i in log_blocks]))
+
     def perform_tick(self):
         self.running = self.pl.tick()
         if not "each_tick" in self.log_conf:
@@ -149,6 +161,7 @@ class logger:
                     i += 1
             i += 1
         print("\n".join(["\n".join(i) for i in log_blocks]))
+
     def print_assertion(self):
         if not "assertion" in self.log_conf:
             return
