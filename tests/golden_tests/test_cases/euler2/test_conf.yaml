@@ -1,4 +1,35 @@
 input: |-
   euler2
-output_compiler:
-output:
+output_compiler: |
+  _start label: {'address': 0, 'section': 'text'} |                   |                                    
+  preprocessed_code                               |                   |                                    
+  addi t3 t4 0                                    |                   |                                    
+  bnez 1                                          |                   |                                    
+  jmp -3                                          |                   |                                    
+  addi t3 t0 0                                    |                   |                                    
+  beqz 7                                          |                   |                                    
+  xor t3 t3 t3                                    |                   | other labels:                      
+  addi t3 t0 0                                    |                   | _start                             
+  add t2 t2 t3                                    | MEMORY CHUNKS     | 	{'address': 0, 'section': 'text'} 
+  mul t3 t3 t3                                    | 0x00000016 | 0x12 | read_loop                          
+  add t1 t3 t1                                    | 0x00000017 | 0x00 | 	{'address': 0, 'section': 'text'} 
+  addi t0 t0 -1                                   | 0x00000018 | 0x00 | loop                               
+  jmp -9                                          | 0x00000019 | 0x00 | 	{'address': 3, 'section': 'text'} 
+  mul t2 t2 t2                                    | ...               | end_loop                           
+  sub t3 t2 t1                                    |                   | 	{'address': 12, 'section': 'text'}
+  lui t2 0x84                                     |                   | int16                              
+  lli t2 0x84                                     |                   | 	{'address': 18, 'section': 'text'}
+  sw 0(t2) t3                                     |                   |                                    
+  halt                                            |                   |                                    
+  lui t0 0x80                                     |                   |                                    
+  lli t0 0x80                                     |                   |                                    
+  lw t0 0(t0)                                     |                   |                                    
+  addi t4 t4 1                                    |                   |                                    
+  iret                                            |                   |                                    
+output: |
+  OUTPUT ASSERT:
+  actual data
+  25164150
+  expected
+  25164150
+  OUTPUT ASSERTION PASSED
