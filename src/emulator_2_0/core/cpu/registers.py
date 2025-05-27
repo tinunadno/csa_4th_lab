@@ -2,10 +2,12 @@ from typing import Union
 
 
 class Registers:
-    def __init__(self, reg_conf: dict, mem_size: int): # type: ignore
+    def __init__(self, reg_conf: dict, mem_size: int):  # type: ignore
         self.regs: list[int] = [0] * reg_conf["register_count"]
         self.common_regs: list[int] = reg_conf["common_registers"]
-        self.special_regs: dict[str, int] = {reg["name"]: reg["number"] for reg in reg_conf["special_registers"]}
+        self.special_regs: dict[str, int] = {
+            reg["name"]: reg["number"] for reg in reg_conf["special_registers"]
+        }
         self.upper: list[int] = reg_conf["upper"]
         self.lower: list[int] = reg_conf["lower"]
         self.set_reg("SP", mem_size)
@@ -39,7 +41,7 @@ class Registers:
             r_num = self.special_regs[reg]
         else:
             r_num = reg
-        self.regs[r_num] |= ((value & mask) << self.upper[0])
+        self.regs[r_num] |= (value & mask) << self.upper[0]
 
     def set_lower(self, reg: Union[int, str], value: int) -> None:
         mask = (1 << (self.lower[1] - self.lower[0] + 1)) - 1

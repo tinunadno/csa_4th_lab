@@ -33,7 +33,9 @@ def run_default(name: str) -> tuple[str, str]:
     assert input_conf.exists(), f"Config file missing: {input_conf}"
 
     out_comp = run_command(["python", str(MAIN_COMPILER_PATH), str(input_asm)])
-    out_emulator = run_command(["python", str(MAIN_EMULATOR_PATH), str(input_bin), str(input_conf)])
+    out_emulator = run_command(
+        ["python", str(MAIN_EMULATOR_PATH), str(input_bin), str(input_conf)]
+    )
 
     return out_comp, out_emulator
 

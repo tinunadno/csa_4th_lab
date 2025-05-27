@@ -4,21 +4,21 @@ from src.emulator_2_0.debugger.debugger import init_debug
 
 
 # mem_logger
-def mem_logger(pl: Pipeline, fmt: dict) -> list[str]: # type: ignore
+def mem_logger(pl: Pipeline, fmt: dict) -> list[str]:  # type: ignore
     ret: list[str] = []
     for i in fmt["slice"]:
         ret.extend(pl.data_mem.get_memory_view(i[0], i[1]))
     return ret
 
 
-def decomp_logger(pl: Pipeline, fmt: dict) -> list[str]: # type: ignore
+def decomp_logger(pl: Pipeline, fmt: dict) -> list[str]:  # type: ignore
     ret: list[str] = []
     for i in fmt["slice"]:
         ret.extend(pl.inst_mem.get_decompiled_memory_view(i[0], i[1]))
     return ret
 
 
-def reg_logger(pl: Pipeline, fmt: dict) -> list[str]: # type: ignore
+def reg_logger(pl: Pipeline, fmt: dict) -> list[str]:  # type: ignore
     ret: list[str] = []
     if fmt["slice"] == "all":
         ret.extend(pl.regs.get_logs())
@@ -28,19 +28,27 @@ def reg_logger(pl: Pipeline, fmt: dict) -> list[str]: # type: ignore
     return ret
 
 
-def pl_stage_mnems_logger(pl: Pipeline, _fmt: dict) -> list[str]: # type: ignore
+def pl_stage_mnems_logger(pl: Pipeline, _fmt: dict) -> list[str]:  # type: ignore
     return ["PIPELINE_STAGES:", pl.get_stages_mnemonics()]
 
 
-def tick_logger(pl: Pipeline, _fmt: dict) -> list[str]: # type: ignore
+def tick_logger(pl: Pipeline, _fmt: dict) -> list[str]:  # type: ignore
     return ["TICK: " + str(pl.tick_)]
 
 
-def int_logger(pl: Pipeline, _fmt: dict) -> list[str]: # type: ignore
-    return ["IN INTERRUPTION: " + str(pl.get_static_signal("INTERRUPT_signal", "is_interrupted") != 0)]
+def int_logger(pl: Pipeline, _fmt: dict) -> list[str]:  # type: ignore
+    return [
+        "IN INTERRUPTION: "
+        + str(pl.get_static_signal("INTERRUPT_signal", "is_interrupted") != 0)
+    ]
 
 
-def basic_assert(addr: list[int], vals: list[int] | list[str], expected: list[int | str], assert_name: str) -> None:
+def basic_assert(
+    addr: list[int],
+    vals: list[int] | list[str],
+    expected: list[int | str],
+    assert_name: str,
+) -> None:
     print(f"{assert_name} ASSERT:")
     print("actual data")
     if len(expected) != 1:
@@ -50,12 +58,14 @@ def basic_assert(addr: list[int], vals: list[int] | list[str], expected: list[in
     print("\t".join(list(map(str, expected))))
     for i in range(len(expected)):
         if vals[i] != expected[i]:
-            print(f"{assert_name} ASSERTION FAILED: {assert_name}[{addr[i]}] {vals[i]} != {expected[i]}")
+            print(
+                f"{assert_name} ASSERTION FAILED: {assert_name}[{addr[i]}] {vals[i]} != {expected[i]}"
+            )
             return
     print(f"{assert_name} ASSERTION PASSED")
 
 
-def mem_asserter(pl: Pipeline, assert_: dict): # type: ignore
+def mem_asserter(pl: Pipeline, assert_: dict):  # type: ignore
     assert_address_slice = list(range(assert_["slice"][0], assert_["slice"][1] + 1))
     if "byte" in assert_:
         assert_slice = [pl.data_mem.read_byte(i) for i in assert_address_slice]
@@ -63,28 +73,28 @@ def mem_asserter(pl: Pipeline, assert_: dict): # type: ignore
         assert_slice = [pl.data_mem.read(i) for i in assert_address_slice]
     expected = assert_["expected"]
     if isinstance(expected[0], str):
-        assert_slice = [''.join([chr(i) for i in assert_slice]).replace("\x00", "\\0")]  # type: ignore
+        assert_slice = ["".join([chr(i) for i in assert_slice]).replace("\x00", "\\0")]  # type: ignore
     basic_assert(assert_address_slice, assert_slice, expected, "MEM")
 
 
-def regs_asserter(pl: Pipeline, assert_: dict): # type: ignore
+def regs_asserter(pl: Pipeline, assert_: dict):  # type: ignore
     reg_number_slice = assert_["slice"]
     reg_number_vals = [pl.regs.get_reg(i) for i in reg_number_slice]
     expected = assert_["expected"]
     basic_assert(reg_number_vals, reg_number_vals, expected, "REGS")
 
 
-def output_asserter(pl: Pipeline, assert_: dict): # type: ignore
+def output_asserter(pl: Pipeline, assert_: dict):  # type: ignore
     expected = assert_["expected"]
     output_vals = pl.data_mem.output
     if isinstance(expected[0], str):
-        output_vals = [''.join([chr(i) for i in output_vals]).replace("\x00", "\\0")]  # type: ignore
+        output_vals = ["".join([chr(i) for i in output_vals]).replace("\x00", "\\0")]  # type: ignore
     output_indexes = list(range(len(output_vals)))
     basic_assert(output_indexes, output_vals, expected, "OUTPUT")
 
 
 class Logger:
-    def __init__(self, log_conf, pl: Pipeline): # type: ignore
+    def __init__(self, log_conf, pl: Pipeline):  # type: ignore
         self.log_conf = log_conf
         self.pl = pl
         self.running = True
@@ -94,12 +104,12 @@ class Logger:
             "regs": reg_logger,
             "pl_stage_mnemonics": pl_stage_mnems_logger,
             "tick": tick_logger,
-            "is_interruption": int_logger
+            "is_interruption": int_logger,
         }
         self.asserters = {
             "mem": mem_asserter,
             "regs": regs_asserter,
-            "output": output_asserter
+            "output": output_asserter,
         }
 
     def start(self, max_tick: int) -> None:
@@ -127,13 +137,23 @@ class Logger:
         while i < len(log_format):
             if log_format[i] in self.loggers:
                 log_blocks.append(
-                    self.loggers[log_format[i]](self.pl, self.log_conf["only_start"]["data"][log_format[i]]))
+                    self.loggers[log_format[i]](
+                        self.pl, self.log_conf["only_start"]["data"][log_format[i]]
+                    )
+                )
             else:
                 if log_format[i] != "|":
                     log_blocks[-1][-1] += log_format[i]
                 else:
-                    nu_block = glue_string_lists([log_blocks[-1], self.loggers[log_format[i + 1]]
-                    (self.pl, self.log_conf["only_start"]["data"][log_format[i + 1]])])
+                    nu_block = glue_string_lists(
+                        [
+                            log_blocks[-1],
+                            self.loggers[log_format[i + 1]](
+                                self.pl,
+                                self.log_conf["only_start"]["data"][log_format[i + 1]],
+                            ),
+                        ]
+                    )
                     log_blocks[-1] = nu_block
                     i += 1
             i += 1
@@ -150,13 +170,23 @@ class Logger:
         while i < len(log_format):
             if log_format[i] in self.loggers:
                 log_blocks.append(
-                    self.loggers[log_format[i]](self.pl, self.log_conf["each_tick"]["data"][log_format[i]]))
+                    self.loggers[log_format[i]](
+                        self.pl, self.log_conf["each_tick"]["data"][log_format[i]]
+                    )
+                )
             else:
                 if log_format[i] != "|":
                     log_blocks[-1][-1] += log_format[i]
                 else:
-                    nu_block = glue_string_lists([log_blocks[-1], self.loggers[log_format[i + 1]]
-                    (self.pl, self.log_conf["each_tick"]["data"][log_format[i + 1]])])
+                    nu_block = glue_string_lists(
+                        [
+                            log_blocks[-1],
+                            self.loggers[log_format[i + 1]](
+                                self.pl,
+                                self.log_conf["each_tick"]["data"][log_format[i + 1]],
+                            ),
+                        ]
+                    )
                     log_blocks[-1] = nu_block
                     i += 1
             i += 1

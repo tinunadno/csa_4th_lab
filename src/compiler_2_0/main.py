@@ -10,8 +10,15 @@ from src.compiler_2_0.translator.command_unwrapper import unwrap_command
 from src.common_utils.log_utils import glue_string_lists
 
 
-def print_compilation_info(text_section: list[str], labels_: dict[str, dict[str, int]], mem: list[tuple[int, bytearray]]) -> None:
-    text_section = [f"_start label: {labels_["_start"]}", "preprocessed_code"] + text_section
+def print_compilation_info(
+    text_section: list[str],
+    labels_: dict[str, dict[str, int]],
+    mem: list[tuple[int, bytearray]],
+) -> None:
+    text_section = [
+        f"_start label: {labels_['_start']}",
+        "preprocessed_code",
+    ] + text_section
     mem_list = ["MEMORY CHUNKS"]
     for chunk in mem:
         current_pointer = chunk[0]
@@ -40,10 +47,12 @@ if __name__ == "__main__":
         for i in inst_desc["complex_decoding_rules"]:
             l_cmd[i["mnemonic"]] = len(i["unwrap_rules"])
         abs_code_path = os.path.abspath(code_file_path)
-        abs_code_path = abs_code_path[:abs_code_path.rfind("/") + 1]
+        abs_code_path = abs_code_path[: abs_code_path.rfind("/") + 1]
         some_code = preprocess_macros(some_code, abs_code_path)
         labels, txt_lines, data_lines = find_labels(some_code, "\n", l_cmd)
-        text_section_proceed, data_section = substitute_labels(data_lines, txt_lines, labels, l_cmd) # type: ignore
+        text_section_proceed, data_section = substitute_labels(
+            data_lines, txt_lines, labels, l_cmd
+        )  # type: ignore
 
         compiled_code = []
         ep: int = 0
@@ -52,8 +61,10 @@ if __name__ == "__main__":
         if "_start" not in labels:
             ep = 0
         else:
-            ep = labels["_start"]["address"] # type: ignore
-        print_compilation_info(text_section_proceed, labels, data_section)# type: ignore
+            ep = labels["_start"]["address"]  # type: ignore
+        print_compilation_info(text_section_proceed, labels, data_section)  # type: ignore
         write_file(ep, data_section, compiled_code, abs_code_path + "/exec")
     except SyntaxError as e:
-        print(str(e))  # handling parsing errors that I raised, other will kill the compiler :D
+        print(
+            str(e)
+        )  # handling parsing errors that I raised, other will kill the compiler :D

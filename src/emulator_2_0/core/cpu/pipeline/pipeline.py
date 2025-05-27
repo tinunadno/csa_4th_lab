@@ -1,25 +1,30 @@
 from src.common_utils.bitwise_utils import set_int_cut
-from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
-    InterruptionController
-from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipelinesignal import PipelineSignal
+from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import (
+    InterruptionController,
+)
+from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipelinesignal import (
+    PipelineSignal,
+)
 from src.emulator_2_0.core.memory.data_mem import DataMem
 from src.emulator_2_0.core.memory.instruction_memory import InstructionMemory
 from src.emulator_2_0.core.cpu.registers import Registers
-from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_stage import pipeline_stage
+from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_stage import (
+    pipeline_stage,
+)
 from src.common_utils.log_utils import glue_string_lists
 from src.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
 from src.emulator_2_0.core.commands.commandtypes import CommandTypes
 from src.emulator_2_0.core.handlers.handlerpool import HandlerPool
 
 
-def reconstruct_nop(inst_desc: dict) -> int: # type: ignore
+def reconstruct_nop(inst_desc: dict) -> int:  # type: ignore
     nop_mnemonic = inst_desc["NOP"]
     cn = 0
     funct = 0
     for i in inst_desc["decoding_rules"]:
         if i["mnemonic"] == nop_mnemonic:
             cn = i["type"]
-            funct = int(''.join(list(map(str, i["functional_bits_match"]))), 2)
+            funct = int("".join(list(map(str, i["functional_bits_match"]))), 2)
     for i in inst_desc["instructions_format"]["types"]:
         if i["command_number"] == cn:
             ret = 0
@@ -31,22 +36,33 @@ def reconstruct_nop(inst_desc: dict) -> int: # type: ignore
 
 
 class Pipeline:
-    def __init__(self, data_mem_: DataMem, instruction_mem: InstructionMemory, registers_: Registers, stages_descriptions, signals_descriptions, instructions_desc, int_controller: InterruptionController): # type: ignore
+    def __init__(
+        self,
+        data_mem_: DataMem,
+        instruction_mem: InstructionMemory,
+        registers_: Registers,
+        stages_descriptions,
+        signals_descriptions,
+        instructions_desc,
+        int_controller: InterruptionController,
+    ):  # type: ignore
         self.regs = registers_
         self.data_mem = data_mem_
         self.inst_mem = instruction_mem
         self.nop = reconstruct_nop(instructions_desc)
         self.int_controller = int_controller
-        self.possible_dependencies = {"registers": self.regs,
-                                      "data_memory": self.data_mem,
-                                      "instruction_memory": self.inst_mem,
-                                      "NOP_CMD": self.nop,
-                                      "int_controller": self.int_controller}
+        self.possible_dependencies = {
+            "registers": self.regs,
+            "data_memory": self.data_mem,
+            "instruction_memory": self.inst_mem,
+            "NOP_CMD": self.nop,
+            "int_controller": self.int_controller,
+        }
         self.static_signals = {}
         for item in signals_descriptions:
             if "static" in item:
                 key_value = item["name"]
-                self.static_signals[key_value] = PipelineSignal(item) # type: ignore
+                self.static_signals[key_value] = PipelineSignal(item)  # type: ignore
         self.signals_for_each_tick: list[list[object]] = []
         self.signal_count = 0
         for stage_desc in stages_descriptions:
@@ -55,8 +71,10 @@ class Pipeline:
                 for item in signals_descriptions:
                     if "static" not in item:
                         key_value = item["name"]
-                        self.signals_for_each_tick[-1][0][key_value] = PipelineSignal(item)  # type: ignore
-        c_types = CommandTypes(instructions_desc["instructions_format"]) # type: ignore
+                        self.signals_for_each_tick[-1][0][key_value] = PipelineSignal(
+                            item
+                        )  # type: ignore
+        c_types = CommandTypes(instructions_desc["instructions_format"])  # type: ignore
         self.last_tick_logs: list[str] = []
         hp = HandlerPool(c_types, instructions_desc["decoding_rules"])
         self.stages = [pipeline_stage(i, hp) for i in stages_descriptions]
@@ -70,13 +88,17 @@ class Pipeline:
         return glue_string_lists(stages_data)
 
     def tick(self) -> bool:
-        last_term_signal: PipelineSignal = self.signals_for_each_tick[-1][0]["terminate"]  # type: ignore
+        last_term_signal: PipelineSignal = self.signals_for_each_tick[-1][0][
+            "terminate"
+        ]  # type: ignore
         if last_term_signal.get_signal("TERMINATE"):
             return False
         self.tick_ += 1
         self.int_controller.current_tick = self.tick_
         # performing signals rotation and signals flushing
-        self.signals_for_each_tick = [self.signals_for_each_tick[-1]] + self.signals_for_each_tick[:-1]
+        self.signals_for_each_tick = [
+            self.signals_for_each_tick[-1]
+        ] + self.signals_for_each_tick[:-1]
         for i in self.signals_for_each_tick[0][0]:  # type: ignore
             signal: PipelineSignal = self.signals_for_each_tick[0][0][i]  # type: ignore
             signal.flush_signal()
@@ -95,18 +117,25 @@ class Pipeline:
                     args.append(self.signals_for_each_tick[signals_idx][0][j])  # type: ignore
                 else:
                     args.append(j)
-            valid_stage = stage.stage_handler.handle(args, self.signals_for_each_tick[signals_idx][1],   # type: ignore
-                                                     self.last_tick_logs)
+            valid_stage = stage.stage_handler.handle(
+                args,
+                self.signals_for_each_tick[signals_idx][1],  # type: ignore
+                self.last_tick_logs,
+            )
             self.signals_for_each_tick[signals_idx][1] = valid_stage
             signals_idx -= 1
-        self.stages_mnemonics[-1] = reconstruct_command(self.regs.get_reg("IR"), self.instruction_desc)
+        self.stages_mnemonics[-1] = reconstruct_command(
+            self.regs.get_reg("IR"), self.instruction_desc
+        )
         self.stages_mnemonics = [self.stages_mnemonics[-1]] + self.stages_mnemonics[:-1]
         return True
 
     def get_stages_mnemonics(self) -> str:
-        pl_mnems = ["{[" + self.stages[i].stage_name + "]: '" + self.stages_mnemonics[i] + "'}" for i in
-                    range(len(self.stages))]
-        return '->'.join(pl_mnems)
+        pl_mnems = [
+            "{[" + self.stages[i].stage_name + "]: '" + self.stages_mnemonics[i] + "'}"
+            for i in range(len(self.stages))
+        ]
+        return "->".join(pl_mnems)
 
     def get_static_signal(self, signal_name: str, signal_range_name: str) -> int:
         for i in self.static_signals.items():

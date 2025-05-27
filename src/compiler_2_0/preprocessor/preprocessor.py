@@ -8,7 +8,7 @@ def process_type_size(line: str) -> int:
     if ".byte" in line:
         return 1
     if ".buf" in line:
-        data = line[line.find(".buf") + 5:].replace("'", "")
+        data = line[line.find(".buf") + 5 :].replace("'", "")
         if "/" in data:
             return data.count("/")
         else:
@@ -18,7 +18,7 @@ def process_type_size(line: str) -> int:
 
 def parse_byte_line(line: str) -> list[int]:
     if ":" in line:
-        line = line[line.find(":") + 1:]
+        line = line[line.find(":") + 1 :]
     line = line.replace(".byte", "").strip()
 
     if not line:
@@ -33,41 +33,45 @@ def parse_byte_line(line: str) -> list[int]:
 
 def parse_word_line(line: str, labels: dict[str, dict[str, int]]) -> int:
     if ":" in line:
-        line = line[line.find(":") + 1:]
+        line = line[line.find(":") + 1 :]
     line = line.replace(".word", "").strip()
     try:
         value = parse_int(line)
         return (
-                ((value & 0xFF) << 24) |
-                ((value >> 8 & 0xFF) << 16) |
-                ((value >> 16 & 0xFF) << 8) |
-                (value >> 24 & 0xFF)
+            ((value & 0xFF) << 24)
+            | ((value >> 8 & 0xFF) << 16)
+            | ((value >> 16 & 0xFF) << 8)
+            | (value >> 24 & 0xFF)
         )
     except ValueError:
         addr: int = labels[line]["address"]
         return (
-                ((addr & 0xFF) << 24) |
-                ((addr >> 8 & 0xFF) << 16) |
-                ((addr >> 16 & 0xFF) << 8) |
-                (addr >> 24 & 0xFF)
+            ((addr & 0xFF) << 24)
+            | ((addr >> 8 & 0xFF) << 16)
+            | ((addr >> 16 & 0xFF) << 8)
+            | (addr >> 24 & 0xFF)
         )
 
 
 def parse_buffer(line: str) -> list[int]:
     if ":" in line:
-        line = line[line.find(":") + 1:]
+        line = line[line.find(":") + 1 :]
     buf_data = line.replace(".buf", "").replace("'", "").strip()
-    if '/' in buf_data:
-        bytes_str = ['0x' + i for i in buf_data[1:].split("/")]
+    if "/" in buf_data:
+        bytes_str = ["0x" + i for i in buf_data[1:].split("/")]
         return [int(b, 16) for b in bytes_str]
     else:
         try:
-            return list(buf_data.encode('utf-8').decode('unicode_escape').encode('latin1'))
+            return list(
+                buf_data.encode("utf-8").decode("unicode_escape").encode("latin1")
+            )
         except UnicodeError:
             raise ValueError(f"Invalid byte string: {buf_data}")
 
 
-def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]) -> tuple[dict[str, dict[str, int | str]], list[str], list[str]]:
+def find_labels(
+    code: str, line_splitter: str, long_commands: dict[str, int]
+) -> tuple[dict[str, dict[str, int | str]], list[str], list[str]]:
     code_lines = code.split(line_splitter)
     current_section = None
     text_address = 0
@@ -77,7 +81,7 @@ def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]) ->
     data_lines = []
     for line in code_lines:
         line = line.strip()
-        if line == '':
+        if line == "":
             continue
         if line.startswith(".text"):
             current_section = "text"
@@ -99,7 +103,7 @@ def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]) ->
                 raise ValueError(f"Duplicate label: {label_name}")
             if current_section == "text":
                 labels[label_name] = {"address": text_address, "section": "text"}
-                other_stuff = line[line.find(":") + 1:].strip()
+                other_stuff = line[line.find(":") + 1 :].strip()
                 if other_stuff != "":
                     mnemonic = other_stuff[: other_stuff.find(" ")]
                     if mnemonic in long_commands:
@@ -127,7 +131,12 @@ def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]) ->
     return labels, text_lines, data_lines
 
 
-def substitute_labels(data_lines: list[str], text_lines: list[str], labels: dict[str, dict[str, int]], long_commands: dict[str, int]) -> tuple[list[str], list[tuple[int, bytearray]]]:
+def substitute_labels(
+    data_lines: list[str],
+    text_lines: list[str],
+    labels: dict[str, dict[str, int]],
+    long_commands: dict[str, int],
+) -> tuple[list[str], list[tuple[int, bytearray]]]:
     data_section: list[tuple[int, bytearray]] = []
     current_address = 0
     if len(data_lines) > 0:
@@ -135,7 +144,7 @@ def substitute_labels(data_lines: list[str], text_lines: list[str], labels: dict
             data_section.append((current_address, bytearray()))
         for line in data_lines:
             if ".org" in line:
-                line = line[line.find(".org") + 4:]
+                line = line[line.find(".org") + 4 :]
                 value = parse_int(line.strip())
                 current_address = value
                 data_section.append((current_address, bytearray()))
@@ -156,17 +165,17 @@ def substitute_labels(data_lines: list[str], text_lines: list[str], labels: dict
     text_address = 0
     for line in text_lines:
         if ":" in line:
-            line = line[line.find(":") + 1:].strip()
+            line = line[line.find(":") + 1 :].strip()
 
         mnemonic = line[: line.find(" ")]
-        if line == '':
+        if line == "":
             continue
         for i in labels.items():
-            if re.search(r'\b' + re.escape(i[0]) + r'\b', line):
-                addr = i[1]['address']
-                if i[1]["section"] == "text": # type: ignore
+            if re.search(r"\b" + re.escape(i[0]) + r"\b", line):
+                addr = i[1]["address"]
+                if i[1]["section"] == "text":  # type: ignore
                     addr -= text_address + 1
-                line = re.sub(r'\b' + re.escape(i[0]) + r'\b', str(addr), line)
+                line = re.sub(r"\b" + re.escape(i[0]) + r"\b", str(addr), line)
         if mnemonic.upper() in long_commands:
             text_address += long_commands[mnemonic.upper()]
         else:

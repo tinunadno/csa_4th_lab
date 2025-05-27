@@ -1,4 +1,6 @@
-def glue_string_lists(log: list[list[str]], max_widths: list[int] = None, max_line_length: int = 150) -> list[str]:  # type: ignore
+def glue_string_lists(
+    log: list[list[str]], max_widths: list[int] = None, max_line_length: int = 150
+) -> list[str]:  # type: ignore
     split_log = []
     for i in range(len(log)):
         stage = log[i]
@@ -9,7 +11,7 @@ def glue_string_lists(log: list[list[str]], max_widths: list[int] = None, max_li
             max_size = max_line_length
         split_stage = []
         for line in stage:
-            parts = [line[i:i + max_size] for i in range(0, len(line), max_size)]
+            parts = [line[i : i + max_size] for i in range(0, len(line), max_size)]
             split_stage.extend(parts)
         split_log.append(split_stage)
 
@@ -27,14 +29,13 @@ def glue_string_lists(log: list[list[str]], max_widths: list[int] = None, max_li
         needed_padding = max_height - len(stage)
         top_padding = needed_padding // 2
         bottom_padding = needed_padding - top_padding
-        padded_stage = [''] * top_padding + stage + [''] * bottom_padding
+        padded_stage = [""] * top_padding + stage + [""] * bottom_padding
         aligned_log.append(padded_stage)
 
     ret = []
     for lines in zip(*aligned_log):
         formatted_lines = [
-            line.ljust(width)
-            for line, width in zip(lines, stage_widths)
+            line.ljust(width) for line, width in zip(lines, stage_widths)
         ]
-        ret.append(' | '.join(formatted_lines))
+        ret.append(" | ".join(formatted_lines))
     return ret

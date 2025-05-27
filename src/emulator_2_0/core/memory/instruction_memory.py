@@ -2,9 +2,11 @@ from src.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
 
 
 class InstructionMemory:
-    def __init__(self, instructions: list[int], cmd_desc): # type: ignore
+    def __init__(self, instructions: list[int], cmd_desc):  # type: ignore
         self.instructions = instructions.copy()
-        self.inst_mnemonics = [reconstruct_command(i, cmd_desc) for i in self.instructions]
+        self.inst_mnemonics = [
+            reconstruct_command(i, cmd_desc) for i in self.instructions
+        ]
         self.nop = 0
 
     def get_instruction(self, address: int) -> int:

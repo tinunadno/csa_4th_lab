@@ -1,7 +1,13 @@
-from src.compiler_2_0.translator.command_builder import build_command, get_replacement, get_mnemonic
+from src.compiler_2_0.translator.command_builder import (
+    build_command,
+    get_replacement,
+    get_mnemonic,
+)
 
 
-def unwrap_command(instruction: str, instructions_format, lower_upper: list[list[int]]) -> list[int]: # type: ignore
+def unwrap_command(
+    instruction: str, instructions_format, lower_upper: list[list[int]]
+) -> list[int]:  # type: ignore
     token_separator = instructions_format["token_separator"]
     mnemonic, tokens = get_mnemonic(instruction, token_separator)
     unwrapping_rule = None

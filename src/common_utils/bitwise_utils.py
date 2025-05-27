@@ -19,9 +19,9 @@ def set_signal_bit(signal: list[int], position: int, val: int) -> None:
     if word_index >= len(signal):
         raise IndexError(f"Position {position} exceeds signal length")
     if val == 1:
-        signal[word_index] |= (val << bit_offset)
+        signal[word_index] |= val << bit_offset
     else:
-        signal[word_index] &= (val << bit_offset)
+        signal[word_index] &= val << bit_offset
 
 
 def set_signal_cut(signal: list[int], position: list[int], value: int) -> None:
@@ -30,7 +30,7 @@ def set_signal_cut(signal: list[int], position: list[int], value: int) -> None:
         return
 
     if value < 0:
-        value = value & 0xffffffff
+        value = value & 0xFFFFFFFF
 
     start, end = position
 
@@ -51,7 +51,7 @@ def set_signal_cut(signal: list[int], position: list[int], value: int) -> None:
         bit = (value >> (i - start)) & 1
 
         if bit:
-            signal[word_index] |= (1 << bit_offset)
+            signal[word_index] |= 1 << bit_offset
         else:
             signal[word_index] &= ~(1 << bit_offset)
 
@@ -81,7 +81,7 @@ def get_signal_cut(signal: list[int], position: list[int]) -> int:
             raise IndexError(f"Position {i} exceeds signal length")
 
         bit = (signal[word_index] >> bit_offset) & 1
-        result |= (bit << (i - start))
+        result |= bit << (i - start)
 
     return result
 
@@ -98,7 +98,9 @@ def set_int_cut(src: int, pos: list[int], val: int) -> int:
         val = -val
         val |= 1 << (pos[1] - pos[0])
     if len(bin(val)[2:]) > pos[1] - pos[0] + 1:
-        raise ValueError(f"Value is longer than it's possible range: val: {val}, pos: {pos}")
+        raise ValueError(
+            f"Value is longer than it's possible range: val: {val}, pos: {pos}"
+        )
     if len(pos) == 1:
         mask = 1 << pos[0]
         return (src & ~mask) | ((val & 0x1) << pos[0])
@@ -115,10 +117,9 @@ def cast_immediate(num: int, bit_range: list[int]) -> int:
     num_bits = num.bit_length() if num != 0 else 0
 
     if num_bits == bit_length:
-        
         mask = (1 << (bit_length - 1)) - 1
         result = num & mask
-        
+
         return -result
     else:
         return num

@@ -2,11 +2,13 @@ from src.emulator_2_0.core.handlers.handlerpool import Handler, HandlerPool
 
 
 class pipeline_stage:
-    def __init__(self, stage_description: dict, hp: HandlerPool): # type: ignore
+    def __init__(self, stage_description: dict, hp: HandlerPool):  # type: ignore
         self.stage_name = stage_description["name"]
         self.dependencies = stage_description["dependencies"]
         self.behaviour = stage_description["behaviour"]
-        self.stage_handler: Handler = hp.get_handler(stage_description["behaviour"]["handler"])
+        self.stage_handler: Handler = hp.get_handler(
+            stage_description["behaviour"]["handler"]
+        )
 
     def get_stage_info_as_lines(self) -> list[str]:
         content_lines = [f"STAGE: {self.stage_name}", "", "DEPENDENCIES:"]
@@ -33,7 +35,7 @@ class pipeline_stage:
         content_lines.append(f"  • Type: {type(self.stage_handler).__name__}")
 
         max_len = max(len(line) for line in content_lines)
-        border = '=' * (max_len + 4)
+        border = "=" * (max_len + 4)
 
         result = [border]
         result.extend(f"= {line.ljust(max_len)} =" for line in content_lines)

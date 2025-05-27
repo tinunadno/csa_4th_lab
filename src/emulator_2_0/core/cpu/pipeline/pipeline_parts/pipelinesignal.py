@@ -2,14 +2,13 @@ from src.common_utils.bitwise_utils import get_signal_cut, set_signal_cut
 
 
 class PipelineSignal:
-    def __init__(self, signal_config): # type: ignore
+    def __init__(self, signal_config):  # type: ignore
         self.signal_conf = signal_config
         self.signal = []
         self.signal_size = 0
         self._initialize_signal_storage()
 
     def _initialize_signal_storage(self) -> None:
-
         max_bit = 0
 
         for field in self.signal_conf["bit_layout"]:
@@ -23,29 +22,24 @@ class PipelineSignal:
         self.signal = [0] * num_words
 
     def flush_signal(self) -> None:
-
         for i in range(len(self.signal)):
             self.signal[i] = 0
 
     def get_signal(self, signal_name: str) -> int:
-
         bits = self._get_bits_for_signal(signal_name)
         return get_signal_cut(self.signal, bits)
 
     def set_signal(self, signal_name: str, value: int) -> None:
-
         bits = self._get_bits_for_signal(signal_name)
         set_signal_cut(self.signal, bits, value)
 
     def _get_bits_for_signal(self, signal_name: str) -> list[int]:
-
         for field in self.signal_conf["bit_layout"]:
             if field["name"] == signal_name:
-                return field["bits"]            # type: ignore
+                return field["bits"]  # type: ignore
         raise ValueError(f"Signal {signal_name} not found in configuration")
 
     def signal_to_string(self) -> list[str]:
-
         ret = [f"Signal: {self.signal_conf['name']}"]
         for field in self.signal_conf["bit_layout"]:
             value = self.get_signal(field["name"])

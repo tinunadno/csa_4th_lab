@@ -8,7 +8,7 @@ import sys
 
 if __name__ == "__main__":
     exec_path = sys.argv[1]
-    with open(exec_path, 'rb') as bin_file:
+    with open(exec_path, "rb") as bin_file:
         bin_data = bytearray(bin_file.read())
     config_path = "../configurations/internal_emulator_config.yaml"
     base_dir = Path(__file__).parent
