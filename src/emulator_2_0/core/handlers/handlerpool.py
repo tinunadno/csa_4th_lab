@@ -318,7 +318,6 @@ class AluExecutionHandler(Handler):
             return
 
         result32 = self._to_unsigned32(result)
-
         self.flags["Z"] = result32 == 0
         self.flags["N"] = result32 & 0x80000000 != 0
 
@@ -366,6 +365,7 @@ class AluExecutionHandler(Handler):
             "reg1": ex_signal.get_signal("reg1"),
             "reg2": ex_signal.get_signal("reg2"),
             "add": ex_signal.get_signal("add"),
+            "addc": ex_signal.get_signal("addc"),
             "and": ex_signal.get_signal("and"),
             "neg_second": ex_signal.get_signal("neg_second"),
             "xor": ex_signal.get_signal("xor"),
@@ -541,7 +541,6 @@ class AluExecutionHandler(Handler):
                     else:
                         result = regs.convert_to_upper(result)
                 do_data_forward(df_signals, df_destination, result, "EX", tick_logs)
-
             if not signals["discard_nzvc"]:
                 tick_logs.append(
                     f"[EX] Operation completed. Result: {result}, Flags: {self.flags}"

@@ -16,23 +16,24 @@ pipeline:
         - { name: "reg1",         bits: [ 0, 31 ],   description: "first operand" }
         - { name: "reg2",         bits: [ 32, 63 ],  description: "second operand" }
         - { name: "add",          bits: [ 64 ],      description: "add signal" }
-        - { name: "and",          bits: [ 65 ],      description: "and signal" }
-        - { name: "neg_second",   bits: [ 66 ],      description: "neg second signal if add signal => or" }
-        - { name: "xor",          bits: [ 67 ],      description: "xor signal" }
-        - { name: "need_shift",   bits: [ 68 ],      description: "need shift signal" }
-        - { name: "sh_dir",       bits: [ 69 ],      description: "shift direction signal" }
-        - { name: "cycl",         bits: [ 70 ],      description: "cyclic shift signal" }
-        - { name: "discard_nzvc", bits: [ 71 ],      description: "discard NZVC flags signal" }
-        - { name: "comp",         bits: [ 72 ],      description: "comparison mode signal" }
-        - { name: "comp_num_fst", bits: [ 73 ],      description: "comparison number first bit" }
-        - { name: "comp_num_snd", bits: [ 74 ],      description: "comparison number second bit" }
-        - { name: "mul",          bits: [ 75 ],      description: "multiplication signal" }
-        - { name: "div",          bits: [ 76 ],      description: "division signal" }
-        - { name: "rem",          bits: [ 77 ],      description: "remainder signal" }
-        - { name: "get_nzvc",     bits: [ 78 ],      description: "get_nzvc_flag" }
-        - { name: "set_nzvc",     bits: [ 79 ],      description: "set_nzvc_flag" }
-        - { name: "FORCE_DISCARD_FORWARDING",          bits: [ 80 ],      description: "we really don't wanna do forward" }
-        - { name: "FORCE_ENABLE_FORWARDING",           bits: [ 81 ],      description: "we really wanna do forward" }
+        - { name: "addc",          bits: [ 65 ],      description: "add signal" }
+        - { name: "and",          bits: [ 66 ],      description: "and signal" }
+        - { name: "neg_second",   bits: [ 67 ],      description: "neg second signal if add signal => or" }
+        - { name: "xor",          bits: [ 68 ],      description: "xor signal" }
+        - { name: "need_shift",   bits: [ 69 ],      description: "need shift signal" }
+        - { name: "sh_dir",       bits: [ 70 ],      description: "shift direction signal" }
+        - { name: "cycl",         bits: [ 71 ],      description: "cyclic shift signal" }
+        - { name: "discard_nzvc", bits: [ 72 ],      description: "discard NZVC flags signal" }
+        - { name: "comp",         bits: [ 73 ],      description: "comparison mode signal" }
+        - { name: "comp_num_fst", bits: [ 74 ],      description: "comparison number first bit" }
+        - { name: "comp_num_snd", bits: [ 75 ],      description: "comparison number second bit" }
+        - { name: "mul",          bits: [ 76 ],      description: "multiplication signal" }
+        - { name: "div",          bits: [ 77 ],      description: "division signal" }
+        - { name: "rem",          bits: [ 78 ],      description: "remainder signal" }
+        - { name: "get_nzvc",     bits: [ 79 ],      description: "get_nzvc_flag" }
+        - { name: "set_nzvc",     bits: [ 80 ],      description: "set_nzvc_flag" }
+        - { name: "FORCE_DISCARD_FORWARDING",          bits: [ 81 ],      description: "we really don't wanna do forward" }
+        - { name: "FORCE_ENABLE_FORWARDING",           bits: [ 82 ],      description: "we really wanna do forward" }
     - name: "MEM_signal"
       bit_layout:
         - { name: "value",      bits: [ 0, 5 ],  description: "value register" }
@@ -216,7 +217,18 @@ instructions:
           args: [ "r1%reg1", "r2%reg2", "add" ]
         - name: "WB_signal"
           args: [ "$rd%reg_dest", "need_wb" ]
-
+    - mnemonic: "ADDC"
+      args:
+        - [ "t$", "$%rd" ]
+        - [ "t$", "$%r1" ]
+        - [ "t$", "$%r2" ]
+      type: 0
+      functional_bits_match: [ 1, 1, 1, 1, 1, 1 ]
+      signals:
+        - name: "EX_signal"
+          args: [ "r1%reg1", "r2%reg2", "add", "addc" ]
+        - name: "WB_signal"
+          args: [ "$rd%reg_dest", "need_wb" ]
     - mnemonic: "SUB"
       args:
         - [ "t$", "$%rd" ]

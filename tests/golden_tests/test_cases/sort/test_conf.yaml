@@ -1,0 +1,53 @@
+input: |-
+  sort
+output_compiler: |
+  _start label: {'address': 0, 'section': 'text'} |                   |                                    
+  preprocessed_code                               |                   |                                    
+  lli t1 1                                        |                   |                                    
+  lli t6 0x80                                     |                   |                                    
+  lli t7 26                                       |                   |                                    
+  xor t3 t3 t3                                    |                   |                                    
+  addi t3 t1 0                                    |                   |                                    
+  beqz 1                                          |                   |                                    
+  jmp -4                                          |                   |                                    
+  lui t0 26                                       |                   |                                    
+  lli t0 26                                       |                   | other labels:                      
+  lw t0 0(t0)                                     |                   | size                               
+  lli t1 0x84                                     |                   | 	{'address': 26, 'section': 'data'}
+  addi t3 t0 0                                    |                   | arr                                
+  lli t10 30                                      | MEMORY CHUNKS     | 	{'address': 30, 'section': 'data'}
+  lui t15 0xFFFFFFFF                              | 0x00000016 | 0x23 | _start                             
+  lli t17 4                                       | 0x00000017 | 0x00 | 	{'address': 0, 'section': 'text'} 
+  xor t4 t4 t4                                    | 0x00000018 | 0x00 | read_loop                          
+  addi t5 t10 0                                   | 0x00000019 | 0x00 | 	{'address': 3, 'section': 'text'} 
+  addi t9 t10 0                                   | 0x0000001A | 0x00 | end_loop                           
+  addi t6 t3 0                                    | 0x0000001B | 0x00 | 	{'address': 7, 'section': 'text'} 
+  addi t6 t6 -1                                   | 0x0000001C | 0x00 | outer_loop                         
+  beqn 7                                          | 0x0000001D | 0x00 | 	{'address': 15, 'section': 'text'}
+  lw t7 0(t9)                                     | 0x0000001E | 0x00 | inner_loop                         
+  addi t9 t9 4                                    | 0x0000001F | 0x00 | 	{'address': 19, 'section': 'text'}
+  sub t8 t4 t7                                    | 0x00000020 | 0x00 | inner_loop_end                     
+  bnen -6                                         | 0x00000021 | 0x00 | 	{'address': 28, 'section': 'text'}
+  addi t4 t7 0                                    | ...               | sort_end                           
+  addi t5 t9 0                                    |                   | 	{'address': 34, 'section': 'text'}
+  jmp -9                                          |                   | int16                              
+  sw 0(t1) t4                                     |                   | 	{'address': 35, 'section': 'text'}
+  addi t5 t5 -4                                   |                   |                                    
+  sw 0(t5) t15                                    |                   |                                    
+  addi t0 t0 -1                                   |                   |                                    
+  beqz 1                                          |                   |                                    
+  jmp -19                                         |                   |                                    
+  halt                                            |                   |                                    
+  lw t1 0(t6)                                     |                   |                                    
+  sw 0(t7) t1                                     |                   |                                    
+  addi t7 t7 4                                    |                   |                                    
+  addi t4 t4 1                                    |                   |                                    
+  iret                                            |                   |                                    
+output: |
+  OUTPUT ASSERT:
+  actual data
+  0	1	2	3	4	5	6
+  8	7	6	5	4	2	1
+  expected
+  8	7	6	5	4	2	1
+  OUTPUT ASSERTION PASSED

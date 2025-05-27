@@ -1,0 +1,13 @@
+limit: 2000
+mem_size: 0x90
+io_mem_map:
+  int_vector: 0x16
+  input:
+    port: 0x80
+    interruptions: [ [ 250, 'Y' ], [ 290, 'u' ], [ 350, 'r' ], [ 400, 'a' ], [ 450, 0 ] ]
+  output:
+    port: 0x84
+log_fmt:
+  assertion:
+    - name: "output"
+      expected: [ 'What is your name?Hello,Yura' ]

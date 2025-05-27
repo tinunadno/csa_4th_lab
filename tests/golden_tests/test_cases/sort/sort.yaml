@@ -1,0 +1,14 @@
+limit: 20000
+mem_size: 0x200
+io_mem_map:
+  int_vector: 0x16
+  input:
+    port: 0x80
+    interruptions: [ [ 16, 7 ], [50, 6], [90, 5], [140, 4], [180, 2], [220, 1], [260, 7], [300, 8], [340, 0] ]
+  output:
+    port: 0x84
+log_fmt:
+#  debug:
+  assertion:
+    - name: "output"
+      expected: [ 8, 7, 6, 5, 4, 2, 1 ]
