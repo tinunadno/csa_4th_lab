@@ -1,4 +1,4 @@
-from src.common_utils.bitwise_utils import *
+from src.common_utils.bitwise_utils import get_signal_cut, set_signal_cut
 
 
 class PipelineSignal:

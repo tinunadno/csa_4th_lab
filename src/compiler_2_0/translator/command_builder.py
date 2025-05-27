@@ -95,7 +95,7 @@ def build_command(instruction: str, instructions_format, lower_upper: list[list[
     translated_instruction = 0
     try:
         translated_instruction = set_int_cut(translated_instruction, type_bits, int(c_type))
-    except:
+    except Exception:
         raise SyntaxError(f"invalid type in commands descriptions: type: {c_type}, instruction: {instruction}")
 
     try:
@@ -105,7 +105,7 @@ def build_command(instruction: str, instructions_format, lower_upper: list[list[
         translated_instruction = set_int_cut(translated_instruction, funct_bits, funct_val)
     except ValueError as e:
         raise SyntaxError(str(e))
-    except:
+    except Exception:
         raise SyntaxError(f"invalid functional bits found in the config: {dec_rule["functional_bits_match"]}")
 
     command_arguments = dec_rule["args"]

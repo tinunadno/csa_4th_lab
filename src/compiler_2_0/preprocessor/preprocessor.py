@@ -27,7 +27,7 @@ def parse_byte_line(line: str) -> list[int]:
     try:
         bytes_list = [parse_int(line)]
         return bytes_list
-    except:
+    except Exception:
         raise SyntaxError(f"Got invalid int value: {line}")
 
 

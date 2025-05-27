@@ -6,7 +6,7 @@ from src.emulator_2_0.core.memory.data_mem import DataMem
 from src.emulator_2_0.core.memory.instruction_memory import InstructionMemory
 from src.emulator_2_0.core.cpu.registers import Registers
 from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.pipeline_stage import pipeline_stage
-from src.common_utils.log_utils import *
+from src.common_utils.log_utils import glue_string_lists
 from src.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
 from src.emulator_2_0.core.commands.commandtypes import CommandTypes
 from src.emulator_2_0.core.handlers.handlerpool import HandlerPool

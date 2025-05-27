@@ -74,7 +74,7 @@ def preprocess_macros(code: str, file_dir_path: str) -> str:
             include_path = file_dir_path + include_path
             try:
                 included_lines = open(include_path).read().split("\n")
-            except:
+            except Exception:
                 raise SyntaxError("included file doesn't exist: " + lines[i] + "  " + include_path)
             lines.pop(i)
             lines[i:i] = included_lines
