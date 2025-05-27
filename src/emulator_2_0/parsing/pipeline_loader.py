@@ -90,8 +90,9 @@ def parse_config(
     regs = Registers(data["registers"], data_mem_.size)
     regs.set_reg("PC", loaded_data["entry_point"])  # type: ignore
     instruction_memory_ = InstructionMemory(
-        loaded_data["text_section"], data["instructions"]
-    )  # type: ignore
+        loaded_data["text_section"],  # type: ignore
+        data["instructions"],
+    )
 
     pl = Pipeline(
         data_mem_,

@@ -1,5 +1,10 @@
 class DataMem:
-    def __init__(self, prefered_size: int, data_clusters: list[tuple[int, bytearray]], io_mem_cell: int):
+    def __init__(
+        self,
+        prefered_size: int,
+        data_clusters: list[tuple[int, bytearray]],
+        io_mem_cell: int,
+    ):
         max_size = prefered_size
         for i in data_clusters:
             max_size = max(i[0] + len(i[1]), max_size)
@@ -16,16 +21,18 @@ class DataMem:
         if address <= self.size - 4:
             tmp_val = value
             for i in range(4):
-                self.data[address + i] = (tmp_val & 0xFF)
+                self.data[address + i] = tmp_val & 0xFF
                 tmp_val >>= 8
             if (not is_int_controller) and address == self.io_mem_cell:
                 self.output.append(value)
         else:
             raise ValueError("Attempting to write memory out of address space")
 
-    def write_byte(self, address: int, value: int, is_int_controller: bool = False) -> None:
+    def write_byte(
+        self, address: int, value: int, is_int_controller: bool = False
+    ) -> None:
         if address < self.size:
-            self.data[address] = (value & 0xFF)
+            self.data[address] = value & 0xFF
             if (not is_int_controller) and address == self.io_mem_cell:
                 self.output.append(value & 0xFF)
         else:

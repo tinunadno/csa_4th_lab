@@ -6,8 +6,10 @@ from src.compiler_2_0.translator.command_builder import (
 
 
 def unwrap_command(
-    instruction: str, instructions_format, lower_upper: list[list[int]]
-) -> list[int]:  # type: ignore
+    instruction: str,
+    instructions_format: dict,  # type: ignore
+    lower_upper: list[list[int]],
+) -> list[int]:
     token_separator = instructions_format["token_separator"]
     mnemonic, tokens = get_mnemonic(instruction, token_separator)
     unwrapping_rule = None

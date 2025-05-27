@@ -307,8 +307,11 @@ class AluExecutionHandler(Handler):
         return value & 0xFFFFFFFF
 
     def _update_flags(
-        self, result: int, operands: tuple = (), discard_nzvc: int = 0
-    ) -> None:  # type: ignore
+        self,
+        result: int,
+        operands: tuple = (),  # type: ignore
+        discard_nzvc: int = 0,
+    ) -> None:
         """Обновляет флаги NZVC на основе результата"""
 
         if discard_nzvc == 1:

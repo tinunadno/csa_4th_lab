@@ -41,11 +41,11 @@ class Pipeline:
         data_mem_: DataMem,
         instruction_mem: InstructionMemory,
         registers_: Registers,
-        stages_descriptions,
-        signals_descriptions,
-        instructions_desc,
+        stages_descriptions: dict,  # type: ignore
+        signals_descriptions: dict,  # type: ignore
+        instructions_desc: dict,  # type: ignore
         int_controller: InterruptionController,
-    ):  # type: ignore
+    ):
         self.regs = registers_
         self.data_mem = data_mem_
         self.inst_mem = instruction_mem
@@ -71,9 +71,9 @@ class Pipeline:
                 for item in signals_descriptions:
                     if "static" not in item:
                         key_value = item["name"]
-                        self.signals_for_each_tick[-1][0][key_value] = PipelineSignal(
+                        self.signals_for_each_tick[-1][0][key_value] = PipelineSignal(  # type: ignore
                             item
-                        )  # type: ignore
+                        )
         c_types = CommandTypes(instructions_desc["instructions_format"])  # type: ignore
         self.last_tick_logs: list[str] = []
         hp = HandlerPool(c_types, instructions_desc["decoding_rules"])

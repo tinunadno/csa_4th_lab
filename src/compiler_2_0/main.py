@@ -51,8 +51,11 @@ if __name__ == "__main__":
         some_code = preprocess_macros(some_code, abs_code_path)
         labels, txt_lines, data_lines = find_labels(some_code, "\n", l_cmd)
         text_section_proceed, data_section = substitute_labels(
-            data_lines, txt_lines, labels, l_cmd
-        )  # type: ignore
+            data_lines,
+            txt_lines,
+            labels,  # type: ignore
+            l_cmd,
+        )
 
         compiled_code = []
         ep: int = 0

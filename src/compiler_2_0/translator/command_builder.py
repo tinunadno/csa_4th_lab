@@ -61,7 +61,7 @@ def get_replacement(token: str, arg_desc: str) -> list:  # type: ignore
     return replacements
 
 
-def get_replacement_substitution_rules(
+def get_replacement_substitution_rules(  # type: ignore
     replacement: list[tuple[int, int]],
     args: list[str],
     type_desc,
@@ -69,7 +69,7 @@ def get_replacement_substitution_rules(
     shift_me: bool,
     shifting_var: str,
     lower_upper: list[int],
-) -> int:  # type: ignore
+) -> int:
     for i in replacement:
         for j in args:
             if str(i[0]) not in j:
@@ -90,8 +90,10 @@ def get_replacement_substitution_rules(
 
 
 def build_command(
-    instruction: str, instructions_format, lower_upper: list[list[int]]
-) -> int:  # type: ignore
+    instruction: str,
+    instructions_format: dict,  # type: ignore
+    lower_upper: list[list[int]],
+) -> int:
     token_separator = instructions_format["token_separator"]
     mnemonic, tokens = get_mnemonic(instruction, token_separator)
     dec_rule: dict = {}  # type: ignore

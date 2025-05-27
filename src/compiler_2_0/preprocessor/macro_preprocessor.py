@@ -17,8 +17,8 @@ class Define:
             line = lines[idx]  # type: ignore
             self.name = line[line.find("#define ") + 8 : line.find("(")].strip()  # type: ignore
             self.args = (
-                line[line.find("(") + 1 : line.find(")")].replace(" ", "").split(",")
-            )  # type: ignore
+                line[line.find("(") + 1 : line.find(")")].replace(" ", "").split(",")  # type: ignore
+            )
             self.body = ""
             idx_macro_start = idx
             while idx < len(lines) and "{" not in lines[idx]:

@@ -8,9 +8,9 @@ class InterruptionController:
         interruptions: list[list[int]],
         interruption_vector: int,
         mem_cell: int,
-        conf,
+        conf: dict,  # type: ignore
         data_mem_: DataMem,
-    ):  # type: ignore
+    ):
         self.interruptions = interruptions
         self.interruption_vector = interruption_vector
         self.mem_cell = mem_cell

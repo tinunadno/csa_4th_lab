@@ -4,7 +4,7 @@ fix = false
 show-source = true
 
 quote-style = "double"
-indent-style = "tab"
+indent-style = "space"
 skip-magic-trailing-comma = true
 line-ending = "lf"
 
