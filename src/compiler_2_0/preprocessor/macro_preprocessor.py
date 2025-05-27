@@ -2,7 +2,7 @@ import re
 
 
 class Define:
-    def __init__(self, lines, idx):
+    def __init__(self, lines: list[str], idx: int):
         # eg simple define
         if "{" not in lines[idx] and "(" not in lines[idx]:
             line = lines[idx].split(" ")
@@ -14,9 +14,9 @@ class Define:
             if "(" not in lines[idx] or ")" not in lines[idx]:
                 raise SyntaxError(f"no arguments brackets in define: {lines[idx]}")
             self.is_simple = False
-            line = lines[idx]
-            self.name = line[line.find("#define ") + 8: line.find("(")].strip()
-            self.args = line[line.find("(") + 1: line.find(")")].replace(" ", "").split(",")
+            line = lines[idx]  # type: ignore
+            self.name = line[line.find("#define ") + 8: line.find("(")].strip()  # type: ignore
+            self.args = line[line.find("(") + 1: line.find(")")].replace(" ", "").split(",")  # type: ignore
             self.body = ""
             idx_macro_start = idx
             while idx < len(lines) and "{" not in lines[idx]:
@@ -41,7 +41,7 @@ class Define:
                 else:
                     lines.pop(idx_macro_start)
 
-    def substitute(self, code):
+    def substitute(self, code: str) -> str:
         if self.is_simple:
             code = re.sub(r'\b' + re.escape(self.name) + r'\b', self.val, code)
 
@@ -63,7 +63,7 @@ class Define:
 
 def preprocess_macros(code: str, file_dir_path: str) -> str:
     lines = code.split("\n")
-    defines = []
+    defines: list[Define] = []
     i = 0
     current_lines_size = len(lines)
     while i < current_lines_size:
