@@ -2,10 +2,10 @@ from typing import Union
 
 
 class Registers:
-    def __init__(self, reg_conf, mem_size):
-        self.regs = [0] * reg_conf["register_count"]
-        self.common_regs = reg_conf["common_registers"]
-        self.special_regs = {reg["name"]: reg["number"] for reg in reg_conf["special_registers"]}
+    def __init__(self, reg_conf: dict, mem_size: int):
+        self.regs: list[int] = [0] * reg_conf["register_count"]
+        self.common_regs: list[int] = reg_conf["common_registers"]
+        self.special_regs: dict[str, int] = {reg["name"]: reg["number"] for reg in reg_conf["special_registers"]}
         self.upper = reg_conf["upper"]
         self.lower = reg_conf["lower"]
         self.set_reg("SP", mem_size)
@@ -27,24 +27,27 @@ class Registers:
             self.regs[reg] = value
 
     def is_common(self, reg: Union[int, str]) -> bool:
-        reg_num = reg
         if isinstance(reg, str):
             reg_num = self.special_regs[reg]
+        else:
+            reg_num = reg
         return self.common_regs[0] <= reg_num <= self.common_regs[1]
 
     def set_upper(self, reg: Union[int, str], value: int) -> None:
         mask = (1 << (self.upper[1] - self.upper[0] + 1)) - 1
-        r_num = reg
         if isinstance(reg, str):
             r_num = self.special_regs[reg]
+        else:
+            r_num = reg
         self.regs[r_num] |= ((value & mask) << self.upper[0])
 
     def set_lower(self, reg: Union[int, str], value: int) -> None:
         mask = (1 << (self.lower[1] - self.lower[0] + 1)) - 1
         shifted_value = (value & mask) << self.lower[0]
-        r_num = reg
         if isinstance(reg, str):
             r_num = self.special_regs[reg]
+        else:
+            r_num = reg
         self.regs[r_num] |= shifted_value
 
     def convert_to_upper(self, value: int) -> int:
@@ -56,7 +59,7 @@ class Registers:
         shifted_value = (value & mask) << self.lower[0]
         return shifted_value
 
-    def get_logs(self):
+    def get_logs(self) -> list[str]:
         ret = ["REGISTERS:"]
         reg_count = len(self.regs)
 
