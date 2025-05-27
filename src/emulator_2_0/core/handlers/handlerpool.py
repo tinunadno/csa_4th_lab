@@ -10,7 +10,7 @@ from src.emulator_2_0.core.commands.commandtypes import CommandTypes
 from src.common_utils.bitwise_utils import get_int_cut, cast_immediate
 
 
-def do_data_forward(df_signals: PipelineSignal, r_dest, value, stage, tick_logs):
+def do_data_forward(df_signals: PipelineSignal, r_dest: int, value: int, stage: str, tick_logs: list[str]) -> None:
     current_forward = (
         df_signals.get_signal("fst_reg_num"),
         df_signals.get_signal("fst_reg_val"),
@@ -33,7 +33,7 @@ def do_data_forward(df_signals: PipelineSignal, r_dest, value, stage, tick_logs)
         f"  [SHIFTED] reg[{df_signals.get_signal("snd_reg_num")}] = 0x{df_signals.get_signal("snd_reg_val"):X}, valid = {df_signals.get_signal("is_snd_forwarded")}")
 
 
-def get_data_forward(df_signals: PipelineSignal, r_dest, value, stage, tick_logs):
+def get_data_forward(df_signals: PipelineSignal, r_dest: int, value: int, stage: str, tick_logs: list[str]) -> int:
     current_forward = (
         df_signals.get_signal("fst_reg_num"),
         df_signals.get_signal("fst_reg_val"),
@@ -118,7 +118,7 @@ class MemHandler(Handler):
 class InstructionLoadHandler(Handler):
     inserted_commands: list[int] = []
 
-    def handle(self, args: list[object | int], is_valid, tick_logs: list[str]) -> bool:
+    def handle(self, args: list[object | int], is_valid: bool, tick_logs: list[str]) -> bool:
         tick_logs.append("[IF] Started instruction fetch stage")
         regs: Registers = args[1] # type: ignore
         ir_reg_name = args[4]
@@ -133,11 +133,11 @@ class InstructionLoadHandler(Handler):
             tick_logs.append(f"[IF] Stalled signal is {stall_value}")
             stall_signal.set_signal("stall_size", stall_value - 1)
             nop_command: int = args[5]  # type: ignore
-            regs.set_reg(ir_reg_name, nop_command)
+            regs.set_reg(ir_reg_name, nop_command) # type: ignore
             tick_logs.append(f"[IF] Setting NOP_CMD {nop_command} to {ir_reg_name}")
             return True
         if len(self.inserted_commands) != 0:
-            regs.set_reg(ir_reg_name, self.inserted_commands[0])
+            regs.set_reg(ir_reg_name, self.inserted_commands[0]) # type: ignore
             ir_val = self.inserted_commands[0]
             tick_logs.append(f"[IF] inserting an interruption instruction: {ir_val}")
             tick_logs.append(
@@ -147,21 +147,21 @@ class InstructionLoadHandler(Handler):
             return True
         pc_reg_name = args[3]
         i_mem: InstructionMemory = args[0] # type: ignore
-        pc_value = regs.get_reg(pc_reg_name)
+        pc_value = regs.get_reg(pc_reg_name) # type: ignore
         ir_val = i_mem.get_instruction(pc_value)
-        regs.set_reg(ir_reg_name, ir_val)
-        regs.set_reg(pc_reg_name, pc_value + 1)
+        regs.set_reg(ir_reg_name, ir_val) # type: ignore
+        regs.set_reg(pc_reg_name, pc_value + 1) # type: ignore
         tick_logs.append(
             f"[IF] Fetched instruction, {ir_reg_name} = {hex(ir_val)} | {bin(ir_val)}, {pc_reg_name} = {hex(pc_value + 1)}")
         return True
 
 
 class InstructionDecoderHandler(Handler):
-    def __init__(self, c_types: CommandTypes, commands_desc):
+    def __init__(self, c_types: CommandTypes, commands_desc: dict): # type: ignore
         self.c_types = c_types
         self.commands_desc = commands_desc
 
-    def handle(self, args: list[object], is_valid, tick_logs: list[str]) -> bool:
+    def handle(self, args: list[object], is_valid: bool, tick_logs: list[str]) -> bool:
         if not is_valid:
             tick_logs.append("[ID] Not a valid stage")
             return False
@@ -181,14 +181,14 @@ class InstructionDecoderHandler(Handler):
         df_signals: PipelineSignal = args[0] # type: ignore
         tick_logs.append("[ID] Checking data forwarding signals")
 
-        signals: dict[str, PipelineSignal] = {                                                                                                                                         # type: ignore
+        signals: dict[str, PipelineSignal] = {
             "EX_signal": args[3],                                                                                                                                                       # type: ignore
             "MEM_signal": args[4],                                                                                                                                                      # type: ignore
             "WB_signal": args[5],                                                                                                                                                       # type: ignore
             "stall": args[6],                                                                                                                                                           # type: ignore
             "terminate": args[7],                                                                                                                                                       # type: ignore
             "INTERRUPT_signal": args[8]                                                                                                                                                 # type: ignore
-        }                                                                                                                                                                               # type: ignore
+        }
 
         for i in self.commands_desc:
             if i["type"] == c_type:
@@ -202,8 +202,8 @@ class InstructionDecoderHandler(Handler):
         for i in c_desc["signals"]:  # type: ignore
             if len(i) == 0:
                 continue
-            signal_name = i["name"]  # type: ignore
-            for j in i["args"]:  # type: ignore
+            signal_name = i["name"]
+            for j in i["args"]:
                 if '%' in j:
                     reg_arg = j[: j.find('%')]
                     sig_arg = j[j.find('%') + 1:]
@@ -238,7 +238,7 @@ class InstructionDecoderHandler(Handler):
 
 
 class AluExecutionHandler(Handler):
-    def __init__(self):
+    def __init__(self) -> None:
         self.flags = {
             'N': False,
             'Z': False,
@@ -258,7 +258,7 @@ class AluExecutionHandler(Handler):
         """Гарантирует 32-битное беззнаковое число"""
         return value & 0xFFFFFFFF
 
-    def _update_flags(self, result: int, operands: tuple = (), discard_nzvc: int = 0):
+    def _update_flags(self, result: int, operands: tuple = (), discard_nzvc: int = 0) -> None: # type: ignore
         """Обновляет флаги NZVC на основе результата"""
 
         if discard_nzvc == 1:
@@ -286,7 +286,7 @@ class AluExecutionHandler(Handler):
             ret |= int(i[1] == 1) & 0xF
         return ret
 
-    def set_nzvc(self, nzvc: int):
+    def set_nzvc(self, nzvc: int) -> None:
         temp = list(self.flags.items())
         for i in temp[::-1]:
             self.flags[i[0]] = nzvc & 0xF != 0
@@ -507,13 +507,13 @@ class RegisterHandler(Handler):
 
 class HandlerPool:
 
-    def __init__(self, c_types: CommandTypes, command_descs):
+    def __init__(self, c_types: CommandTypes, command_descs: dict) -> None: # type: ignore
         self.handlers = {"mem_handler": MemHandler(),
                          "instruction_load_handler": InstructionLoadHandler(),
                          "instruction_decoder_handler": InstructionDecoderHandler(c_types, command_descs),
                          "alu_execution_handler": AluExecutionHandler(),
                          "register_handler": RegisterHandler()}
 
-    def get_handler(self, handler_name: str):
+    def get_handler(self, handler_name: str) -> Handler:
         handler_name = handler_name.lower()
         return self.handlers[handler_name]

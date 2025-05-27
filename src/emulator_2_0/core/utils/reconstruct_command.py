@@ -1,7 +1,7 @@
 from src.common_utils.bitwise_utils import get_int_cut, cast_immediate
 
 
-def reconstruct_command(instruction: int, inst_desc):
+def reconstruct_command(instruction: int, inst_desc) -> str: # type: ignore
     c_type = inst_desc["instructions_format"]["command_number_bits"]
     current_c_type = get_int_cut(instruction, c_type)
     type_desc = {}
@@ -44,4 +44,4 @@ def reconstruct_command(instruction: int, inst_desc):
                                 result_arg = result_arg.replace(current_subst, str(val))
                     command_parts.append(result_arg)
                 return ' '.join(command_parts)
-    return None
+    return "NOP"

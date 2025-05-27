@@ -2,10 +2,10 @@ from src.common_utils.bitwise_utils import get_int_cut
 
 
 class CommandTypes:
-    def __init__(self, command_description):
+    def __init__(self, command_description): # type: ignore
         self.cmd_desc = command_description
 
-    def define_command_type(self, command: int):
+    def define_command_type(self, command: int): # type: ignore
         cn_range = self.cmd_desc["command_number_bits"]
         c_type = get_int_cut(command, cn_range)
         for i in self.cmd_desc["types"]:

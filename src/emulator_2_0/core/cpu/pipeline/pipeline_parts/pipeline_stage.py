@@ -2,7 +2,7 @@ from src.emulator_2_0.core.handlers.handlerpool import Handler, HandlerPool
 
 
 class pipeline_stage:
-    def __init__(self, stage_description, hp: HandlerPool):
+    def __init__(self, stage_description: dict, hp: HandlerPool): # type: ignore
         self.stage_name = stage_description["name"]
         self.dependencies = stage_description["dependencies"]
         self.behaviour = stage_description["behaviour"]

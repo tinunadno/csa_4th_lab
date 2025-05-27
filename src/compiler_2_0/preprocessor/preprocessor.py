@@ -2,7 +2,7 @@ from src.compiler_2_0.translator.primitive_parsers import parse_int
 import re
 
 
-def process_type_size(line: str):
+def process_type_size(line: str) -> int:
     if ".word" in line:
         return 4
     if ".byte" in line:
@@ -31,7 +31,7 @@ def parse_byte_line(line: str) -> list[int]:
         raise SyntaxError(f"Got invalid int value: {line}")
 
 
-def parse_word_line(line: str, labels) -> int:
+def parse_word_line(line: str, labels: dict[str, dict[str, int]]) -> int:
     if ":" in line:
         line = line[line.find(":") + 1:]
     line = line.replace(".word", "").strip()
@@ -44,7 +44,7 @@ def parse_word_line(line: str, labels) -> int:
                 (value >> 24 & 0xFF)
         )
     except ValueError:
-        addr = labels[line]["address"]
+        addr: int = labels[line]["address"]
         return (
                 ((addr & 0xFF) << 24) |
                 ((addr >> 8 & 0xFF) << 16) |
@@ -67,12 +67,12 @@ def parse_buffer(line: str) -> list[int]:
             raise ValueError(f"Invalid byte string: {buf_data}")
 
 
-def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]):
+def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]) -> tuple[dict[str, dict[str, int | str]], list[str], list[str]]:
     code_lines = code.split(line_splitter)
     current_section = None
     text_address = 0
     data_address = 0
-    labels = {}
+    labels: dict[str, dict[str, int | str]] = {}
     text_lines = []
     data_lines = []
     for line in code_lines:
@@ -127,7 +127,7 @@ def find_labels(code: str, line_splitter: str, long_commands: dict[str, int]):
     return labels, text_lines, data_lines
 
 
-def substitute_labels(data_lines: list[str], text_lines: list[str], labels, long_commands: dict[str, int]):
+def substitute_labels(data_lines: list[str], text_lines: list[str], labels: dict[str, dict[str, int]], long_commands: dict[str, int]) -> tuple[list[str], list[tuple[int, bytearray]]]:
     data_section: list[tuple[int, bytearray]] = []
     current_address = 0
     if len(data_lines) > 0:
@@ -152,7 +152,7 @@ def substitute_labels(data_lines: list[str], text_lines: list[str], labels, long
             else:
                 word = parse_word_line(line, labels)
                 data_section[-1][1].extend(word.to_bytes(4))
-    text_section_processed = []
+    text_section_processed: list[str] = []
     text_address = 0
     for line in text_lines:
         if ":" in line:
@@ -164,7 +164,7 @@ def substitute_labels(data_lines: list[str], text_lines: list[str], labels, long
         for i in labels.items():
             if re.search(r'\b' + re.escape(i[0]) + r'\b', line):
                 addr = i[1]['address']
-                if i[1]["section"] == "text":
+                if i[1]["section"] == "text": # type: ignore
                     addr -= text_address + 1
                 line = re.sub(r'\b' + re.escape(i[0]) + r'\b', str(addr), line)
         if mnemonic.upper() in long_commands:

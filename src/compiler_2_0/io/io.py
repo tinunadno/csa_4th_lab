@@ -1,8 +1,8 @@
-def int_to_4bytes(value) -> bytearray:
+def int_to_4bytes(value: int) -> bytearray:
     return bytearray(value.to_bytes(4, signed=False))
 
 
-def write_bin_file(bin_data, filename):
+def write_bin_file(bin_data: bytearray, filename: str) -> None:
     with open(filename, 'wb') as f:
         f.write(bin_data)
 

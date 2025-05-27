@@ -1,5 +1,5 @@
 from src.emulator_2_0.core.cpu.pipeline.pipeline import Pipeline
-import yaml
+import yaml # type: ignore
 
 from src.emulator_2_0.core.cpu.pipeline.pipeline_parts.interruption_controller import \
     InterruptionController
@@ -10,7 +10,7 @@ from src.emulator_2_0.debugger.logger import Logger
 
 
 # returns ep, data-section_clusters, text_section
-def parse_bin_file(bin_data: bytearray) -> dict:
+def parse_bin_file(bin_data: bytearray) -> dict[str, int | list[list[tuple[int, bytearray]]] | list[int]]:
     offset = 0
     result: dict[str, int | list[list[tuple[int, bytearray]]] | list[int]] = {
         'entry_point': int.from_bytes(bin_data[offset:offset + 4])}
@@ -43,11 +43,11 @@ def parse_bin_file(bin_data: bytearray) -> dict:
     return result
 
 
-def parse_user_config(user_config_path) -> dict:
+def parse_user_config(user_config_path: str) -> dict:  # type: ignore
     with open(user_config_path) as conf:
         u_conf = yaml.safe_load(conf)
 
-    return u_conf
+    return u_conf  # type: ignore
 
 
 def parse_config(config_path: str, user_config_path: str, executable_bin_stuff: bytearray) -> tuple[int, Logger]:
@@ -76,12 +76,12 @@ def parse_config(config_path: str, user_config_path: str, executable_bin_stuff: 
             output_addr = u_conf["io_mem_map"]["output"]["port"]
             pref_size = max(pref_size, output_addr + 4)
 
-    data_mem_ = DataMem(pref_size, loaded_data['data_clusters'], output_addr)
+    data_mem_ = DataMem(pref_size, loaded_data['data_clusters'], output_addr)   # type: ignore
     int_controller = InterruptionController(interruptions, interruption_vector, input_addr, data, data_mem_)
 
     regs = Registers(data["registers"], data_mem_.size)
-    regs.set_reg("PC", loaded_data['entry_point'])
-    instruction_memory_ = InstructionMemory(loaded_data["text_section"], data["instructions"])
+    regs.set_reg("PC", loaded_data['entry_point'])  # type: ignore
+    instruction_memory_ = InstructionMemory(loaded_data["text_section"], data["instructions"])  # type: ignore
 
     pl = Pipeline(data_mem_, instruction_memory_, regs, data["pipeline"]["stages"],
                   data["pipeline"]["pipeline_signals"], data["instructions"], int_controller)

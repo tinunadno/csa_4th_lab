@@ -4,22 +4,22 @@ from src.emulator_2_0.debugger.debugger import init_debug
 
 
 # mem_logger
-def mem_logger(pl: Pipeline, fmt) -> list[str]:
-    ret = []
+def mem_logger(pl: Pipeline, fmt: dict) -> list[str]: # type: ignore
+    ret: list[str] = []
     for i in fmt["slice"]:
         ret.extend(pl.data_mem.get_memory_view(i[0], i[1]))
     return ret
 
 
-def decomp_logger(pl: Pipeline, fmt) -> list[str]:
-    ret = []
+def decomp_logger(pl: Pipeline, fmt: dict) -> list[str]: # type: ignore
+    ret: list[str] = []
     for i in fmt["slice"]:
         ret.extend(pl.inst_mem.get_decompiled_memory_view(i[0], i[1]))
     return ret
 
 
-def reg_logger(pl: Pipeline, fmt) -> list[str]:
-    ret = []
+def reg_logger(pl: Pipeline, fmt: dict) -> list[str]: # type: ignore
+    ret: list[str] = []
     if fmt["slice"] == "all":
         ret.extend(pl.regs.get_logs())
         return ret
@@ -28,19 +28,19 @@ def reg_logger(pl: Pipeline, fmt) -> list[str]:
     return ret
 
 
-def pl_stage_mnems_logger(pl: Pipeline, _fmt) -> list[str]:
+def pl_stage_mnems_logger(pl: Pipeline, _fmt: dict) -> list[str]: # type: ignore
     return ["PIPELINE_STAGES:", pl.get_stages_mnemonics()]
 
 
-def tick_logger(pl: Pipeline, _fmt) -> list[str]:
+def tick_logger(pl: Pipeline, _fmt: dict) -> list[str]: # type: ignore
     return ["TICK: " + str(pl.tick_)]
 
 
-def int_logger(pl: Pipeline, _fmt) -> list[str]:
+def int_logger(pl: Pipeline, _fmt: dict) -> list[str]: # type: ignore
     return ["IN INTERRUPTION: " + str(pl.get_static_signal("INTERRUPT_signal", "is_interrupted") != 0)]
 
 
-def basic_assert(addr, vals, expected, assert_name) -> None:
+def basic_assert(addr: list[int], vals: list[int] | list[str], expected: list[int | str], assert_name: str) -> None:
     print(f"{assert_name} ASSERT:")
     print("actual data")
     if len(expected) != 1:
@@ -55,7 +55,7 @@ def basic_assert(addr, vals, expected, assert_name) -> None:
     print(f"{assert_name} ASSERTION PASSED")
 
 
-def mem_asserter(pl: Pipeline, assert_):
+def mem_asserter(pl: Pipeline, assert_: dict): # type: ignore
     assert_address_slice = list(range(assert_["slice"][0], assert_["slice"][1] + 1))
     if "byte" in assert_:
         assert_slice = [pl.data_mem.read_byte(i) for i in assert_address_slice]
@@ -63,28 +63,28 @@ def mem_asserter(pl: Pipeline, assert_):
         assert_slice = [pl.data_mem.read(i) for i in assert_address_slice]
     expected = assert_["expected"]
     if isinstance(expected[0], str):
-        assert_slice = [''.join([chr(i) for i in assert_slice]).replace("\x00", "\\0")]
+        assert_slice = [''.join([chr(i) for i in assert_slice]).replace("\x00", "\\0")]  # type: ignore
     basic_assert(assert_address_slice, assert_slice, expected, "MEM")
 
 
-def regs_asserter(pl: Pipeline, assert_):
+def regs_asserter(pl: Pipeline, assert_: dict): # type: ignore
     reg_number_slice = assert_["slice"]
     reg_number_vals = [pl.regs.get_reg(i) for i in reg_number_slice]
     expected = assert_["expected"]
     basic_assert(reg_number_vals, reg_number_vals, expected, "REGS")
 
 
-def output_asserter(pl: Pipeline, assert_):
+def output_asserter(pl: Pipeline, assert_: dict): # type: ignore
     expected = assert_["expected"]
     output_vals = pl.data_mem.output
     if isinstance(expected[0], str):
-        output_vals = [''.join([chr(i) for i in output_vals]).replace("\x00", "\\0")]
-    output_indexes = range(len(output_vals))
+        output_vals = [''.join([chr(i) for i in output_vals]).replace("\x00", "\\0")]  # type: ignore
+    output_indexes = list(range(len(output_vals)))
     basic_assert(output_indexes, output_vals, expected, "OUTPUT")
 
 
 class Logger:
-    def __init__(self, log_conf, pl: Pipeline):
+    def __init__(self, log_conf, pl: Pipeline): # type: ignore
         self.log_conf = log_conf
         self.pl = pl
         self.running = True
@@ -102,7 +102,7 @@ class Logger:
             "output": output_asserter
         }
 
-    def start(self, max_tick):
+    def start(self, max_tick: int) -> None:
         if "debug" in self.log_conf:
             self.debug_mode()
         else:
@@ -113,16 +113,16 @@ class Logger:
                 self.perform_tick()
             self.print_assertion()
 
-    def debug_mode(self):
+    def debug_mode(self) -> None:
         print("\n".join(self.pl.print_initial_logs()))
         init_debug(self.pl)
 
-    def print_initial_logs(self):
+    def print_initial_logs(self) -> None:
         if "only_start" not in self.log_conf:
             return
         print("INITIAL LOGS:")
         log_format = self.log_conf["only_start"]["view"].split("-")
-        log_blocks: list[list[str]] = []  # type: ignore
+        log_blocks: list[list[str]] = []
         i = 0
         while i < len(log_format):
             if log_format[i] in self.loggers:
@@ -139,13 +139,13 @@ class Logger:
             i += 1
         print("\n".join(["\n".join(i) for i in log_blocks]))
 
-    def perform_tick(self):
+    def perform_tick(self) -> None:
         self.running = self.pl.tick()
         if "each_tick" not in self.log_conf:
             return
         print("TICK LOGS:")
         log_format = self.log_conf["each_tick"]["view"].split("-")
-        log_blocks: list[list[str]] = []  # type: ignore
+        log_blocks: list[list[str]] = []
         i = 0
         while i < len(log_format):
             if log_format[i] in self.loggers:
@@ -162,7 +162,7 @@ class Logger:
             i += 1
         print("\n".join(["\n".join(i) for i in log_blocks]))
 
-    def print_assertion(self):
+    def print_assertion(self) -> None:
         if "assertion" not in self.log_conf:
             return
         for i in self.log_conf["assertion"]:

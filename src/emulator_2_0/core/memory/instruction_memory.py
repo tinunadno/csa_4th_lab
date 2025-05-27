@@ -2,7 +2,7 @@ from src.emulator_2_0.core.utils.reconstruct_command import reconstruct_command
 
 
 class InstructionMemory:
-    def __init__(self, instructions: list[int], cmd_desc):
+    def __init__(self, instructions: list[int], cmd_desc): # type: ignore
         self.instructions = instructions.copy()
         self.inst_mnemonics = [reconstruct_command(i, cmd_desc) for i in self.instructions]
         self.nop = 0
@@ -12,7 +12,7 @@ class InstructionMemory:
             return self.nop
         return self.instructions[address]
 
-    def get_memory_view(self, data_start, data_end) -> list[str]:
+    def get_memory_view(self, data_start: int, data_end: int) -> list[str]:
         ret = ["INSTRUCTION MEMORY:", "ADDRESS    | INSTRUCTION"]
         if len(self.instructions) < 16:
             for i in range(len(self.instructions)):
@@ -22,7 +22,7 @@ class InstructionMemory:
                 ret.append(f"0x{i:08X} | 0x{self.instructions[i]:08X}")
         return ret
 
-    def get_decompiled_memory_view(self, data_start, data_end) -> list[str]:
+    def get_decompiled_memory_view(self, data_start: int, data_end: int) -> list[str]:
         ret = ["INSTRUCTION MEMORY:", "ADDRESS    | INSTRUCTION"]
         if len(self.instructions) < 16:
             for i in range(len(self.instructions)):

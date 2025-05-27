@@ -1,7 +1,7 @@
 from src.common_utils.bitwise_utils import set_int_cut
 from src.compiler_2_0.translator.primitive_parsers import parse_int
 
-def get_mnemonic(instruction, token_separator: str):
+def get_mnemonic(instruction: str, token_separator: str) -> tuple[str, list[str]]:
     if token_separator == " ":
         while "  " in instruction:
             instruction = instruction.replace("  ", " ")
@@ -12,7 +12,7 @@ def get_mnemonic(instruction, token_separator: str):
     mnemonic = mnemonic.lower()
     return mnemonic, tokens
 
-def get_replacement(token: str, arg_desc: str):
+def get_replacement(token: str, arg_desc: str) -> list: # type: ignore
     if arg_desc == "":
         raise SyntaxError(f"Got invalid argument description: {arg_desc}")
     arg_desc_len = len(arg_desc)
@@ -51,8 +51,7 @@ def get_replacement(token: str, arg_desc: str):
     return replacements
 
 
-def get_replacement_substitution_rules(replacement: list[tuple[int, int]], args: list[str], type_desc,
-                                       translated_instruction, shift_me, shifting_var, lower_upper) -> int:
+def get_replacement_substitution_rules(replacement: list[tuple[int, int]], args: list[str], type_desc, translated_instruction: int, shift_me: bool, shifting_var: str, lower_upper: list[int]) -> int:  # type: ignore
     for i in replacement:
         for j in args:
             if str(i[0]) not in j:
@@ -72,10 +71,10 @@ def get_replacement_substitution_rules(replacement: list[tuple[int, int]], args:
     return translated_instruction
 
 
-def build_command(instruction: str, instructions_format, lower_upper) -> int:
+def build_command(instruction: str, instructions_format, lower_upper: list[list[int]]) -> int: # type: ignore
     token_separator = instructions_format["token_separator"]
     mnemonic, tokens = get_mnemonic(instruction, token_separator)
-    dec_rule: dict = {}
+    dec_rule: dict = {} # type: ignore
     for current_dec_rule in instructions_format["decoding_rules"]:
         if current_dec_rule["mnemonic"].lower() == mnemonic:
             dec_rule = current_dec_rule
@@ -84,7 +83,7 @@ def build_command(instruction: str, instructions_format, lower_upper) -> int:
         raise SyntaxError(f"Can't find this mnemonic in internal config: {mnemonic} in instruction {instruction}")
 
     c_type = dec_rule["type"]
-    type_desc: dict = {}
+    type_desc: dict = {} # type: ignore
     type_bits = instructions_format["instructions_format"]["command_number_bits"]
     for current_type_desc in instructions_format["instructions_format"]["types"]:
         if current_type_desc["command_number"] == c_type:
