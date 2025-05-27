@@ -1,9 +1,13 @@
 #define input_addr 0x80
 #define output_addr 0x84
+
     .data
+
 .org 0x16
 int16
+
     .text
+
 _start:
 read_loop:
     xor t3 t3 t3                ; waiting for interruption

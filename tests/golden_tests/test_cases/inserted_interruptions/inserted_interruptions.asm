@@ -1,8 +1,3 @@
-#define buf_size 6
-#define set(reg, data){
-    lui reg data
-    lli reg data
-}
 ; #############################################
 ; #   this test 'gotta show that if one       #
 ; #   interruption happened inside other      #
@@ -12,12 +7,21 @@
 ; #    ticks manually, so interruptions       #
 ; #    are called manually)                   #
 ; #############################################
+#define buf_size 6
+#define set(reg, data){
+    lui reg data
+    lli reg data
+}
+
     .data
+
 buf: .buf '/00/00/00/00/00'
 buf1: .buf 'test1'
 .org 0x16
 int16
+
     .text
+
 _start:
     set(t0, buf1){}             ; just setting buffer pointers
     set(t1, buf){}

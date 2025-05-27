@@ -1,9 +1,13 @@
 #define input 0x80
 #define output 0x84
+
     .data
+
 .org 0x16
 int16
+
     .text
+
 _start:
 read_loop:
     addi t3 t4 0
