@@ -98,7 +98,7 @@ def build_command(
     mnemonic, tokens = get_mnemonic(instruction, token_separator)
     dec_rule: dict = {}  # type: ignore
     for current_dec_rule in instructions_format["decoding_rules"]:
-        tmp =  current_dec_rule["mnemonic"].lower()
+        tmp = current_dec_rule["mnemonic"].lower()
         if tmp == mnemonic:
             dec_rule = current_dec_rule
             break

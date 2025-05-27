@@ -50,11 +50,11 @@ read_loop:
     beqz end_loop
     jmp read_loop
 end_loop:
-    set(t0, size){}   ; t0 = len(list)    ; counter
-    lli t1 output     ; const t1 = 0x84
-    addi t3 t0 0      ; const t3 = len(list)
-    lli t10 arr       ; const t10 = *arr
-    lui t15 0xFFFFFFFF; big negative
+    set(t0, size){}      ; t0 = len(list)    ; counter
+    lli t1 output        ; const t1 = 0x84
+    addi t3 t0 0         ; const t3 = len(list)
+    lli t10 arr          ; const t10 = *arr
+    lui t15 0xFFFFFFFF   ; big negative
     lli t17 4
 outer_loop:
     xor t4 t4 t4         ; current max value

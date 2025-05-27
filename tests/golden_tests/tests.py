@@ -111,6 +111,7 @@ def test_log(golden: GoldenTestFixture) -> None:
     assert out_comp == golden.out["output_compiler"]
     assert out_emulator == golden.out["output"]
 
+
 @pytest.mark.golden_test("test_cases/hello_name/test_conf.yaml")
 def test_hello_name(golden: GoldenTestFixture) -> None:
     name = "hello_name"
@@ -118,6 +119,7 @@ def test_hello_name(golden: GoldenTestFixture) -> None:
 
     assert out_comp == golden.out["output_compiler"]
     assert out_emulator == golden.out["output"]
+
 
 @pytest.mark.golden_test("test_cases/sort/test_conf.yaml")
 def test_sort(golden: GoldenTestFixture) -> None:
