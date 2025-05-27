@@ -2,12 +2,12 @@ from typing import Union
 
 
 class Registers:
-    def __init__(self, reg_conf: dict, mem_size: int):
+    def __init__(self, reg_conf: dict, mem_size: int): # type: ignore
         self.regs: list[int] = [0] * reg_conf["register_count"]
         self.common_regs: list[int] = reg_conf["common_registers"]
         self.special_regs: dict[str, int] = {reg["name"]: reg["number"] for reg in reg_conf["special_registers"]}
-        self.upper = reg_conf["upper"]
-        self.lower = reg_conf["lower"]
+        self.upper: list[int] = reg_conf["upper"]
+        self.lower: list[int] = reg_conf["lower"]
         self.set_reg("SP", mem_size)
 
     def get_reg(self, reg: Union[int, str]) -> int:
