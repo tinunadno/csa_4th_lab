@@ -8,7 +8,7 @@ io_mem_map:
   output:
     port: 0x84
 log_fmt:
-#  debug:
+  debug:
   assertion:
     - name: "output"
       expected: [ 8, 7, 6, 5, 4, 2, 1 ]
