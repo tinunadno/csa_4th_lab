@@ -196,7 +196,7 @@
 
  
 
- типы команд:
+ #### типы команд:
  
     3 bits - command number
     | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
@@ -209,7 +209,77 @@
  тут imm - целочисленное знаковое значение, +- его знак, funct - функциональные биты (от которых вычисляются сигналы процессора)
  r* - номера регистров, cn - номера команд
  
- описание команд и их декодирования:
+  #### Описание команд
+
+    MEM:
+    LI - load immediate
+        lli <r>, <val> %lo(val) -> r
+    LUI - load immediate
+        lli <r>, <val> %hi(val) -> r
+    SW - store word
+        sw <r>, <offset> (*(start_+offset) <- r
+    LW - load word
+        lw <r>, <offset> (*(start_+offset) -> r)
+    WB - write byte
+        wb <r>, <offset> (*(start_+offset) <- r&0xFF
+    LB - load long word
+        llw <r1>, <r2> *(r1) -> r2
+    
+    MATH:
+    ADD - add
+        add <r1>, <r2>, <r3> r1 <- r2 + r3
+    ADDC - add c
+        add <r1>, <r2>, <r3> r1 <- r2 + r3 + c
+    ADDI - add immediate
+        add <r1>, <r2>, <k> r1 <- r2 + k
+    SUB - substract
+        sub <r1>, <r2>, <r3> r1 <- r2 - r3
+    MUL - negative
+        neg <r> r <- -r
+    
+    BITWISE:
+    ROL - rotate left
+        rol <r1>, <r2>, <r3> r1 <- r2 (rot)<< r3
+    ROR - rotate right
+        ror <r1>, <r2>, <r3> r1 <- r2 (rot)>> r3
+    SHL - shift left
+        shl <r1>, <r2>, <r3> r1 <- r2 (sh)<< r3
+    SHR - shift right
+        shr <r1>, <r2>, <r3> r1 <- r2 (sh)>> r3
+    AND - bitwise and
+        and <r1>, <r2>, <r3> r1 <- r2 & r3
+    OR - bitwise or
+        or <r1>, <r2>, <r3> r1 <- r2 | r3
+    XOR - bitwise xor
+        xor <r1>, <r2> r1 <- !r2
+    
+    BRANCH:
+    JMP - jump
+        jmp k pc+=k
+    LJMP - long jump
+        ljmp <r1> pc = r1
+    BZ(BN\BV\BC) - branch if (Z\N\V\C)
+        bz <k> z ? pc+=k
+    BNZ(BNN\BNV\BNC) - branch if not (Z\N\V\C)
+        bnz <k> !z ? pc+=k
+    BEQZ(BEQN) - branch if reg (Zero)\(negative)
+        beqz <r>, <k> r==0 ? pc+=k
+    BNEQZ(BNEQN) - branch if reg not (Zero)\(negative)
+        bneqz <r>, <k> r!=0 ? pc+=k
+    HALT - terminate execution
+        halt
+    
+    FUNCTION PUSH/POP etc
+    POP - pop from stack top
+        pop <r> r <- stack.pop
+    push - push to stack top
+        push <r> r -> stack.push
+    INT - call interruption
+        int int_vec
+    IRET - interruption return
+       iret
+
+ #### описание декодирования команд:
  
     1 type 0b00
     ADD SUB AND OR XOR ADDI SHL SHR ROL ROR MUL DIV REM
@@ -254,6 +324,7 @@
            2nd bit - is return (is interruption is zero, this bit defines call\ret, else int\iret)
            3d  bit - halt
            if all zeros => NOP
+
 
  также есть *длинные* команды, выполнение которых невозможно за один такт, например int\iret, при компиляции они *разварачиваются* в 
  
@@ -415,6 +486,12 @@
  ### Консольный интерфейс
 
  Входные данные: путь к бинарному файлу, сгенерированному компилятором, путь к конфигу .yaml, где описаны io, логи, ассерты
+
+ #### запуск
+
+ ``` bash
+  python main.py path_to/exec path_to/cfg.yaml
+ ```
  
  [пример конфига](https://github.com/tinunadno/csa_4th_lab/blob/actual_risc_arcitecture/tests/golden_tests/test_cases/log_test/log_test.yaml)
  
