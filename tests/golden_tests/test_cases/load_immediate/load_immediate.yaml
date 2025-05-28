@@ -4,6 +4,14 @@ io_mem_map:
   output:
     port: 0x84
 log_fmt:
+  each_tick:
+    data:
+      regs:
+        slice: [ 0 ]
+      pl_stage_mnemonics:
+      tick:
+      is_interruption:
+    view: "tick- -is_interruption-regs-pl_stage_mnemonics"
   assertion:
     - name: "regs"
       slice: [ 0 ]

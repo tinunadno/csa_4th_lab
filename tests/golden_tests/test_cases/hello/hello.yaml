@@ -4,6 +4,10 @@ io_mem_map:
   output:
     port: 0x84
 log_fmt:
+  each_tick:
+    data:
+      pl_stage_mnemonics:
+    view: "pl_stage_mnemonics"
   assertion:
     - name: "output"
       expected: [ 'Hello, World!' ]

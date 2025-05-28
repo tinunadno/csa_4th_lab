@@ -7,6 +7,54 @@ output_compiler: |
   lli t0 0xFFFFFFFF                               |               | 	{'address': 0, 'section': 'text'}
   halt                                            |               |                                   
 output: |
+  TICK LOGS:
+  TICK: 1 
+  IN INTERRUPTION: False
+  0: 0
+  PIPELINE_STAGES:
+  {[IF]: 'LUI t0 2047'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  TICK: 2 
+  IN INTERRUPTION: False
+  0: 0
+  PIPELINE_STAGES:
+  {[IF]: 'LLI t0 -1048575'}->{[ID]: 'LUI t0 2047'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  TICK: 3 
+  IN INTERRUPTION: False
+  0: 0
+  PIPELINE_STAGES:
+  {[IF]: 'HALT'}->{[ID]: 'LLI t0 -1048575'}->{[EX]: 'LUI t0 2047'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  TICK: 4 
+  IN INTERRUPTION: False
+  0: 0
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'HALT'}->{[EX]: 'LLI t0 -1048575'}->{[MEM]: 'LUI t0 2047'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  TICK: 5 
+  IN INTERRUPTION: False
+  0: 4292870144
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'HALT'}->{[MEM]: 'LLI t0 -1048575'}->{[WB]: 'LUI t0 2047'}
+  TICK LOGS:
+  TICK: 6 
+  IN INTERRUPTION: False
+  0: 4294967295
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'HALT'}->{[WB]: 'LLI t0 -1048575'}
+  TICK LOGS:
+  TICK: 7 
+  IN INTERRUPTION: False
+  0: 4294967295
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'HALT'}
+  TICK LOGS:
+  TICK: 7 
+  IN INTERRUPTION: False
+  0: 4294967295
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'HALT'}
   REGS ASSERT:
   actual data
   4294967295

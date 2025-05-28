@@ -19,6 +19,606 @@ output_compiler: |
   jmp -8                                          | ...               |                                    
   halt                                            |                   |                                    
 output: |
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LUI t0 0'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LLI t0 132'}->{[ID]: 'LUI t0 0'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LUI t1 0'}->{[ID]: 'LLI t0 132'}->{[EX]: 'LUI t0 0'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LLI t1 0'}->{[ID]: 'LUI t1 0'}->{[EX]: 'LLI t0 132'}->{[MEM]: 'LUI t0 0'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LUI t2 0'}->{[ID]: 'LLI t1 0'}->{[EX]: 'LUI t1 0'}->{[MEM]: 'LLI t0 132'}->{[WB]: 'LUI t0 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LLI t2 13'}->{[ID]: 'LUI t2 0'}->{[EX]: 'LLI t1 0'}->{[MEM]: 'LUI t1 0'}->{[WB]: 'LLI t0 132'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'LLI t2 13'}->{[EX]: 'LUI t2 0'}->{[MEM]: 'LLI t1 0'}->{[WB]: 'LUI t1 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'LLI t2 13'}->{[MEM]: 'LUI t2 0'}->{[WB]: 'LLI t1 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'LLI t2 13'}->{[WB]: 'LUI t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'LLI t2 13'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'JMP -8'}->{[WB]: 'ADDI t1 t1 1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'XOR t3 t3 t3'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'JMP -8'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t3 t2 0'}->{[ID]: 'XOR t3 t3 t3'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'BEQZ 5'}->{[ID]: 'ADDI t3 t2 0'}->{[EX]: 'XOR t3 t3 t3'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'BEQZ 5'}->{[EX]: 'ADDI t3 t2 0'}->{[MEM]: 'XOR t3 t3 t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'BEQZ 5'}->{[MEM]: 'ADDI t3 t2 0'}->{[WB]: 'XOR t3 t3 t3'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'BEQZ 5'}->{[WB]: 'ADDI t3 t2 0'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t2 t2 -1'}->{[ID]: 'NOP'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'BEQZ 5'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'LB t3 0(t1)'}->{[ID]: 'ADDI t2 t2 -1'}->{[EX]: 'NOP'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'LB t3 0(t1)'}->{[EX]: 'ADDI t2 t2 -1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'SB 0(t0) t3'}->{[ID]: 'NOP'}->{[EX]: 'LB t3 0(t1)'}->{[MEM]: 'ADDI t2 t2 -1'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'ADDI t1 t1 1'}->{[ID]: 'SB 0(t0) t3'}->{[EX]: 'NOP'}->{[MEM]: 'LB t3 0(t1)'}->{[WB]: 'ADDI t2 t2 -1'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'JMP -8'}->{[ID]: 'ADDI t1 t1 1'}->{[EX]: 'SB 0(t0) t3'}->{[MEM]: 'NOP'}->{[WB]: 'LB t3 0(t1)'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'JMP -8'}->{[EX]: 'ADDI t1 t1 1'}->{[MEM]: 'SB 0(t0) t3'}->{[WB]: 'NOP'}
+  TICK LOGS:
+  PIPELINE_STAGES:
+  {[IF]: 'NOP'}->{[ID]: 'NOP'}->{[EX]: 'JMP -8'}->{[MEM]: 'ADDI t1 t1 1'}->{[WB]: 'SB 0(t0) t3'}
   OUTPUT ASSERT:
   actual data
   Hello, World!
