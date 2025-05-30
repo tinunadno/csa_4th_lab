@@ -590,8 +590,8 @@
 
  #### DataPath
 
- ![risc_DataPath.png](contents/risc_DataPath.png)
- 
+ ![risc_DATAPATH.png](contents/risc_DATAPATH.png)
+
  где:
   - IF - instruction fetch controller
   - ID - instruction decoder controller
