@@ -1,25 +1,87 @@
-line-length = 150
-target-version = "py312"
-fix = false
-show-source = true
+sudo apt install -y build-essential cmake libnvinfer-dev libnvonnxparsers-dev
 
-quote-style = "double"
-indent-style = "space"
-skip-magic-trailing-comma = true
-line-ending = "lf"
+#include <NvInfer.h>
+#include <NvOnnxParser.h>
+#include <fstream>
 
-docstring-code-format = true
+using namespace nvinfer1;
 
-select = ["ALL"]
+// Функция для конвертации ONNX в TensorRT-движок
+bool buildEngineFromONNX(const std::string& onnxPath, const std::string& enginePath) {
+    // 1. Создаем билдер и сеть
+    IBuilder* builder = createInferBuilder(gLogger);
+    uint32_t flag = 1U << static_cast<uint32_t>(NetworkDefinitionCreationFlag::kEXPLICIT_BATCH);
+    INetworkDefinition* network = builder->createNetworkV2(flag);
 
-ignore = [
-  "D100",
-  "ANN101",
-]
+    // 2. Парсим ONNX
+    nvonnxparser::IParser* parser = nvonnxparser::createParser(*network, gLogger);
+    parser->parseFromFile(onnxPath.c_str(), static_cast<int>(ILogger::Severity::kWARNING));
 
-exclude = [
-  ".venv",
-  "__pycache__",
-  ".git",
-  "build",
-]
+    // 3. Конфигурируем билдер
+    IBuilderConfig* config = builder->createBuilderConfig();
+    config->setMaxWorkspaceSize(1 << 30);  // 1 GB
+    config->setFlag(BuilderFlag::kFP16);   // Включить FP16 (опционально)
+
+    // 4. Собираем движок
+    ICudaEngine* engine = builder->buildEngineWithConfig(*network, *config);
+
+    // 5. Сохраняем движок в файл
+    std::ofstream engineFile(enginePath, std::ios::binary);
+    IHostMemory* serializedEngine = engine->serialize();
+    engineFile.write(static_cast<const char*>(serializedEngine->data()), serializedEngine->size());
+
+    // 6. Освобождаем ресурсы
+    serializedEngine->destroy();
+    engine->destroy();
+    config->destroy();
+    parser->destroy();
+    network->destroy();
+    builder->destroy();
+
+    return true;
+}
+
+#include <NvInferRuntime.h>
+
+// Загрузка движка из файла
+ICudaEngine* loadEngine(const std::string& enginePath) {
+    std::ifstream engineFile(enginePath, std::ios::binary);
+    engineFile.seekg(0, std::ios::end);
+    size_t size = engineFile.tellg();
+    engineFile.seekg(0, std::ios::beg);
+
+    std::vector<char> engineData(size);
+    engineFile.read(engineData.data(), size);
+
+    IRuntime* runtime = createInferRuntime(gLogger);
+    return runtime->deserializeCudaEngine(engineData.data(), size);
+}
+
+// Инференс
+void inference(ICudaEngine* engine, float* inputData, float* outputData) {
+    IExecutionContext* context = engine->createExecutionContext();
+
+    // Получаем размеры входов/выходов
+    int inputIndex = engine->getBindingIndex("input_name");
+    int outputIndex = engine->getBindingIndex("output_name");
+    Dims inputDims = engine->getBindingDimensions(inputIndex);
+
+    // Выделяем память на GPU
+    void* buffers[2];
+    cudaMalloc(&buffers[inputIndex], inputDims.d[0] * inputDims.d[1] * inputDims.d[2] * sizeof(float));
+    cudaMalloc(&buffers[outputIndex], outputSize * sizeof(float));
+
+    // Копируем входные данные на GPU
+    cudaMemcpy(buffers[inputIndex], inputData, inputSize * sizeof(float), cudaMemcpyHostToDevice);
+
+    // Запускаем инференс
+    context->executeV2(buffers);
+
+    // Копируем результаты обратно на CPU
+    cudaMemcpy(outputData, buffers[outputIndex], outputSize * sizeof(float), cudaMemcpyDeviceToHost);
+
+    // Освобождаем ресурсы
+    cudaFree(buffers[inputIndex]);
+    cudaFree(buffers[outputIndex]);
+    context->destroy();
+}

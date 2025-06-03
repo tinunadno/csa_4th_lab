@@ -3,8 +3,6 @@ from pathlib import Path
 from src.emulator_2_0.parsing.pipeline_loader import parse_config
 import sys
 
-# TODO add code quality control                 (a 'don 'nou 'wat is it)
-# TODO add report
 
 if __name__ == "__main__":
     exec_path = sys.argv[1]
