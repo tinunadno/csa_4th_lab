@@ -41,8 +41,8 @@ jobs:
 
     - name: Run unit tests
       run: |
-         pytest tests/compiler_unit_tests/compiler_test.py -p no:warnings
+         pytest -v tests/compiler_unit_tests/compiler_test.py -p no:warnings
 
     - name: Run golden tests
       run: |
-        pytest tests/golden_tests
+        pytest -v tests/golden_tests
