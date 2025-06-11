@@ -179,12 +179,12 @@
    Память: DD CC BB AA 22 11 FF EE (little-endian)
  
   
-        .data
-    .org 0x16
-    a: .word 0x88FF
-    b: .byte 0xEE
-    .org 0x35
-    buffer: .buf '/00/FF/EE'
+          .data
+      .org 0x16
+      a: .word 0x88FF
+      b: .byte 0xEE
+      .org 0x35
+      buffer: .buf '/00/FF/EE'
 
  тогда в память будет загруженно:
 
