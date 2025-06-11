@@ -88,14 +88,13 @@
 ---
 
  #### Типизация
+   **статическая**, все инструкции ожидают целые числа: номера регистров / целочисленное значение.
  
-  - **статическая**, все инструкции ожидают целые числа: номера регистров / целочисленное значение
+  Память данных представляет собой последовательность байтов.
  
-  - память данных представляет собой последовательность байтов
+  Память команд представляет собой последовательность 32 битных чисел.
  
-  - память команд представляет собой последовательность 32 битных чисел
- 
-  - целочисленные значения могут быть представлены в разных системах счисления: 0b0 / 0x0 / 10 / -10
+  Целочисленные значения могут быть представлены в разных системах счисления: 0b0 / 0x0 / 10 / -10
  
 ---
  **пример семантики** 
@@ -158,11 +157,11 @@
 
     
           регистры               память данных                  память инструкций
-       +-------------+  +---------------------------------+ +-----------------------+
-       |  t0-t31     |  | 0x00000000 - байт               | | 0x0.0 addi t0 t0 0    |
-       +-------------+  | 0x0.0 - 0x0.4 - машинное слово  | | 0x0.1 0xFE0a0123      |
-                        | 0x0.0 - 0x0.n - буфер / строка  | | 0x0.n halt            |  
-                        +---------------------------------+ +-----------------------+
+       +-------------+  +---------------------------------+ +----------------------------+
+       |  t0-t31     |  | 0x00000000 - байт               | | 0x0 0b101000 #addi t0 t0 0 |
+       +-------------+  | 0x0 - 0x4 - машинное слово      | | 0x1 0xFE0a0123 #?          |
+                        | 0x5 - 0xn - буфер / строка      | | 0xn 0b100100 #halt         |  
+                        +---------------------------------+ +----------------------------+
  
 
 ---
@@ -201,6 +200,9 @@
     0x00000037: 0xEE
     ...
 
+
+  ---
+
  при push регистр будет размещен в конец памяти, пусть размер памяти - 0x0000FFFF, а значение регистра - 0xAABBCCDD тогда:
  
     ...
@@ -234,156 +236,492 @@
 
 ---
 
- #### типы команд:
+ ### типы команд:
  
-    3 bits - command number
-    | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 |  9 |  8 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
-    | +- |                       imm        |           s2           |           r1           |           rd           |    funct2    |     funct1   |       cn     | 1st type
-    | +- |                                                      imm                 |           r            |           rd           |     funct    |       cn     | 2nd type
-    | +- |                                                      imm                                          |           rd           |     funct    |       cn     | 3nd type
-    | +- |                                                      imm                                          |           rd           |     funct    |       cn     | 4d  type
-    | +- |                                                      imm                                          |           rd           |     funct    |       cn     | spec
+3 bits - command number
+
+![command_types_table.png](contents/command_types_table.png)
+    
 
  тут imm - целочисленное знаковое значение, +- его знак, funct - функциональные биты (от которых вычисляются сигналы процессора)
  r* - номера регистров, cn - номера команд
  
 ---
 
-  #### Описание команд
+  ### Описание команд
 
-    MEM:
-    LI - load immediate
-        lli <r>, <val> %lo(val) -> r
-    LUI - load immediate
-        lli <r>, <val> %hi(val) -> r
-    SW - store word
-        sw <r>, <offset> (*(start_+offset) <- r
-    LW - load word
-        lw <r>, <offset> (*(start_+offset) -> r)
-    WB - write byte
-        wb <r>, <offset> (*(start_+offset) <- r&0xFF
-    LB - load long word
-        llw <r1>, <r2> *(r1) -> r2
-    
-    MATH:
-    ADD - add
-        add <r1>, <r2>, <r3> r1 <- r2 + r3
-    ADDC - add c
-        add <r1>, <r2>, <r3> r1 <- r2 + r3 + c
-    ADDI - add immediate
-        add <r1>, <r2>, <k> r1 <- r2 + k
-    SUB - substract
-        sub <r1>, <r2>, <r3> r1 <- r2 - r3
-    MUL - negative
-        neg <r> r <- -r
-    
-    BITWISE:
-    ROL - rotate left
-        rol <r1>, <r2>, <r3> r1 <- r2 (rot)<< r3
-    ROR - rotate right
-        ror <r1>, <r2>, <r3> r1 <- r2 (rot)>> r3
-    SHL - shift left
-        shl <r1>, <r2>, <r3> r1 <- r2 (sh)<< r3
-    SHR - shift right
-        shr <r1>, <r2>, <r3> r1 <- r2 (sh)>> r3
-    AND - bitwise and
-        and <r1>, <r2>, <r3> r1 <- r2 & r3
-    OR - bitwise or
-        or <r1>, <r2>, <r3> r1 <- r2 | r3
-    XOR - bitwise xor
-        xor <r1>, <r2> r1 <- !r2
-    
-    BRANCH:
-    JMP - jump
-        jmp k pc+=k
-    LJMP - long jump
-        ljmp <r1> pc = r1
-    BZ(BN\BV\BC) - branch if (Z\N\V\C)
-        bz <k> z ? pc+=k
-    BNZ(BNN\BNV\BNC) - branch if not (Z\N\V\C)
-        bnz <k> !z ? pc+=k
-    BEQZ(BEQN) - branch if reg (Zero)\(negative)
-        beqz <r>, <k> r==0 ? pc+=k
-    BNEQZ(BNEQN) - branch if reg not (Zero)\(negative)
-        bneqz <r>, <k> r!=0 ? pc+=k
-    HALT - terminate execution
-        halt
-    
-    FUNCTION PUSH/POP etc
-    POP - pop from stack top
-        pop <r> r <- stack.pop
-    push - push to stack top
-        push <r> r -> stack.push
-    INT - call interruption
-        int int_vec
-    IRET - interruption return
-       iret
+#### MEM
+
+- **LLI** - load lower immediate
+
+  **syntax:**
+  ```
+  lli <r>, <val>
+  ```
+
+  **description:**
+  ```
+  %lo(val) -> r
+  ```
+
+- **LUI** - load upper immediate
+
+  **syntax:**
+  ```
+  lui <r>, <val>
+  ```
+
+  **description:**
+  ```
+  %hi(val) -> r
+  ```
+
+- **SW** - store word
+
+  **syntax:**
+  ```
+  sw <r1>, imm(<r2>)
+  ```
+
+  **description:**
+  ```
+  *(r2 + imm) <- r1
+  ```
+
+- **LW** - load word
+
+  **syntax:**
+  ```
+  lw <r1>, imm(<r2>)
+  ```
+
+  **description:**
+  ```
+  l1 <- *(r2 + imm)
+  ```
+
+- **WB** - write byte
+
+  **syntax:**
+  ```
+  wb <r1>, imm(<r2>)
+  ```
+
+  **description:**
+  ```
+  *(r2 + offset) <- r1 & 0xFF
+  ```
+
+- **LB** - load long word (likely typo, should be "load byte"?)
+
+  **syntax:**
+  ```
+  lb <r1>, imm(<r2>)
+  ```
+
+  **description:**
+  ```
+  r1 <- *(r2 + imm) & 0xFF
+  ```
+
+#### MATH
+
+- **ADD** - add
+
+  **syntax:**
+  ```
+  add <r1>, <r2>, <r3>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 + r3
+  ```
+
+- **ADDC** - add with carry
+
+  **syntax:**
+  ```
+  addc <r1>, <r2>, <r3>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 + r3 + c
+  ```
+
+- **ADDI** - add immediate
+
+  **syntax:**
+  ```
+  addi <r1>, <r2>, <k>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 + k
+  ```
+
+- **SUB** - subtract
+
+  **syntax:**
+  ```
+  sub <r1>, <r2>, <r3>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 - r3
+  ```
+
+- **MUL** - multiply (note: description seems incorrect in original input)
+
+  **syntax:**
+  ```
+  mul <rd>, <r1>, <r2>
+  ```
+
+  **description:**
+  ```
+  rd <- r1 * r2
+  ```
+
+#### BITWISE
+
+- **ROL** - rotate left
+
+  **syntax:**
+  ```
+  rol <r1>, <r2>, <r3>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 << r3 (циклический)
+  ```
+
+- **ROR** - rotate right
+
+  **syntax:**
+  ```
+  ror <r1>, <r2>, <r3>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 >> r3 (циклический)
+  ```
+
+- **SHL** - shift left
+
+  **syntax:**
+  ```
+  shl <r1>, <r2>, <r3>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 << r3
+  ```
+
+- **SHR** - shift right
+
+  **syntax:**
+  ```
+  shr <r1>, <r2>, <r3>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 >> r3
+  ```
+
+- **AND** - bitwise and
+
+  **syntax:**
+  ```
+  and <r1>, <r2>, <r3>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 & r3
+  ```
+
+- **OR** - bitwise or
+
+  **syntax:**
+  ```
+  or <r1>, <r2>, <r3>
+  ```
+
+  **description:**
+  ```
+  r1 <- r2 | r3
+  ```
+
+- **XOR** - bitwise xor
+
+  **syntax:**
+  ```
+  xor <rd>, <r2>, <r2>
+  ```
+
+  **description:**
+  ```
+  rd <- r1 ^ r2
+  ```
+
+#### BRANCH
+
+- **JMP** - jump
+
+  **syntax:**
+  ```
+  jmp <k>
+  ```
+
+  **description:**
+  ```
+  pc += k
+  ```
+
+- **LJMP** - long jump
+
+  **syntax:**
+  ```
+  ljmp <r1>
+  ```
+
+  **description:**
+  ```
+  pc = r1
+  ```
+
+- **BEQZ / BEQN** - branch if Zero/Negative flag is set
+
+  **syntax:**
+  ```
+  beqz <k>
+  ```
+
+  **description:**
+  ```
+  z/n flag != 0 ? pc += k
+  ```
+
+- **BNEQZ / BNEQN** - branch if Zero/Negative flag is not set
+
+  **syntax:**
+  ```
+  bneqz <k>
+  ```
+
+  **description:**
+  ```
+  z/n flag == 0 ? pc += k
+  ```
+
+#### SPECIALS
+
+- **INT** - call interrupt
+
+  **syntax:**
+  ```
+  int <int_vec>
+  ```
+
+  **description:**
+  ```
+  смотрит адрес ISR (int_vec), сохраняет контекст исполнения, передает контроль ISR
+  ```
+
+- **IRET** - interrupt return
+
+  **syntax:**
+  ```
+  iret
+  ```
+
+  **description:**
+  ```
+  восстанавиливает контекст до прирывания, продолжает исполнение
+  ```
+
+- **HALT** - kill process
+
+  **syntax:**
+  ```
+  halt
+  ```
+
+  **description:**
+  ```
+  0 - PS после этого эмулятор откажется работать
+  ```
+
+
 ---
- #### описание декодирования команд:
  
-    1 type 0b00
-    ADD SUB AND OR XOR ADDI SHL SHR ROL ROR MUL DIV REM
-    funct1: 1st bit - sum or bitwise or\and
-            2nd bit - 2nd operand - negative/(if sum = 0 => or|and)
-            3d  bit - addi (if 1st bit is 1), xor (if first bit is 0)
-    funct2: 1st bit - need shift or not
-            2nd bit - shift left\right
-            3d  bit - cyclic shift
-    combined funct:
-            1st bit of funct 1 and 1st bit of funct 2 - need multiplication or division or remainder
-            funct1 snd bit - multiplication
-            funct1 thd bit - division
-            funct 1 snd and thd bit - remainder
-            in this case funct2 snd and thd bit - are reserved
-    here s1 - first register, s2 - second register, rd - destination register, imm only used in addi
-    2 type 0b01
-    LW SW SB                                lower\upper
-    funct: 1st bit - load\store
-           2nd bit - SB
-           3d  bit - add displacement
-    rd - destination register (where data will be writen\readen)
-    r - address register
-    
-    3 type 0b10
-    LI
-    funct: 1st bit - LI
-           2nd bit -
-           3d  bit - upper\lower
-    4 type 0b11
-    BEQZ BEQN BNEZ BNEN JMP LJMP
-    funct: 1st bit - (JMP or branch instruction) (if 1 => JMP)
-           2/3 bit - (00 - BEQZ, 01 - BEQN, 10 - BNEZ, 11 - BNEN) if first bit is 1 - 2nd bit defines JMP or long JMP(LJMP)
-    register is comparing value, immediate is a displacement
-    if its a jump, immediate value is displacement
-    if its long jump, register is an address
-    
-    spec 0b100
-    HALT NOP
-    register is a register with address
-    funct: 1st bit - is interruption
-           2nd bit - is return (is interruption is zero, this bit defines call\ret, else int\iret)
-           3d  bit - halt
-           if all zeros => NOP
+### Форматы инструкций (описание функциональных битов)
+
+Всего существует **5 типов форматов инструкций**, каждый из которых определяет способ кодирования операции и операндов в 32-битном слове.
+
+---
+
+### Тип 0: Арифметико-логические операции
+
+**Поддерживаемые команды:**  
+`ADD`, `SUB`, `AND`, `OR`, `XOR`, `ADDI`, `SHL`, `SHR`, `ROL`, `ROR`, `MUL`, `DIV`, `REM`
+
+#### Поля:
+- `funct1` — управляет базовой операцией
+  - Бит 1:
+    - `0` → побитовая операция (`AND`, `OR`)
+    - `1` → арифметическая операция (`ADD`, `SUB`)
+  - Бит 2:
+    - Если бит 1 = `1`:
+      - `0` → сложение (`ADD`)
+      - `1` → вычитание (`SUB`)
+    - Если бит 1 = `0`:
+      - `0` → логическое И (`AND`)
+      - `1` → логическое ИЛИ (`OR`)
+  - Бит 3:
+    - Если бит 1 = `1`: 
+      - `1` → это `ADDI` (добавление немедленного значения)
+    - Если бит 1 = `0`: 
+      - `1` → это `XOR` (исключающее ИЛИ)
+
+- `funct2` — управляет сдвигами и циклическими операциями
+  - Бит 1: 
+    - `1` → требуется выполнить сдвиг
+  - Бит 2: 
+    - `0` → сдвиг влево (`SHL`) / `ROL`  
+    - `1` → сдвиг вправо (`SHR`) / `ROR`
+  - Бит 3: 
+    - `1` → циклический сдвиг (`ROL`, `ROR`)
+
+- Комбинированный `funct`:
+  - Бит 1 `funct1` + бит 1 `funct2`:
+    - `11` → умножение / деление / остаток (`MUL`, `DIV`, `REM`)
+  - Бит 2 `funct1`:
+    - `1` → умножение (`MUL`)
+  - Бит 3 `funct1`:
+    - `1` → деление (`DIV`)
+  - Биты 2+3 `funct1`:
+    - `11` → остаток от деления (`REM`)
+  - В этом случае биты `funct2` зарезервированы.
+
+#### Операнды:
+- `s1` — первый регистр-источник
+- `s2` — второй регистр-источник
+- `rd` — целевой регистр
+- `imm` — целочисленное *immediate* значение
+
+---
+
+### Тип 1: Работа с памятью (загрузка/сохранение)
+
+**Поддерживаемые команды:**  
+`LW`, `SW`, `SB`
+
+#### Поля:
+- `funct`:
+  - Бит 1: 
+    - `0` → загрузка (`LW`)  
+    - `1` → сохранение (`SW`, `SB`)
+  - Бит 2: 
+    - `1` → сохранение байта (`SB`)
+  - Бит 3: 
+    - `1` → добавлять смещение к адресу
+
+#### Операнды:
+- `rd` — целевой регистр (куда будет записано значение при загрузке или откуда будет взято при сохранении)
+- `r` — регистр с адресом
+
+---
+
+### Тип 2: Немедленная загрузка и стековые операции
+
+**Поддерживаемые команды:**  
+`LLI`, `LUI`, `PUSH`, `POP`
+
+#### Поля:
+- `funct`:
+  - Бит 1: 
+    - `1` → команда `LI` (загрузка немедленного значения)
+  - Бит 2: 
+    - `1` → `PUSH` или `POP`
+  - Бит 3: 
+    - Если бит 2 = `1`:
+      - `0` → `PUSH`  
+      - `1` → `POP`
+    - Если бит 2 = `0`:
+      - `1` → указывает на верхнюю/нижнюю часть значения (для LI)
+
+---
+
+### Тип 3: Условные переходы и прыжки
+
+**Поддерживаемые команды:**  
+`BEQZ`, `BEQN`, `BNEZ`, `BNEN`, `JMP`, `LJMP`
+
+#### Поля:
+- `funct`:
+  - Бит 1:
+    - `0` → условный переход (`BEQZ`, `BEQN`, `BNEZ`, `BNEN`)
+    - `1` → безусловный переход (`JMP`, `LJMP`)
+  - Биты 2–3:
+    - `00` → `BEQZ` (branch if equal to zero)
+    - `01` → `BEQN` (branch if negative flag set)
+    - `10` → `BNEZ` (branch if not equal to zero)
+    - `11` → `BNEN` (branch if negative flag not set)
+  - Если бит 1 = `1`:
+    - Бит 2:
+      - `0` → `JMP` (short jump)
+      - `1` → `LJMP` (long jump)
+
+#### Операнды:
+- Регистр содержит значение для сравнения (для ветвлений)
+- Немедленное значение (`imm`) — смещение (для прыжков)
+
+---
+
+### Тип 4: Специальные команды
+
+**Поддерживаемые команды:**  
+`HALT`, `NOP`
+
+#### Поля:
+- `funct`:
+  - Бит 3:
+    - `1` → команда `HALT`
+    - `0` → команда `NOP` (если все биты равны 0)
+
+#### Операнды:
+- Регистр содержит адрес (при необходимости)
+
+---
 
 
  также есть *длинные* команды, выполнение которых невозможно за один такт, например int\iret, при компиляции они *разварачиваются* в 
  
-    # INT
-    # SET_INT_FLAG 1    ; setting interruption mode
-    # PUSH PC           ; saving program counter
-    # NZVC->IC          ; getting nzvc flags
-    # PUSH IC           ; saving nzvc flags
-    # LW IC 0(int_num)  ; getting interruption handler address
-    # LJMP 0(IC)        ; jumping into it
+    INT ->
+    SET_INT_FLAG 1    ; setting interruption mode
+    PUSH PC           ; saving program counter
+    NZVC->IC          ; getting nzvc flags
+    PUSH IC           ; saving nzvc flags
+    LW IC 0(int_num)  ; getting interruption handler address
+    LJMP 0(IC)        ; jumping into it
     
-    # IRET
-    # LW IC 0(SP)       ; loading nzvc flags
-    # IC->NZVC          ; restoring nzvc flags
-    # POP               ; popping nzvc flags
-    # LW IC 0(SP)       ; loading PC
-    # POP               ; popping PC
-    # SET_INT_FLAG 0    ; quiting interruption
-    # LJMP 0(IC)        ; returning back
+    IRET ->
+    LW IC 0(SP)       ; loading nzvc flags
+    IC->NZVC          ; restoring nzvc flags
+    POP               ; popping nzvc flags
+    LW IC 0(SP)       ; loading PC
+    POP               ; popping PC
+    SET_INT_FLAG 0    ; quiting interruption
+    LJMP 0(IC)        ; returning back
 
  подробности установки сигналов и последовательности исполнения команд см в [конфиге эмулятора](https://github.com/tinunadno/csa_4th_lab/blob/actual_risc_arcitecture/src/configurations/internal_emulator_config.yaml)
  
@@ -620,67 +958,7 @@ assertion:
 
 ---
 
- также доступен режим дебага, для этого в log_fmt нужно указать ключ debug, пример
- 
-    
-    TICK:  52
-    IS INTERRUPTION: True
-     PIPELINE STATE:
-    [WB] Started write back stage                                                                                                                          |                                |                               
-    [WB] Don't need WB                                                                                                                                     |                                |                               
-    [MEM] Starting memory stage processing                                                                                                                 |                                |                               
-    [MEM] Memory access not needed, skipping                                                                                                               |                                |                               
-    [EX] Starting execution with signals: {'reg1': 0, 'reg2': 0, 'add': 0, 'addc': 0, 'and': 0, 'neg_second': 0, 'xor': 0, 'need_shift': 0, 'sh_dir': 0, ' |                                |                               
-    cycl': 0, 'discard_nzvc': 0, 'comp': 0, 'comp_num': 0, 'mul': 0, 'div': 0, 'rem': 0, 'get_nzvc': 0, 'set_nzvc': 0, 'FORCE_DISCARD_FORWARDING': 0, 'FOR |                                |                               
-    CE_ENABLE_FORWARDING': 0}                                                                                                                              | MEMORY:                        | INSTRUCTION MEMORY:           
-    [EX] Operation completed. Result: 0, Flags: {'N': False, 'Z': False, 'V': False, 'C': 0}                                                               | ADDRESS    | DATA              | ADDRESS    | INSTRUCTION      
-    [ID] Started instruction decode stage                                                                                                                  | 0x00000000 | 0x00              | 0x00000000 | 0x0000086A       
-    [ID] Processing command: 16235552                                                                                                                      | 0x00000001 | 0x00              | 0x00000001 | 0x000401AA       
-    [ID] Command type: 0, functional bits: 4                                                                                                               | 0x00000002 | 0x00              | 0x00000002 | 0x0000D1EA       
-    [ID] Checking data forwarding signals                                                                                                                  | 0x00000003 | 0x00              | 0x00000003 | 0x0018C620       
-    [ID] Matched command description: {'mnemonic': 'XOR', 'args': [['t$', '$%rd'], ['t$', '$%r1'], ['t$', '$%r2']], 'type': 0, 'functional_bits_match': [0 | 0x00000004 | 0x00              | 0x00000004 | 0x00004628       
-    , 0, 0, 1, 0, 0], 'signals': [{'name': 'EX_signal', 'args': ['r1%reg1', 'r2%reg2', 'xor']}, {'name': 'WB_signal', 'args': ['$rd%reg_dest', 'need_wb']} | 0x00000005 | 0x00              | 0x00000005 | 0x0000080B       
-    ]}                                                                                                                                                     | 0x00000006 | 0x00              | 0x00000006 | 0x80002003       
-    [ID] Setting pipeline signals                                                                                                                          | 0x00000007 | 0x00              | 0x00000007 | 0x0000000A       
-    f[ID] Got forward 512 for reg[30]                                                                                                                      | 0x00000008 | 0x00              | 0x00000008 | 0x0000D02A       
-    [ID] Got register r1 value: 5                                                                                                                          | 0x00000009 | 0x00              | 0x00000009 | 0x00000021       
-    [ID] Set signal EX_signal.reg1 = 5                                                                                                                     | 0x0000000A | 0x00              | 0x0000000A | 0x0004206A       
-    f[ID] Got forward 512 for reg[30]                                                                                                                      | 0x0000000B | 0x00              | 0x0000000B | 0x00000628       
-    [ID] Got register r2 value: 5                                                                                                                          | 0x0000000C | 0x00              | 0x0000000C | 0x0000F2AA       
-    [ID] Set signal EX_signal.reg2 = 5                                                                                                                     | 0x0000000D | 0x00              | 0x0000000D | 0x003FFBCA       
-    [ID] Set signal EX_signal.xor = 1                                                                                                                      | 0x0000000E | 0x00              | 0x0000000E | 0x0000246A       
-    [ID] Set signal WB_signal.reg_dest = 30                                                                                                                | 0x0000000F | 0x00              | 0x0000000F | 0x00210820       
-    [ID] Set signal WB_signal.need_wb = 1                                                                                                                  |                                |                               
-    [ID] Finished instruction decode stage                                                                                                                 |                                |                               
-    [IF] Started instruction fetch stage                                                                                                                   |                                |                               
-    [IF] inserting an interruption instruction: 490536                                                                                                     |                                |                               
-    [IF] Fetched instruction, IR = 0x77c28 | 0b1110111110000101000, didn't touch PC                                                                        |                                |                               
-    [IF] left interruption instructions: [1922, 1972, 1922, 16235552, 47018, 63393, 1939]                                                                  |                                |                               
-    
-    PIPELINE_STAGES_MNEMONICS:
-    {[IF]: 'ADDI t30 t29 0'}->{[ID]: 'XOR t30 t30 t30'}->{[EX]: 'SET_INT 1'}->{[MEM]: 'NOP'}->{[WB]: 'NOP'}
-    REGISTERS:
-    t0          t1          t2          t3          t4          t5          t6          t7          t8          t9          t10         t11         t12         t13         t14         t15         
-    0x00000000  0x00000007  0x00000000  0x00000001  0x00000001  0x00000000  0x00000080  0x0000001E  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  
-    t16         t17         t18         t19         t20         t21         t22         t23         t24         t25         t26         t27         t28         t29 (PC)    t30 (IC)    t31 (SP)    
-    0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000000  0x00000006  0x00000005  0x00000200  
-    t32         t33 (IR)    t34 (PS)    t35         
-    0x00000000  0x00077C28  0x00000000  0x00000000  
-
----
-
-в нем выводится состояние регистров, памяти, памяти инструкций и логи для каждой из стадий, так же он поддерживает комманды
-
-    tick ~ perform pipeline tick       
-    mem_slice ~ show memory slice       
-    inst_slice ~ show instruction memory slice       
-    dec_slice ~ show instruction memory slice but decompiled       
-    help ~ show available commands_descriptions       
-    break ~ set break point       
-    show_bp ~ show break points       
-    run ~ perform ticks until end or break points   
-
-в режиме дебага можно потактово наблюдать за состоянием процессора, ставить брейк поинты итп
+ также доступен режим дебага, про него можно почитать [тут](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/examples)
 
 
  ### Схема
@@ -790,21 +1068,48 @@ ADD  t2, t1, t3   ; на момент исполнения предыдущая 
 
  #### [euler2](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/euler2)
  требуется вычислить разность суммы квадратов и квадрата сумма всех натуральных чисел до n
+
+ ---
+
  #### [factorial](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/factorial)
  вычисление факториала натурального числа
+
+ ---
+
  #### [get_put_char](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/get_put_char)
  получить строку - вывести строку
+
+ ---
+
  #### [hello](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/hello)
  Hello, World!
+
+ ---
+
  #### [WHO ARE YOU](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/hello_name)
  спросить, как зовут и поздароваться
+
+ ---
+
  #### [inserted_interruptions](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/inserted_interruptions)
  проверить, что будет, если вызвать прерывание внутри обработки прерывания
+
+ ---
+
  #### [load_immediate](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/load_immediate)
  проверка lui/lli
+
+ ---
+
  #### [log_test](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/log_test)
  проверить, как ведут себя логи
+
+ ---
+
  #### [not](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/not)
  получить число, вернуть побитовое не этого числа
+
+ ---
+ 
  #### [sort](https://github.com/tinunadno/csa_4th_lab/tree/actual_risc_arcitecture/tests/golden_tests/test_cases/sort)
  получить массив чисел, вывести его упорядоченным
