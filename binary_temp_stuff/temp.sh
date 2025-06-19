@@ -1,5 +1,5 @@
 for ((i = 0; i < 5000; i++))
 do
-	echo $(($i*$i*$i)) >> bin$i
+        echo "print('$i')" >> bin$i.py
 done
-
+~                          
