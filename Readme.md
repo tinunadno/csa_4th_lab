@@ -1,8 +1,3 @@
- # 4я лаба по ака
- ### Перминов Юра P3231
-
- ## Вариант
- asm | risc | harv | hw | tick | binary | trap | mem | pstr | prob2 | superscalar
  ## Язык программирования
  ### Описание в форме Бэкуса-Наура
     <program> ::= { <top-level-item> }
